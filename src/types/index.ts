@@ -1,0 +1,36 @@
+export interface Product {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  image_url: string;
+  created_at: string;
+}
+
+export interface ProductVariant {
+  id: string;
+  product_id: string;
+  dosage_mg: number;
+  price_inr: number;
+  in_stock: boolean;
+  vial_configuration?: string;
+  created_at: string;
+}
+
+export interface ProductWithVariants extends Product {
+  variants: ProductVariant[];
+}
+
+export interface CartItem {
+  product: Product;
+  variant: ProductVariant;
+  quantity: number;
+}
+
+export interface OrderFormData {
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  shipping_address: string;
+  disclaimer_accepted: boolean;
+}
