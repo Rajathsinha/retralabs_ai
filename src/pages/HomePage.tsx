@@ -105,6 +105,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
         </div>
       </section>
 
+      {/* Reddit community section temporarily hidden
       <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-3xl p-12 shadow-xl border border-orange-100">
           <div className="flex items-center justify-center mb-6">
@@ -139,6 +140,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           </a>
         </div>
       </section>
+      */}
 
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="max-w-3xl mx-auto bg-slate-100 rounded-2xl p-10">

@@ -53,6 +53,7 @@ export default function Header({ onNavigate, currentPage }: HeaderProps) {
             >
               Track Order
             </button>
+            {/* Reviews temporarily hidden
             <button
               onClick={() => onNavigate('reviews')}
               className={`text-sm font-medium transition-colors ${
@@ -63,6 +64,7 @@ export default function Header({ onNavigate, currentPage }: HeaderProps) {
             >
               Reviews
             </button>
+            */}
             <button
               onClick={() => onNavigate('support')}
               className={`text-sm font-medium transition-colors ${

@@ -1,9 +1,85 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { ProductWithVariants, ProductVariant } from '../types';
 import { useCart } from '../context/CartContext';
 import { ShieldCheck, Microscope } from 'lucide-react';
 import ProductModal from '../components/ProductModal';
+
+// Demo products for when Supabase isn't configured
+const DEMO_PRODUCTS: ProductWithVariants[] = [
+  {
+    id: '1',
+    name: 'Retatrutide',
+    description: 'Triple agonist peptide targeting GLP-1, GIP, and glucagon receptors for metabolic research.',
+    category: 'research-peptide',
+    image_url: '/retatrutide.jpg',
+    created_at: new Date().toISOString(),
+    variants: [
+      { id: '1a', product_id: '1', dosage_mg: 20, price_inr: 7000, in_stock: true, vial_configuration: 'Single vial', created_at: new Date().toISOString() },
+      { id: '1b', product_id: '1', dosage_mg: 50, price_inr: 13000, in_stock: true, vial_configuration: '10mg × 5 vials', created_at: new Date().toISOString() },
+      { id: '1c', product_id: '1', dosage_mg: 100, price_inr: 21000, in_stock: true, vial_configuration: '10mg × 10 vials / 20mg × 5 vials', created_at: new Date().toISOString() },
+    ]
+  },
+  {
+    id: '2',
+    name: 'Tirzepatide',
+    description: 'Research-grade tirzepatide for analytical purposes.',
+    category: 'research-peptide',
+    image_url: '/tirzepatide.jpg',
+    created_at: new Date().toISOString(),
+    variants: [
+      { id: '2a', product_id: '2', dosage_mg: 20, price_inr: 6000, in_stock: true, vial_configuration: 'Single vial', created_at: new Date().toISOString() },
+      { id: '2b', product_id: '2', dosage_mg: 50, price_inr: 11000, in_stock: true, vial_configuration: '10mg × 5 vials', created_at: new Date().toISOString() },
+      { id: '2c', product_id: '2', dosage_mg: 100, price_inr: 18000, in_stock: true, vial_configuration: '10mg × 10 vials / 20mg × 5 vials', created_at: new Date().toISOString() },
+    ]
+  },
+  {
+    id: '3',
+    name: 'GHK-Cu',
+    description: 'Copper peptide complex for skin regeneration and wound healing research applications.',
+    category: 'research-peptide',
+    image_url: '/ghk-cu.jpg',
+    created_at: new Date().toISOString(),
+    variants: [
+      { id: '3a', product_id: '3', dosage_mg: 50, price_inr: 4000, in_stock: true, created_at: new Date().toISOString() },
+      { id: '3b', product_id: '3', dosage_mg: 100, price_inr: 7000, in_stock: true, created_at: new Date().toISOString() },
+      { id: '3c', product_id: '3', dosage_mg: 150, price_inr: 10000, in_stock: true, created_at: new Date().toISOString() },
+      { id: '3d', product_id: '3', dosage_mg: 200, price_inr: 13000, in_stock: true, created_at: new Date().toISOString() },
+      { id: '3e', product_id: '3', dosage_mg: 250, price_inr: 16500, in_stock: true, created_at: new Date().toISOString() },
+    ]
+  },
+  {
+    id: '4',
+    name: 'IGF-1 LR3',
+    description: 'Insulin-like growth factor for cellular research applications.',
+    category: 'research-peptide',
+    image_url: '/igf-1-lr3.jpg',
+    created_at: new Date().toISOString(),
+    variants: [
+      { id: '4a', product_id: '4', dosage_mg: 1, price_inr: 5000, in_stock: true, created_at: new Date().toISOString() },
+      { id: '4b', product_id: '4', dosage_mg: 5, price_inr: 20000, in_stock: true, created_at: new Date().toISOString() },
+      { id: '4c', product_id: '4', dosage_mg: 10, price_inr: 35000, in_stock: true, created_at: new Date().toISOString() },
+    ]
+  },
+  {
+    id: '5',
+    name: 'HGH 191AA',
+    description: 'Human growth hormone (Somatropin) for laboratory analysis.',
+    category: 'research-peptide',
+    image_url: '/hgh-191aa.jpg',
+    created_at: new Date().toISOString(),
+    variants: [
+      { id: '5a', product_id: '5', dosage_mg: 50, price_inr: 6000, in_stock: true, vial_configuration: '10IU × 5 vials', created_at: new Date().toISOString() },
+      { id: '5b', product_id: '5', dosage_mg: 100, price_inr: 10000, in_stock: true, vial_configuration: '10IU × 10 vials', created_at: new Date().toISOString() },
+      { id: '5c', product_id: '5', dosage_mg: 60, price_inr: 7000, in_stock: true, vial_configuration: '12IU × 5 vials', created_at: new Date().toISOString() },
+      { id: '5d', product_id: '5', dosage_mg: 120, price_inr: 11000, in_stock: true, vial_configuration: '12IU × 10 vials', created_at: new Date().toISOString() },
+      { id: '5e', product_id: '5', dosage_mg: 75, price_inr: 8000, in_stock: true, vial_configuration: '15IU × 5 vials', created_at: new Date().toISOString() },
+      { id: '5f', product_id: '5', dosage_mg: 150, price_inr: 14000, in_stock: true, vial_configuration: '15IU × 10 vials', created_at: new Date().toISOString() },
+      { id: '5g', product_id: '5', dosage_mg: 120, price_inr: 16000, in_stock: true, vial_configuration: '24IU × 5 vials', created_at: new Date().toISOString() },
+      { id: '5h', product_id: '5', dosage_mg: 240, price_inr: 21000, in_stock: true, vial_configuration: '24IU × 10 vials', created_at: new Date().toISOString() },
+    ]
+  },
+];
 
 interface CataloguePageProps {
   onNavigate: (page: string) => void;
@@ -22,6 +98,13 @@ export default function CataloguePage({ onNavigate }: CataloguePageProps) {
   }, []);
 
   async function loadProducts() {
+    // Use demo products if Supabase isn't configured
+    if (!isSupabaseConfigured()) {
+      setProducts(DEMO_PRODUCTS);
+      setLoading(false);
+      return;
+    }
+
     try {
       const { data: productsData, error: productsError } = await supabase
         .from('products')
@@ -51,9 +134,16 @@ export default function CataloguePage({ onNavigate }: CataloguePageProps) {
         variants: variantsData.filter((v) => v.product_id === product.id),
       }));
 
-      setProducts(productsWithVariants);
+      // Fall back to demo products if database is empty
+      if (productsWithVariants.length === 0) {
+        setProducts(DEMO_PRODUCTS);
+      } else {
+        setProducts(productsWithVariants);
+      }
     } catch (error) {
       console.error('Error loading products:', error);
+      // Fall back to demo products on error
+      setProducts(DEMO_PRODUCTS);
     } finally {
       setLoading(false);
     }
