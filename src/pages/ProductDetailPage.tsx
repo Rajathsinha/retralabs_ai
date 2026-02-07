@@ -18,6 +18,7 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
   const [quantity, setQuantity] = useState(1);
   const [imageZoom, setImageZoom] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
+  const [bundleAdded, setBundleAdded] = useState(false);
   const { addToCart } = useCart();
 
   useEffect(() => {
@@ -99,22 +100,19 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
       addToCart(product, selectedVariant);
     }
 
+    if (bundleAdded && bacWater) {
+      const bacWaterVariant = bacWater.variants.find(v => v.dosage_mg === 50);
+      if (bacWaterVariant) {
+        addToCart(bacWater, bacWaterVariant);
+      }
+    }
+
     onNavigate('checkout');
   };
 
   const handleAddBundle = () => {
     if (!product || !selectedVariant || !bacWater) return;
-
-    for (let i = 0; i < quantity; i++) {
-      addToCart(product, selectedVariant);
-    }
-
-    const bacWaterVariant = bacWater.variants.find(v => v.dosage_mg === 50);
-    if (bacWaterVariant) {
-      addToCart(bacWater, bacWaterVariant);
-    }
-
-    onNavigate('checkout');
+    setBundleAdded(true);
   };
 
   const isFlagship = product?.name === 'Retatrutide' || product?.name === 'Tirzepatide';
@@ -148,7 +146,8 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
     );
   }
 
-  const totalPrice = selectedVariant ? selectedVariant.price_inr * quantity : 0;
+  const basePrice = selectedVariant ? selectedVariant.price_inr * quantity : 0;
+  const totalPrice = bundleAdded ? basePrice + bacWaterPrice : basePrice;
 
   return (
     <div className="min-h-screen bg-white relative">
@@ -418,20 +417,35 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center justify-between p-4 bg-emerald-50 border-2 border-emerald-200 rounded-xl">
+                <div className={`flex items-center justify-between p-4 rounded-xl transition-all ${
+                  bundleAdded
+                    ? 'bg-emerald-100 border-2 border-emerald-500'
+                    : 'bg-emerald-50 border-2 border-emerald-200'
+                }`}>
                   <div>
                     <div className="text-sm text-emerald-700">Bundle Price</div>
                     <div className="text-2xl font-bold text-emerald-900">
-                      ₹{(totalPrice + bacWaterPrice).toLocaleString('en-IN')}
+                      ₹{(basePrice + bacWaterPrice).toLocaleString('en-IN')}
                     </div>
                     <div className="text-xs text-emerald-600 mt-0.5">Save with bundle</div>
                   </div>
                   <button
-                    onClick={handleAddBundle}
+                    onClick={bundleAdded ? () => setBundleAdded(false) : handleAddBundle}
                     disabled={!selectedVariant}
-                    className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    className={`px-6 py-3 font-bold rounded-xl transition-all disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2 ${
+                      bundleAdded
+                        ? 'bg-emerald-700 hover:bg-emerald-800 text-white'
+                        : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                    }`}
                   >
-                    Add Bundle
+                    {bundleAdded ? (
+                      <>
+                        <Check className="w-5 h-5" />
+                        Bundle Added
+                      </>
+                    ) : (
+                      'Add Bundle'
+                    )}
                   </button>
                 </div>
               </div>
@@ -442,6 +456,31 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
                 <span className="text-lg font-medium text-slate-300">Total Amount</span>
                 <span className="text-4xl font-extrabold">₹{totalPrice.toLocaleString('en-IN')}</span>
               </div>
+
+              {bundleAdded && (
+                <div className="bg-emerald-900 border-2 border-emerald-600 rounded-xl p-4 mb-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Check className="w-5 h-5 text-emerald-400" />
+                    <span className="text-sm font-bold text-emerald-300">Items Included</span>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 bg-slate-400 rounded-full" />
+                        <span className="text-slate-200">{product.name} ({selectedVariant?.dosage_mg}mg)</span>
+                      </div>
+                      <span className="text-slate-300">₹{basePrice.toLocaleString('en-IN')}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 bg-slate-400 rounded-full" />
+                        <span className="text-slate-200">Bacteriostatic Water (50ML)</span>
+                      </div>
+                      <span className="text-slate-300">₹{bacWaterPrice.toLocaleString('en-IN')}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 mb-5">
                 <div className="flex items-center gap-3">
@@ -478,7 +517,7 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
                 className="w-full py-5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold rounded-xl transition-all disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
                 <Package className="w-6 h-6" />
-                Place Order
+                Order Now
               </button>
             </div>
           </div>
@@ -490,6 +529,12 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
           <div className="flex-1">
             <div className="text-xs text-slate-600">Total Price</div>
             <div className="text-2xl font-extrabold text-slate-900">₹{totalPrice.toLocaleString('en-IN')}</div>
+            {bundleAdded && (
+              <div className="flex items-center gap-1 mt-1">
+                <Check className="w-3 h-3 text-emerald-600" />
+                <span className="text-xs text-emerald-700 font-semibold">Bundle Added</span>
+              </div>
+            )}
           </div>
           <button
             onClick={handleAddToCart}
