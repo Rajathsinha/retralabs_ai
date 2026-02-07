@@ -1,4 +1,4 @@
-import { Mail, HelpCircle, Package, Thermometer } from 'lucide-react';
+import { Mail, HelpCircle, Package, Thermometer, MessageSquare, Clock } from 'lucide-react';
 
 export default function SupportPage() {
   const faqs = [
@@ -42,8 +42,8 @@ export default function SupportPage() {
           Find answers to common questions or get in touch with our team.
         </p>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
-          <div className="border border-gray-200 p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+          <div className="border border-gray-200 p-6 hover:border-blue-300 transition-colors">
             <Mail className="w-8 h-8 text-blue-700 mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">Email Support</h3>
             <p className="text-gray-600 mb-4">
@@ -57,7 +57,29 @@ export default function SupportPage() {
             </a>
           </div>
 
-          <div className="border border-gray-200 p-6">
+          <div className="border border-gray-200 p-6 hover:border-green-300 transition-colors bg-gradient-to-br from-green-50 to-white">
+            <MessageSquare className="w-8 h-8 text-green-600 mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">WhatsApp Support</h3>
+            <div className="flex items-center gap-2 mb-3">
+              <Clock className="w-4 h-4 text-green-600" />
+              <p className="text-sm font-semibold text-green-700">
+                9AM-6PM • SLA: 1 Hour
+              </p>
+            </div>
+            <p className="text-xs text-gray-600 mb-3">
+              Outside hours: Response depends on agent availability
+            </p>
+            <a
+              href="https://wa.me/918217824384?text=Hello%2C%20I%20need%20support%20with%20RetraLabs"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-green-600 hover:text-green-700 font-bold inline-flex items-center gap-1"
+            >
+              +91 8217824384
+            </a>
+          </div>
+
+          <div className="border border-gray-200 p-6 hover:border-blue-300 transition-colors">
             <Package className="w-8 h-8 text-blue-700 mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">Order Status</h3>
             <p className="text-gray-600 mb-4">
@@ -68,7 +90,7 @@ export default function SupportPage() {
             </p>
           </div>
 
-          <div className="border border-gray-200 p-6">
+          <div className="border border-gray-200 p-6 hover:border-blue-300 transition-colors">
             <Thermometer className="w-8 h-8 text-blue-700 mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               Technical Support
