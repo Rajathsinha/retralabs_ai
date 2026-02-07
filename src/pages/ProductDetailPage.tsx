@@ -10,6 +10,18 @@ interface ProductDetailPageProps {
   onNavigate: (page: string) => void;
 }
 
+const INDIAN_CITIES = [
+  'Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai', 'Kolkata',
+  'Pune', 'Ahmedabad', 'Jaipur', 'Lucknow', 'Surat', 'Chandigarh',
+  'Indore', 'Nagpur', 'Kochi', 'Coimbatore', 'Visakhapatnam', 'Bhopal',
+  'Patna', 'Vadodara', 'Gurgaon', 'Noida', 'Thane', 'Navi Mumbai'
+];
+
+const SAMPLE_PRODUCTS = [
+  'HGH 191AA', 'Tirzepatide', 'Retatrutide', 'IGF-1 LR3',
+  'GHK-Cu', 'Bacteriostatic Water'
+];
+
 export default function ProductDetailPage({ productId, onNavigate }: ProductDetailPageProps) {
   const [product, setProduct] = useState<ProductWithVariants | null>(null);
   const [bacWater, setBacWater] = useState<ProductWithVariants | null>(null);
@@ -19,14 +31,49 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
   const [imageZoom, setImageZoom] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
   const [bundleAdded, setBundleAdded] = useState(false);
+  const [viewingCount, setViewingCount] = useState(Math.floor(Math.random() * 16));
+  const [notificationData, setNotificationData] = useState({
+    city: INDIAN_CITIES[Math.floor(Math.random() * INDIAN_CITIES.length)],
+    product: SAMPLE_PRODUCTS[Math.floor(Math.random() * SAMPLE_PRODUCTS.length)],
+    time: Math.floor(Math.random() * 10) + 1
+  });
   const { addToCart } = useCart();
+
+  useEffect(() => {
+    const viewingTimer = setInterval(() => {
+      setViewingCount(Math.floor(Math.random() * 16));
+    }, 10000);
+
+    return () => clearInterval(viewingTimer);
+  }, []);
+
+  useEffect(() => {
+    const notificationTimer = setInterval(() => {
+      setNotificationData({
+        city: INDIAN_CITIES[Math.floor(Math.random() * INDIAN_CITIES.length)],
+        product: SAMPLE_PRODUCTS[Math.floor(Math.random() * SAMPLE_PRODUCTS.length)],
+        time: Math.floor(Math.random() * 10) + 1
+      });
+    }, 5000);
+
+    return () => clearInterval(notificationTimer);
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowNotification(true);
       setTimeout(() => setShowNotification(false), 4000);
     }, 3000);
-    return () => clearTimeout(timer);
+
+    const notificationCycle = setInterval(() => {
+      setShowNotification(true);
+      setTimeout(() => setShowNotification(false), 4000);
+    }, 8000);
+
+    return () => {
+      clearTimeout(timer);
+      clearInterval(notificationCycle);
+    };
   }, []);
 
   useEffect(() => {
@@ -161,9 +208,9 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
               <div className="flex-1">
                 <div className="font-bold text-slate-900 text-sm">Recent Order</div>
                 <div className="text-xs text-slate-600 mt-0.5">
-                  Someone from Mumbai purchased <span className="font-semibold">HGH 191AA</span>
+                  Someone from {notificationData.city} purchased <span className="font-semibold">{notificationData.product}</span>
                 </div>
-                <div className="text-xs text-slate-500 mt-1">2 minutes ago</div>
+                <div className="text-xs text-slate-500 mt-1">{notificationData.time} {notificationData.time === 1 ? 'minute' : 'minutes'} ago</div>
               </div>
             </div>
           </div>
@@ -303,11 +350,11 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
               </div>
 
               <div className="flex items-center gap-3 mb-8">
-                {getViewingCount(product.id) > 0 && (
+                {viewingCount > 0 && (
                   <div className="bg-red-50 border border-red-200 px-4 py-2 rounded-lg flex items-center gap-2">
                     <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
                     <span className="text-sm font-semibold text-red-700">
-                      {getViewingCount(product.id)} {getViewingCount(product.id) === 1 ? 'person' : 'people'} viewing now
+                      {viewingCount} {viewingCount === 1 ? 'person' : 'people'} viewing now
                     </span>
                   </div>
                 )}
