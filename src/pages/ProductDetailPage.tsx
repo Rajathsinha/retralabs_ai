@@ -255,14 +255,6 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
 
               <p className="text-lg text-slate-600 mb-6 leading-relaxed">{product.description}</p>
 
-              <div className="flex items-center gap-3 mb-6">
-                <div className="flex items-center gap-1 bg-amber-50 px-3 py-2 rounded-lg border border-amber-200">
-                  <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
-                  <span className="text-xl font-bold text-slate-900">4.8</span>
-                </div>
-                <span className="text-slate-600 text-sm">698+ verified reviews</span>
-              </div>
-
               <div className="flex items-center gap-3 mb-8">
                 <div className="bg-red-50 border border-red-200 px-4 py-2 rounded-lg flex items-center gap-2">
                   <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
@@ -425,27 +417,14 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
                       </div>
                     </div>
                   </div>
-                  <div className="text-2xl text-slate-400">+</div>
-                  <div className="flex-1 bg-white border-2 border-slate-200 rounded-xl p-4 hover:border-blue-300 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className="w-16 h-16 bg-slate-100 rounded-lg flex items-center justify-center">
-                        <Shield className="w-8 h-8 text-slate-400" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="font-bold text-slate-900 text-sm">Sterile Syringes</div>
-                        <div className="text-xs text-slate-600 mt-0.5">Pack of 10 - 1ML</div>
-                        <div className="text-sm font-bold text-blue-600 mt-1">₹499</div>
-                      </div>
-                    </div>
-                  </div>
                 </div>
                 <div className="flex items-center justify-between p-4 bg-emerald-50 border-2 border-emerald-200 rounded-xl">
                   <div>
                     <div className="text-sm text-emerald-700">Bundle Price</div>
                     <div className="text-2xl font-bold text-emerald-900">
-                      ₹{(totalPrice + 1298).toLocaleString('en-IN')}
+                      ₹{(totalPrice + 799).toLocaleString('en-IN')}
                     </div>
-                    <div className="text-xs text-emerald-600 mt-0.5">Save ₹200 on bundle</div>
+                    <div className="text-xs text-emerald-600 mt-0.5">Save ₹100 on bundle</div>
                   </div>
                   <button className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors">
                     Add Bundle
