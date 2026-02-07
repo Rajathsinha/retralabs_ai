@@ -238,7 +238,11 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
   }
 
   const basePrice = selectedVariant ? selectedVariant.price_inr * quantity : 0;
-  const totalPrice = bundleAdded ? basePrice + bacWaterPrice : basePrice;
+  const subtotal = bundleAdded ? basePrice + bacWaterPrice : basePrice;
+  const totalItems = quantity + (bundleAdded ? 1 : 0);
+  const discountPercent = totalItems >= 3 ? 25 : totalItems === 2 ? 20 : 0;
+  const discountAmount = Math.round((subtotal * discountPercent) / 100);
+  const totalPrice = subtotal - discountAmount;
 
   return (
     <div className="min-h-screen bg-white relative">
@@ -543,35 +547,53 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
             )}
 
             <div className="border-2 border-slate-900 rounded-2xl p-6 mb-6 bg-slate-900 text-white">
-              <div className="flex items-baseline justify-between mb-6">
-                <span className="text-lg font-medium text-slate-300">Total Amount</span>
-                <span className="text-4xl font-extrabold">₹{totalPrice.toLocaleString('en-IN')}</span>
-              </div>
-
-              {bundleAdded && (
-                <div className="bg-emerald-900 border-2 border-emerald-600 rounded-xl p-4 mb-5">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Check className="w-5 h-5 text-emerald-400" />
-                    <span className="text-sm font-bold text-emerald-300">Items Included</span>
+              <div className="space-y-3 mb-6">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-400">{product.name} ({selectedVariant?.dosage_mg}{isBacWater ? 'ML' : 'mg'}) x {quantity}</span>
+                  <span className="text-slate-300">₹{basePrice.toLocaleString('en-IN')}</span>
+                </div>
+                {bundleAdded && (
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-slate-400">Bacteriostatic Water (50ML)</span>
+                    <span className="text-slate-300">₹{bacWaterPrice.toLocaleString('en-IN')}</span>
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 bg-slate-400 rounded-full" />
-                        <span className="text-slate-200">{product.name} ({selectedVariant?.dosage_mg}mg)</span>
-                      </div>
-                      <span className="text-slate-300">₹{basePrice.toLocaleString('en-IN')}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 bg-slate-400 rounded-full" />
-                        <span className="text-slate-200">Bacteriostatic Water (50ML)</span>
-                      </div>
-                      <span className="text-slate-300">₹{bacWaterPrice.toLocaleString('en-IN')}</span>
-                    </div>
+                )}
+                <div className="flex items-center justify-between text-sm pt-2 border-t border-slate-700">
+                  <span className="text-slate-300">Subtotal ({totalItems} {totalItems === 1 ? 'item' : 'items'})</span>
+                  <span className="text-slate-200 font-medium">₹{subtotal.toLocaleString('en-IN')}</span>
+                </div>
+
+                {discountPercent > 0 && (
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-emerald-400 font-semibold">Volume Discount ({discountPercent}%)</span>
+                    <span className="text-emerald-400 font-semibold">-₹{discountAmount.toLocaleString('en-IN')}</span>
+                  </div>
+                )}
+
+                <div className="flex items-baseline justify-between pt-3 border-t border-slate-700">
+                  <span className="text-lg font-medium text-slate-300">Total Amount</span>
+                  <div className="text-right">
+                    {discountPercent > 0 && (
+                      <span className="text-sm text-slate-500 line-through mr-2">₹{subtotal.toLocaleString('en-IN')}</span>
+                    )}
+                    <span className="text-4xl font-extrabold">₹{totalPrice.toLocaleString('en-IN')}</span>
                   </div>
                 </div>
-              )}
+
+                {discountPercent > 0 && (
+                  <div className="bg-emerald-900/60 border border-emerald-600 rounded-lg px-3 py-2 flex items-center gap-2">
+                    <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                    <span className="text-sm text-emerald-300 font-medium">You save ₹{discountAmount.toLocaleString('en-IN')} with {discountPercent}% volume discount</span>
+                  </div>
+                )}
+
+                {discountPercent === 0 && totalItems === 1 && (
+                  <div className="bg-amber-900/40 border border-amber-600/50 rounded-lg px-3 py-2 flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                    <span className="text-sm text-amber-300">Add 1 more item to get <strong>20% OFF</strong></span>
+                  </div>
+                )}
+              </div>
 
               <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 mb-5">
                 <div className="flex items-center gap-3">
@@ -619,9 +641,20 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
         <div className="flex items-center gap-3">
           <div className="flex-1">
             <div className="text-xs text-slate-600">Total Price</div>
-            <div className="text-2xl font-extrabold text-slate-900">₹{totalPrice.toLocaleString('en-IN')}</div>
-            {bundleAdded && (
-              <div className="flex items-center gap-1 mt-1">
+            <div className="flex items-baseline gap-2">
+              {discountPercent > 0 && (
+                <span className="text-sm text-slate-400 line-through">₹{subtotal.toLocaleString('en-IN')}</span>
+              )}
+              <span className="text-2xl font-extrabold text-slate-900">₹{totalPrice.toLocaleString('en-IN')}</span>
+            </div>
+            {discountPercent > 0 && (
+              <div className="flex items-center gap-1 mt-0.5">
+                <Check className="w-3 h-3 text-emerald-600" />
+                <span className="text-xs text-emerald-700 font-semibold">{discountPercent}% OFF applied</span>
+              </div>
+            )}
+            {bundleAdded && discountPercent === 0 && (
+              <div className="flex items-center gap-1 mt-0.5">
                 <Check className="w-3 h-3 text-emerald-600" />
                 <span className="text-xs text-emerald-700 font-semibold">Bundle Added</span>
               </div>
