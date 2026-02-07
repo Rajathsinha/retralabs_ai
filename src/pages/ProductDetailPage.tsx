@@ -2,69 +2,13 @@ import { useEffect, useState } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { ProductWithVariants, ProductVariant } from '../types';
 import { useCart } from '../context/CartContext';
-import { ChevronRight, Star, Check, Package, Truck, Shield, Thermometer, AlertTriangle, MapPin, Phone, Minus, Plus } from 'lucide-react';
-import { getViewingCount, getSoldCount } from '../utils/productMetrics';
+import { ChevronRight, Star, Check, Package, Truck, Shield, AlertTriangle, MapPin, Phone, Minus, Plus } from 'lucide-react';
 
 interface ProductDetailPageProps {
   productId: string;
   onNavigate: (page: string) => void;
 }
 
-const INDIAN_LOCATIONS = [
-  // Major Cities
-  'Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai', 'Kolkata', 'Pune', 'Ahmedabad',
-  'Jaipur', 'Lucknow', 'Surat', 'Chandigarh', 'Indore', 'Nagpur', 'Kochi', 'Coimbatore',
-  'Visakhapatnam', 'Bhopal', 'Patna', 'Vadodara', 'Gurgaon', 'Noida', 'Thane', 'Navi Mumbai',
-
-  // Tier 2 Cities & Districts
-  'Agra', 'Amritsar', 'Aurangabad', 'Bareilly', 'Belgaum', 'Bhilai', 'Bhiwandi', 'Bikaner',
-  'Bokaro', 'Cuttack', 'Dehradun', 'Dhanbad', 'Durgapur', 'Erode', 'Faridabad', 'Ghaziabad',
-  'Guntur', 'Guwahati', 'Gwalior', 'Hubli', 'Jabalpur', 'Jamshedpur', 'Jodhpur', 'Kannur',
-  'Kanpur', 'Kota', 'Kozhikode', 'Madurai', 'Mangalore', 'Meerut', 'Mysore', 'Nashik',
-  'Nellore', 'Raipur', 'Rajkot', 'Ranchi', 'Salem', 'Shimla', 'Siliguri', 'Tirupati',
-  'Trichy', 'Udaipur', 'Ujjain', 'Varanasi', 'Vijayawada', 'Warangal',
-
-  // Tier 3 Cities & Towns
-  'Ajmer', 'Alwar', 'Ambala', 'Anand', 'Bhavnagar', 'Bilaspur', 'Burdwan', 'Daman',
-  'Gandhidham', 'Gangtok', 'Haridwar', 'Hisar', 'Jamnagar', 'Jhansi', 'Junagadh', 'Karnal',
-  'Kollam', 'Kurnool', 'Mathura', 'Muzaffarpur', 'Panipat', 'Patiala', 'Pondicherry', 'Rourkela',
-  'Sangli', 'Shillong', 'Sonipat', 'Thrissur', 'Tirunelveli', 'Tumkur', 'Vellore', 'Vizianagaram',
-
-  // Districts & Smaller Cities
-  'Aligarh', 'Allahabad', 'Amravati', 'Anantapur', 'Azamgarh', 'Barabanki', 'Bhagalpur', 'Bharatpur',
-  'Bijapur', 'Bulandshahr', 'Chittoor', 'Cuddalore', 'Dhule', 'Dindigul', 'Etawah', 'Firozabad',
-  'Gorakhpur', 'Gulbarga', 'Haldwani', 'Hassan', 'Hospet', 'Imphal', 'Jalandhar', 'Jalgaon',
-  'Jorhat', 'Karimnagar', 'Khammam', 'Kolhapur', 'Korba', 'Kulti', 'Kumbakonam', 'Latur',
-  'Ludhiana', 'Malegaon', 'Malerkotla', 'Mirzapur', 'Moradabad', 'Morena', 'Nanded', 'Navsari',
-  'Nizamabad', 'Pali', 'Palakkad', 'Parbhani', 'Pathankot', 'Purnia', 'Raichur', 'Rajahmundry',
-  'Rampur', 'Ratlam', 'Rohtak', 'Saharanpur', 'Sambalpur', 'Satara', 'Shahjahanpur', 'Shimoga',
-  'Sitapur', 'Solapur', 'Srinagar', 'Sultanpur', 'Thanjavur', 'Tiruppur', 'Tonk', 'Tuticorin',
-
-  // Villages & Rural Areas
-  'Khorda', 'Balaghat', 'Balasore', 'Ballia', 'Banswara', 'Barmer', 'Basti', 'Betul', 'Bhind',
-  'Churu', 'Darbhanga', 'Deoria', 'Dewas', 'Dhar', 'Dholpur', 'Dumka', 'Dungarpur', 'Ernakulam',
-  'Fatehpur', 'Ganjam', 'Gaya', 'Giridih', 'Gonda', 'Hamirpur', 'Hanumangarh', 'Hathras',
-  'Hazaribagh', 'Hoshangabad', 'Idukki', 'Jaintia Hills', 'Jalaun', 'Jaunpur', 'Jehanabad',
-  'Jhalawar', 'Jhunjhunu', 'Kaithal', 'Kangra', 'Kanniyakumari', 'Kasaragod', 'Katni', 'Kendrapara',
-  'Khammam', 'Khargone', 'Kishanganj', 'Kolar', 'Koppal', 'Koraput', 'Kottayam', 'Krishnagiri',
-  'Lakhimpur', 'Lakhisarai', 'Latehar', 'Madhepura', 'Madhubani', 'Mahbubnagar', 'Mahasamund',
-  'Mahendragarh', 'Mahoba', 'Mainpuri', 'Malappuram', 'Mandi', 'Mandla', 'Mandsaur', 'Mayurbhanj',
-  'Medak', 'Mewat', 'Nabarangpur', 'Nagaon', 'Nagapattinam', 'Nainital', 'Nalanda', 'Nalgonda',
-  'Namakkal', 'Nandurbar', 'Narsinghpur', 'Nawada', 'Nawanshahr', 'Neemuch', 'Palamu', 'Panchkula',
-  'Panchmahal', 'Pauri Garhwal', 'Perambalur', 'Phek', 'Pilibhit', 'Pithoragarh', 'Porbandar',
-  'Pratapgarh', 'Pudukkottai', 'Rae Bareli', 'Raisen', 'Ramanathapuram', 'Ramgarh', 'Rewa',
-  'Rewari', 'Sabarkantha', 'Sagar', 'Saharsa', 'Samastipur', 'Sangrur', 'Saran', 'Sawai Madhopur',
-  'Seoni', 'Shahdol', 'Shajapur', 'Sheikhpura', 'Sheopur', 'Shivpuri', 'Sikar', 'Sirsa',
-  'Sivaganga', 'Solan', 'Subarnapur', 'Supaul', 'Surendranagar', 'Tehri Garhwal', 'Theni',
-  'Thoothukudi', 'Tikamgarh', 'Tinsukia', 'Tiruvannamalai', 'Tiruvallur', 'Tiruvallur', 'Tonk',
-  'Udalguri', 'Udhampur', 'Udupi', 'Umaria', 'Una', 'Unnao', 'Uttara Kannada', 'Valsad',
-  'Viluppuram', 'Wardha', 'Wayanad', 'West Champaran', 'Yadgir', 'Yamunanagar', 'Yavatmal'
-];
-
-const SAMPLE_PRODUCTS = [
-  'HGH 191AA', 'Tirzepatide', 'Retatrutide', 'IGF-1 LR3',
-  'GHK-Cu', 'Bacteriostatic Water'
-];
 
 export default function ProductDetailPage({ productId, onNavigate }: ProductDetailPageProps) {
   const [product, setProduct] = useState<ProductWithVariants | null>(null);
@@ -73,52 +17,8 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [imageZoom, setImageZoom] = useState(false);
-  const [showNotification, setShowNotification] = useState(false);
   const [bundleAdded, setBundleAdded] = useState(false);
-  const [viewingCount, setViewingCount] = useState(Math.floor(Math.random() * 16));
-  const [notificationData, setNotificationData] = useState({
-    city: INDIAN_LOCATIONS[Math.floor(Math.random() * INDIAN_LOCATIONS.length)],
-    product: SAMPLE_PRODUCTS[Math.floor(Math.random() * SAMPLE_PRODUCTS.length)],
-    time: Math.floor(Math.random() * 10) + 1
-  });
   const { addToCart } = useCart();
-
-  useEffect(() => {
-    const viewingTimer = setInterval(() => {
-      setViewingCount(Math.floor(Math.random() * 16));
-    }, 10000);
-
-    return () => clearInterval(viewingTimer);
-  }, []);
-
-  useEffect(() => {
-    const notificationTimer = setInterval(() => {
-      setNotificationData({
-        city: INDIAN_LOCATIONS[Math.floor(Math.random() * INDIAN_LOCATIONS.length)],
-        product: SAMPLE_PRODUCTS[Math.floor(Math.random() * SAMPLE_PRODUCTS.length)],
-        time: Math.floor(Math.random() * 10) + 1
-      });
-    }, 20000);
-
-    return () => clearInterval(notificationTimer);
-  }, []);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowNotification(true);
-      setTimeout(() => setShowNotification(false), 4000);
-    }, 3000);
-
-    const notificationCycle = setInterval(() => {
-      setShowNotification(true);
-      setTimeout(() => setShowNotification(false), 4000);
-    }, 8000);
-
-    return () => {
-      clearTimeout(timer);
-      clearInterval(notificationCycle);
-    };
-  }, []);
 
   useEffect(() => {
     loadProduct();
@@ -246,25 +146,6 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
 
   return (
     <div className="min-h-screen bg-white relative">
-      {showNotification && (
-        <div className="fixed bottom-6 left-6 z-50 animate-slide-up">
-          <div className="bg-white border-2 border-emerald-500 rounded-xl shadow-2xl p-4 max-w-sm">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                <Check className="w-5 h-5 text-emerald-600" />
-              </div>
-              <div className="flex-1">
-                <div className="font-bold text-slate-900 text-sm">Recent Order</div>
-                <div className="text-xs text-slate-600 mt-0.5">
-                  Someone from {notificationData.city} purchased <span className="font-semibold">{notificationData.product}</span>
-                </div>
-                <div className="text-xs text-slate-500 mt-1">{notificationData.time} {notificationData.time === 1 ? 'minute' : 'minutes'} ago</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className="bg-slate-100 border-b border-slate-200 py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2 text-sm">
@@ -398,18 +279,13 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
               </div>
 
               <div className="flex items-center gap-3 mb-8">
-                {viewingCount > 0 && (
-                  <div className="bg-red-50 border border-red-200 px-4 py-2 rounded-lg flex items-center gap-2">
-                    <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                    <span className="text-sm font-semibold text-red-700">
-                      {viewingCount} {viewingCount === 1 ? 'person' : 'people'} viewing now
-                    </span>
-                  </div>
-                )}
-                <div className="bg-orange-50 border border-orange-200 px-4 py-2 rounded-lg">
-                  <span className="text-sm font-semibold text-orange-700">
-                    {getSoldCount(product.id, product.name, product.category)} sold in last 24h
-                  </span>
+                <div className="bg-emerald-50 border border-emerald-200 px-4 py-2 rounded-lg flex items-center gap-2">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full" />
+                  <span className="text-sm font-semibold text-emerald-700">In Stock</span>
+                </div>
+                <div className="bg-blue-50 border border-blue-200 px-4 py-2 rounded-lg flex items-center gap-2">
+                  <Shield className="w-3.5 h-3.5 text-blue-600" />
+                  <span className="text-sm font-semibold text-blue-700">COA Verified</span>
                 </div>
               </div>
             </div>
