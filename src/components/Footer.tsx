@@ -25,7 +25,7 @@ export default function Footer({ onNavigate }: FooterProps) {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
           <div className="md:col-span-1">
             <div className="mb-5">
-              <Logo size="sm" />
+              <Logo size="sm" variant="light" />
             </div>
             <p className="text-sm leading-relaxed mb-5">
               Research peptides for laboratory and educational use only. Sourced directly from verified manufacturers.
@@ -40,7 +40,7 @@ export default function Footer({ onNavigate }: FooterProps) {
           </div>
 
           <div>
-            <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-5">Company</h4>
+            <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-5">COMPANY</h4>
             <ul className="space-y-3">
               {COMPANY_LINKS.map((link) => (
                 <li key={link.key}>
@@ -57,7 +57,7 @@ export default function Footer({ onNavigate }: FooterProps) {
           </div>
 
           <div>
-            <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-5">Legal</h4>
+            <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-5">LEGAL</h4>
             <ul className="space-y-3">
               {LEGAL_LINKS.map((link) => (
                 <li key={link.key}>
@@ -74,7 +74,7 @@ export default function Footer({ onNavigate }: FooterProps) {
           </div>
 
           <div>
-            <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-5">Quick Links</h4>
+            <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-5">QUICK LINKS</h4>
             <ul className="space-y-3">
               <li>
                 <button
@@ -98,10 +98,10 @@ export default function Footer({ onNavigate }: FooterProps) {
           </div>
         </div>
 
-        <div className="pt-8 border-t border-slate-800/50">
+        <div className="pt-8 border-t border-slate-800/50 pr-20 md:pr-24">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
             <p>&copy; {new Date().getFullYear()} RetraLabs. All rights reserved.</p>
-            <p>Research Use Disclaimer: All products are for research purposes only.</p>
+            <p className="text-center md:text-right">Research Use Disclaimer: All products are for research purposes only.</p>
           </div>
         </div>
       </div>
