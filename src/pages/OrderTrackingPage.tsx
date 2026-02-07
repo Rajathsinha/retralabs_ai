@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Package, Truck, CheckCircle, Clock, XCircle, MapPin } from 'lucide-react';
+import { Search, Package, Truck, CheckCircle, Clock, XCircle, MapPin, MessageSquare } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface OrderTrackingPageProps {
@@ -218,8 +218,18 @@ export default function OrderTrackingPage({ onNavigate }: OrderTrackingPageProps
             </div>
 
             {error && (
-              <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 text-sm">
-                {error}
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-sm">
+                <p className="text-red-700 mb-2">{error}</p>
+                <p className="text-red-600 mb-3">Please contact Support for assistance.</p>
+                <a
+                  href="https://wa.me/918217824384?text=Hello%2C%20I%20need%20help%20tracking%20my%20order%20on%20RetraLabs"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-lg transition-colors"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  Chat on WhatsApp
+                </a>
               </div>
             )}
 
