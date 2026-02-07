@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Search, Package, Truck, CheckCircle, Clock, XCircle, MapPin, MessageSquare } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { getProductImageUrl, BAC_WATER_IMAGE_URL } from '../utils/imageUrl';
 
 interface OrderTrackingPageProps {
   onNavigate: (page: string) => void;
@@ -325,9 +326,14 @@ export default function OrderTrackingPage({ onNavigate }: OrderTrackingPageProps
                       <div className="w-20 h-20 bg-gray-100 flex items-center justify-center flex-shrink-0">
                         {item.product.image_url ? (
                           <img
-                            src={item.product.image_url}
+                            src={getProductImageUrl(item.product.image_url, item.product.name)}
                             alt={item.product.name}
                             className="w-full h-full object-cover"
+                            onError={(e) => {
+                              if (item.product.name.toLowerCase().includes('bacteriostatic water')) {
+                                (e.target as HTMLImageElement).src = BAC_WATER_IMAGE_URL;
+                              }
+                            }}
                           />
                         ) : (
                           <Package className="w-8 h-8 text-gray-400" />

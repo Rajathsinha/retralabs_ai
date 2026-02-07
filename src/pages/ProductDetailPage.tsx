@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { getProductImageUrl, BAC_WATER_IMAGE_URL } from '../utils/imageUrl';
 import { ProductWithVariants, ProductVariant } from '../types';
 import { useCart } from '../context/CartContext';
 import { ChevronRight, Star, Check, Package, Truck, Shield, AlertTriangle, MapPin, Phone, Minus, Plus, ShoppingCart } from 'lucide-react';
@@ -150,9 +151,14 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
               <div className="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm group">
                 <div className="aspect-square relative p-8 cursor-pointer bg-gradient-to-br from-slate-50 to-white" onClick={() => setImageZoom(!imageZoom)}>
                   <img
-                    src={product.image_url}
+                    src={getProductImageUrl(product.image_url, product.name)}
                     alt={product.name}
                     className={`w-full h-full object-contain transition-transform duration-500 ${imageZoom ? 'scale-150' : 'group-hover:scale-105'}`}
+                    onError={(e) => {
+                      if (product.name.toLowerCase().includes('bacteriostatic water')) {
+                        (e.target as HTMLImageElement).src = BAC_WATER_IMAGE_URL;
+                      }
+                    }}
                   />
                   {isFlagship && (
                     <div className="absolute top-4 left-4 px-3 py-1.5 bg-slate-900 text-white text-xs font-bold rounded-lg flex items-center gap-1.5">

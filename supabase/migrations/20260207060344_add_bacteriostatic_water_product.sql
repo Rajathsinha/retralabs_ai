@@ -36,7 +36,7 @@ VALUES (
   'Bacteriostatic Water (Pharma Grade)',
   'High-quality pharmaceutical grade bacteriostatic water. Sterile water containing 0.9% benzyl alcohol, used for reconstituting and diluting medications for injection. Ensures product safety and extends shelf life after reconstitution.',
   'Medical Supplies',
-  '/bac-water.jpg'
+  '/bac-water.png'
 )
 ON CONFLICT DO NOTHING;
 

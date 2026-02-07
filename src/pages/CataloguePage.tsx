@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { getProductImageUrl, BAC_WATER_IMAGE_URL } from '../utils/imageUrl';
 import { ProductWithVariants } from '../types';
 import { ShieldCheck, Microscope, ArrowRight } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
@@ -75,6 +76,20 @@ const DEMO_PRODUCTS: ProductWithVariants[] = [
       { id: '5f', product_id: '5', dosage_mg: 150, price_inr: 14000, in_stock: true, vial_configuration: '15IU x 10 vials', created_at: new Date().toISOString() },
       { id: '5g', product_id: '5', dosage_mg: 120, price_inr: 16000, in_stock: true, vial_configuration: '24IU x 5 vials', created_at: new Date().toISOString() },
       { id: '5h', product_id: '5', dosage_mg: 240, price_inr: 21000, in_stock: true, vial_configuration: '24IU x 10 vials', created_at: new Date().toISOString() },
+    ]
+  },
+  {
+    id: '6',
+    name: 'Bacteriostatic Water (Pharma Grade)',
+    description: 'Pharmaceutical grade bacteriostatic water for reconstituting peptides. Sterile, 0.9% benzyl alcohol.',
+    category: 'Medical Supplies',
+    image_url: '/bac-water.png',
+    created_at: new Date().toISOString(),
+    variants: [
+      { id: '6a', product_id: '6', dosage_mg: 10, price_inr: 400, in_stock: true, vial_configuration: '1×10ML', created_at: new Date().toISOString() },
+      { id: '6b', product_id: '6', dosage_mg: 20, price_inr: 600, in_stock: true, vial_configuration: '2×10ML', created_at: new Date().toISOString() },
+      { id: '6c', product_id: '6', dosage_mg: 50, price_inr: 800, in_stock: true, vial_configuration: '5×10ML', created_at: new Date().toISOString() },
+      { id: '6d', product_id: '6', dosage_mg: 100, price_inr: 1500, in_stock: true, vial_configuration: '10×10ML', created_at: new Date().toISOString() },
     ]
   },
 ];
@@ -197,9 +212,14 @@ export default function CataloguePage({ onNavigate }: CataloguePageProps) {
                   >
                     <div className="aspect-[4/3] bg-slate-100 overflow-hidden relative">
                       <img
-                        src={product.image_url}
+                        src={getProductImageUrl(product.image_url, product.name)}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+                        onError={(e) => {
+                          if (product.name.toLowerCase().includes('bacteriostatic water')) {
+                            (e.target as HTMLImageElement).src = BAC_WATER_IMAGE_URL;
+                          }
+                        }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-slate-800 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">
