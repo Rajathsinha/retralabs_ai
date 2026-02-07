@@ -11,6 +11,7 @@ export default function ReconstitutionCalculator({ isOpen, onClose }: Reconstitu
   const [waterVolume, setWaterVolume] = useState('2');
   const [desiredDose, setDesiredDose] = useState('0.25');
   const [doseUnit, setDoseUnit] = useState<'mg' | 'mcg'>('mg');
+  const [syringeType, setSyringeType] = useState<'u100' | 'u40'>('u100');
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -31,7 +32,8 @@ export default function ReconstitutionCalculator({ isOpen, onClose }: Reconstitu
 
   const concentration = waterMl > 0 ? peptideMg / waterMl : 0;
   const injectionVolume = concentration > 0 ? doseMg / concentration : 0;
-  const injectionUnits = injectionVolume * 100;
+  const unitsPerMl = syringeType === 'u100' ? 100 : 40;
+  const injectionUnits = injectionVolume * unitsPerMl;
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) onClose();
@@ -132,6 +134,35 @@ export default function ReconstitutionCalculator({ isOpen, onClose }: Reconstitu
                   </select>
                 </div>
               </div>
+
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Syringe className="w-4 h-4 text-emerald-600" />
+                  <label className="text-xs font-bold text-slate-900 uppercase tracking-wide">Syringe Type</label>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => setSyringeType('u100')}
+                    className={`px-3 py-2.5 rounded-lg text-sm font-bold transition-all ${
+                      syringeType === 'u100'
+                        ? 'bg-slate-800 text-white shadow-md'
+                        : 'bg-white border-2 border-slate-300 text-slate-600 hover:border-emerald-400'
+                    }`}
+                  >
+                    U-100 (100 units/mL)
+                  </button>
+                  <button
+                    onClick={() => setSyringeType('u40')}
+                    className={`px-3 py-2.5 rounded-lg text-sm font-bold transition-all ${
+                      syringeType === 'u40'
+                        ? 'bg-slate-800 text-white shadow-md'
+                        : 'bg-white border-2 border-slate-300 text-slate-600 hover:border-emerald-400'
+                    }`}
+                  >
+                    U-40 (40 units/mL)
+                  </button>
+                </div>
+              </div>
             </div>
 
             <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-5 border border-slate-700">
@@ -153,7 +184,7 @@ export default function ReconstitutionCalculator({ isOpen, onClose }: Reconstitu
                 </div>
 
                 <div className="bg-emerald-600/20 border border-emerald-500/30 rounded-lg p-4">
-                  <div className="text-[10px] text-emerald-300 mb-1 font-semibold uppercase tracking-wider">Syringe Units</div>
+                  <div className="text-[10px] text-emerald-300 mb-1 font-semibold uppercase tracking-wider">{syringeType === 'u100' ? 'U-100' : 'U-40'} Units</div>
                   <div className="text-xl font-extrabold text-white">
                     {injectionUnits.toFixed(1)} <span className="text-xs">units</span>
                   </div>
