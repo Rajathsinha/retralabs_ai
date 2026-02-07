@@ -294,6 +294,15 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
 
               <p className="text-lg text-slate-600 mb-6 leading-relaxed">{product.description}</p>
 
+              <div className="bg-rose-50 border-l-4 border-rose-400 rounded-r-xl p-5 mb-6">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-rose-900 leading-relaxed">
+                    <strong className="font-bold">RESEARCH USE ONLY</strong> — This product is strictly for laboratory and research purposes. Not for human consumption, medical treatment, or clinical application. By ordering, you confirm you are a qualified researcher or represent a legitimate research institution.
+                  </div>
+                </div>
+              </div>
+
               <div className="flex items-center gap-3 mb-8">
                 {getViewingCount(product.id) > 0 && (
                   <div className="bg-red-50 border border-red-200 px-4 py-2 rounded-lg flex items-center gap-2">
@@ -430,17 +439,8 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
                 className="w-full py-5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold rounded-xl transition-all disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
                 <Package className="w-6 h-6" />
-                Order on WhatsApp
+                Place Order
               </button>
-            </div>
-
-            <div className="bg-rose-50 border-l-4 border-rose-400 rounded-r-xl p-5 mb-6">
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-rose-900 leading-relaxed">
-                  <strong className="font-bold">RESEARCH USE ONLY</strong> — This product is strictly for laboratory and research purposes. Not for human consumption, medical treatment, or clinical application. By ordering, you confirm you are a qualified researcher or represent a legitimate research institution.
-                </div>
-              </div>
             </div>
 
             {!isBacWater && bacWater && (
