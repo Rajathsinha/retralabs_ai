@@ -398,53 +398,8 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
               )}
             </div>
 
-            <div className="border-2 border-slate-900 rounded-2xl p-6 mb-6 bg-slate-900 text-white">
-              <div className="flex items-baseline justify-between mb-6">
-                <span className="text-lg font-medium text-slate-300">Total Amount</span>
-                <span className="text-4xl font-extrabold">₹{totalPrice.toLocaleString('en-IN')}</span>
-              </div>
-
-              <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 mb-5">
-                <div className="flex items-center gap-3">
-                  <MapPin className="w-6 h-6 text-blue-600 flex-shrink-0" />
-                  <div className="flex-1">
-                    <div className="font-bold text-blue-900 text-base">Free Shipping to India</div>
-                    <div className="text-sm text-blue-700 mt-0.5">Secure pharmaceutical delivery • 5-7 business days</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 mb-5">
-                <div className="flex items-center gap-3 mb-3">
-                  <Phone className="w-5 h-5 text-slate-400" />
-                  <div className="text-sm text-slate-300">
-                    <span className="font-semibold">International Orders:</span> Contact support for shipping availability
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-700">
-                  <div className="flex items-center gap-2">
-                    <Shield className="w-4 h-4 text-emerald-400" />
-                    <span className="text-xs text-slate-300">Temperature Controlled</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Truck className="w-4 h-4 text-emerald-400" />
-                    <span className="text-xs text-slate-300">Express Processing</span>
-                  </div>
-                </div>
-              </div>
-
-              <button
-                onClick={handleAddToCart}
-                disabled={!selectedVariant}
-                className="w-full py-5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold rounded-xl transition-all disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-              >
-                <Package className="w-6 h-6" />
-                Place Order
-              </button>
-            </div>
-
             {!isBacWater && bacWater && (
-              <div className="border-2 border-blue-200 rounded-2xl p-6 bg-gradient-to-br from-blue-50 to-white">
+              <div className="border-2 border-blue-200 rounded-2xl p-6 mb-6 bg-gradient-to-br from-blue-50 to-white">
                 <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
                   <Package className="w-5 h-5 text-blue-600" />
                   Frequently Bought Together
@@ -481,6 +436,51 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
                 </div>
               </div>
             )}
+
+            <div className="border-2 border-slate-900 rounded-2xl p-6 mb-6 bg-slate-900 text-white">
+              <div className="flex items-baseline justify-between mb-6">
+                <span className="text-lg font-medium text-slate-300">Total Amount</span>
+                <span className="text-4xl font-extrabold">₹{totalPrice.toLocaleString('en-IN')}</span>
+              </div>
+
+              <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 mb-5">
+                <div className="flex items-center gap-3">
+                  <MapPin className="w-6 h-6 text-blue-600 flex-shrink-0" />
+                  <div className="flex-1">
+                    <div className="font-bold text-blue-900 text-base">Free Shipping to India</div>
+                    <div className="text-sm text-blue-700 mt-0.5">Secure delivery • 5-7 business days or sometimes within a day depends on stocks, contact support / sales for more info</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 mb-5">
+                <div className="flex items-center gap-3 mb-3">
+                  <Phone className="w-5 h-5 text-slate-400" />
+                  <div className="text-sm text-slate-300">
+                    <span className="font-semibold">International Orders:</span> Contact support for shipping availability
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-700">
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-4 h-4 text-emerald-400" />
+                    <span className="text-xs text-slate-300">Temperature Controlled</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Truck className="w-4 h-4 text-emerald-400" />
+                    <span className="text-xs text-slate-300">Express Processing</span>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={handleAddToCart}
+                disabled={!selectedVariant}
+                className="w-full py-5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold rounded-xl transition-all disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              >
+                <Package className="w-6 h-6" />
+                Place Order
+              </button>
+            </div>
           </div>
         </div>
       </div>
