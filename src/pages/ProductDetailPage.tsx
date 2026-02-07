@@ -14,7 +14,17 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
   const [loading, setLoading] = useState(true);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [imageZoom, setImageZoom] = useState(false);
+  const [showNotification, setShowNotification] = useState(false);
   const { addToCart } = useCart();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowNotification(true);
+      setTimeout(() => setShowNotification(false), 4000);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     loadProduct();
@@ -102,7 +112,26 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
   const totalPrice = selectedVariant ? selectedVariant.price_inr * quantity : 0;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white relative">
+      {showNotification && (
+        <div className="fixed bottom-6 left-6 z-50 animate-slide-up">
+          <div className="bg-white border-2 border-emerald-500 rounded-xl shadow-2xl p-4 max-w-sm">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                <Check className="w-5 h-5 text-emerald-600" />
+              </div>
+              <div className="flex-1">
+                <div className="font-bold text-slate-900 text-sm">Recent Order</div>
+                <div className="text-xs text-slate-600 mt-0.5">
+                  Someone from Mumbai purchased <span className="font-semibold">HGH 191AA</span>
+                </div>
+                <div className="text-xs text-slate-500 mt-1">2 minutes ago</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="bg-slate-100 border-b border-slate-200 py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2 text-sm">
@@ -138,16 +167,18 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           <div className="lg:col-span-2">
             <div className="sticky top-8">
-              <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl overflow-hidden border-2 border-slate-200 shadow-xl">
-                <div className="aspect-square relative p-8">
+              <div className="bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 rounded-2xl overflow-hidden border-2 border-slate-200 shadow-xl hover:shadow-2xl transition-all duration-300 group">
+                <div className="aspect-square relative p-8 cursor-pointer" onClick={() => setImageZoom(!imageZoom)}>
                   <img
                     src={product.image_url}
                     alt={product.name}
-                    className="w-full h-full object-contain"
+                    className={`w-full h-full object-contain transition-transform duration-500 ${imageZoom ? 'scale-150' : 'group-hover:scale-105'}`}
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
                   {isFlagship && (
                     <div className="absolute top-4 left-4">
-                      <div className="px-3 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-xs font-bold rounded-lg shadow-lg flex items-center gap-1.5">
+                      <div className="px-3 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-xs font-bold rounded-lg shadow-lg flex items-center gap-1.5 animate-pulse">
                         <Star className="w-3.5 h-3.5 fill-current" />
                         FLAGSHIP
                       </div>
@@ -155,27 +186,56 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
                   )}
                   {product.name === 'Retatrutide' && (
                     <div className="absolute top-4 right-4">
-                      <div className="px-3 py-1.5 bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-900 text-xs font-bold rounded-lg shadow-lg">
+                      <div className="px-3 py-1.5 bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-900 text-xs font-bold rounded-lg shadow-lg animate-bounce">
                         🔥 TRENDING
                       </div>
                     </div>
                   )}
+
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg p-2 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                        <span className="text-xs font-semibold text-slate-700">In Stock</span>
+                      </div>
+                      <span className="text-xs text-slate-600">23 units available</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="mt-6 bg-emerald-50 border-2 border-emerald-200 rounded-xl p-4">
+              <div className="mt-6 bg-gradient-to-br from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-xl p-4 hover:shadow-lg transition-shadow">
                 <div className="flex items-center gap-3">
-                  <Shield className="w-6 h-6 text-emerald-600" />
+                  <div className="relative">
+                    <Shield className="w-6 h-6 text-emerald-600" />
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full animate-ping" />
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full" />
+                  </div>
                   <div className="flex-1">
                     <div className="font-bold text-emerald-900 text-lg">99.45% Purity</div>
                     <div className="text-sm text-emerald-700">HPLC Verified • COA Available</div>
                   </div>
                   <button
                     onClick={() => onNavigate('support')}
-                    className="text-emerald-600 hover:text-emerald-700 font-semibold text-sm whitespace-nowrap"
+                    className="text-emerald-600 hover:text-emerald-700 font-semibold text-sm whitespace-nowrap hover:underline"
                   >
                     Contact Sales →
                   </button>
+                </div>
+              </div>
+
+              <div className="mt-4 grid grid-cols-3 gap-3">
+                <div className="bg-white border-2 border-slate-200 rounded-xl p-3 text-center hover:border-blue-300 transition-colors">
+                  <div className="text-2xl font-bold text-slate-900">24h</div>
+                  <div className="text-xs text-slate-600 mt-1">Fast Ship</div>
+                </div>
+                <div className="bg-white border-2 border-slate-200 rounded-xl p-3 text-center hover:border-blue-300 transition-colors">
+                  <div className="text-2xl font-bold text-slate-900">4.8★</div>
+                  <div className="text-xs text-slate-600 mt-1">Rating</div>
+                </div>
+                <div className="bg-white border-2 border-slate-200 rounded-xl p-3 text-center hover:border-blue-300 transition-colors">
+                  <div className="text-2xl font-bold text-slate-900">2K+</div>
+                  <div className="text-xs text-slate-600 mt-1">Orders</div>
                 </div>
               </div>
             </div>
@@ -195,12 +255,22 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
 
               <p className="text-lg text-slate-600 mb-6 leading-relaxed">{product.description}</p>
 
-              <div className="flex items-center gap-3 mb-8">
+              <div className="flex items-center gap-3 mb-6">
                 <div className="flex items-center gap-1 bg-amber-50 px-3 py-2 rounded-lg border border-amber-200">
                   <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
                   <span className="text-xl font-bold text-slate-900">4.8</span>
                 </div>
                 <span className="text-slate-600 text-sm">698+ verified reviews</span>
+              </div>
+
+              <div className="flex items-center gap-3 mb-8">
+                <div className="bg-red-50 border border-red-200 px-4 py-2 rounded-lg flex items-center gap-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                  <span className="text-sm font-semibold text-red-700">15 people viewing now</span>
+                </div>
+                <div className="bg-orange-50 border border-orange-200 px-4 py-2 rounded-lg">
+                  <span className="text-sm font-semibold text-orange-700">12 sold in last 24h</span>
+                </div>
               </div>
             </div>
 
@@ -327,7 +397,7 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
               </button>
             </div>
 
-            <div className="bg-rose-50 border-l-4 border-rose-400 rounded-r-xl p-5">
+            <div className="bg-rose-50 border-l-4 border-rose-400 rounded-r-xl p-5 mb-6">
               <div className="flex items-start gap-3">
                 <AlertTriangle className="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5" />
                 <div className="text-sm text-rose-900 leading-relaxed">
@@ -335,7 +405,72 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
                 </div>
               </div>
             </div>
+
+            {!isBacWater && (
+              <div className="border-2 border-blue-200 rounded-2xl p-6 bg-gradient-to-br from-blue-50 to-white">
+                <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                  <Package className="w-5 h-5 text-blue-600" />
+                  Frequently Bought Together
+                </h3>
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="flex-1 bg-white border-2 border-slate-200 rounded-xl p-4 hover:border-blue-300 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="w-16 h-16 bg-slate-100 rounded-lg flex items-center justify-center">
+                        <Package className="w-8 h-8 text-slate-400" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-bold text-slate-900 text-sm">Bacteriostatic Water</div>
+                        <div className="text-xs text-slate-600 mt-0.5">30ML - Pharma Grade</div>
+                        <div className="text-sm font-bold text-blue-600 mt-1">₹799</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-2xl text-slate-400">+</div>
+                  <div className="flex-1 bg-white border-2 border-slate-200 rounded-xl p-4 hover:border-blue-300 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="w-16 h-16 bg-slate-100 rounded-lg flex items-center justify-center">
+                        <Shield className="w-8 h-8 text-slate-400" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-bold text-slate-900 text-sm">Sterile Syringes</div>
+                        <div className="text-xs text-slate-600 mt-0.5">Pack of 10 - 1ML</div>
+                        <div className="text-sm font-bold text-blue-600 mt-1">₹499</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between p-4 bg-emerald-50 border-2 border-emerald-200 rounded-xl">
+                  <div>
+                    <div className="text-sm text-emerald-700">Bundle Price</div>
+                    <div className="text-2xl font-bold text-emerald-900">
+                      ₹{(totalPrice + 1298).toLocaleString('en-IN')}
+                    </div>
+                    <div className="text-xs text-emerald-600 mt-0.5">Save ₹200 on bundle</div>
+                  </div>
+                  <button className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors">
+                    Add Bundle
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
+        </div>
+      </div>
+
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 border-slate-200 p-4 z-40 shadow-2xl">
+        <div className="flex items-center gap-3">
+          <div className="flex-1">
+            <div className="text-xs text-slate-600">Total Price</div>
+            <div className="text-2xl font-extrabold text-slate-900">₹{totalPrice.toLocaleString('en-IN')}</div>
+          </div>
+          <button
+            onClick={handleAddToCart}
+            disabled={!selectedVariant}
+            className="flex-1 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold rounded-xl transition-all disabled:from-slate-400 disabled:to-slate-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg"
+          >
+            <Package className="w-5 h-5" />
+            Order Now
+          </button>
         </div>
       </div>
     </div>
