@@ -10,11 +10,55 @@ interface ProductDetailPageProps {
   onNavigate: (page: string) => void;
 }
 
-const INDIAN_CITIES = [
-  'Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai', 'Kolkata',
-  'Pune', 'Ahmedabad', 'Jaipur', 'Lucknow', 'Surat', 'Chandigarh',
-  'Indore', 'Nagpur', 'Kochi', 'Coimbatore', 'Visakhapatnam', 'Bhopal',
-  'Patna', 'Vadodara', 'Gurgaon', 'Noida', 'Thane', 'Navi Mumbai'
+const INDIAN_LOCATIONS = [
+  // Major Cities
+  'Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai', 'Kolkata', 'Pune', 'Ahmedabad',
+  'Jaipur', 'Lucknow', 'Surat', 'Chandigarh', 'Indore', 'Nagpur', 'Kochi', 'Coimbatore',
+  'Visakhapatnam', 'Bhopal', 'Patna', 'Vadodara', 'Gurgaon', 'Noida', 'Thane', 'Navi Mumbai',
+
+  // Tier 2 Cities & Districts
+  'Agra', 'Amritsar', 'Aurangabad', 'Bareilly', 'Belgaum', 'Bhilai', 'Bhiwandi', 'Bikaner',
+  'Bokaro', 'Cuttack', 'Dehradun', 'Dhanbad', 'Durgapur', 'Erode', 'Faridabad', 'Ghaziabad',
+  'Guntur', 'Guwahati', 'Gwalior', 'Hubli', 'Jabalpur', 'Jamshedpur', 'Jodhpur', 'Kannur',
+  'Kanpur', 'Kota', 'Kozhikode', 'Madurai', 'Mangalore', 'Meerut', 'Mysore', 'Nashik',
+  'Nellore', 'Raipur', 'Rajkot', 'Ranchi', 'Salem', 'Shimla', 'Siliguri', 'Tirupati',
+  'Trichy', 'Udaipur', 'Ujjain', 'Varanasi', 'Vijayawada', 'Warangal',
+
+  // Tier 3 Cities & Towns
+  'Ajmer', 'Alwar', 'Ambala', 'Anand', 'Bhavnagar', 'Bilaspur', 'Burdwan', 'Daman',
+  'Gandhidham', 'Gangtok', 'Haridwar', 'Hisar', 'Jamnagar', 'Jhansi', 'Junagadh', 'Karnal',
+  'Kollam', 'Kurnool', 'Mathura', 'Muzaffarpur', 'Panipat', 'Patiala', 'Pondicherry', 'Rourkela',
+  'Sangli', 'Shillong', 'Sonipat', 'Thrissur', 'Tirunelveli', 'Tumkur', 'Vellore', 'Vizianagaram',
+
+  // Districts & Smaller Cities
+  'Aligarh', 'Allahabad', 'Amravati', 'Anantapur', 'Azamgarh', 'Barabanki', 'Bhagalpur', 'Bharatpur',
+  'Bijapur', 'Bulandshahr', 'Chittoor', 'Cuddalore', 'Dhule', 'Dindigul', 'Etawah', 'Firozabad',
+  'Gorakhpur', 'Gulbarga', 'Haldwani', 'Hassan', 'Hospet', 'Imphal', 'Jalandhar', 'Jalgaon',
+  'Jorhat', 'Karimnagar', 'Khammam', 'Kolhapur', 'Korba', 'Kulti', 'Kumbakonam', 'Latur',
+  'Ludhiana', 'Malegaon', 'Malerkotla', 'Mirzapur', 'Moradabad', 'Morena', 'Nanded', 'Navsari',
+  'Nizamabad', 'Pali', 'Palakkad', 'Parbhani', 'Pathankot', 'Purnia', 'Raichur', 'Rajahmundry',
+  'Rampur', 'Ratlam', 'Rohtak', 'Saharanpur', 'Sambalpur', 'Satara', 'Shahjahanpur', 'Shimoga',
+  'Sitapur', 'Solapur', 'Srinagar', 'Sultanpur', 'Thanjavur', 'Tiruppur', 'Tonk', 'Tuticorin',
+
+  // Villages & Rural Areas
+  'Khorda', 'Balaghat', 'Balasore', 'Ballia', 'Banswara', 'Barmer', 'Basti', 'Betul', 'Bhind',
+  'Churu', 'Darbhanga', 'Deoria', 'Dewas', 'Dhar', 'Dholpur', 'Dumka', 'Dungarpur', 'Ernakulam',
+  'Fatehpur', 'Ganjam', 'Gaya', 'Giridih', 'Gonda', 'Hamirpur', 'Hanumangarh', 'Hathras',
+  'Hazaribagh', 'Hoshangabad', 'Idukki', 'Jaintia Hills', 'Jalaun', 'Jaunpur', 'Jehanabad',
+  'Jhalawar', 'Jhunjhunu', 'Kaithal', 'Kangra', 'Kanniyakumari', 'Kasaragod', 'Katni', 'Kendrapara',
+  'Khammam', 'Khargone', 'Kishanganj', 'Kolar', 'Koppal', 'Koraput', 'Kottayam', 'Krishnagiri',
+  'Lakhimpur', 'Lakhisarai', 'Latehar', 'Madhepura', 'Madhubani', 'Mahbubnagar', 'Mahasamund',
+  'Mahendragarh', 'Mahoba', 'Mainpuri', 'Malappuram', 'Mandi', 'Mandla', 'Mandsaur', 'Mayurbhanj',
+  'Medak', 'Mewat', 'Nabarangpur', 'Nagaon', 'Nagapattinam', 'Nainital', 'Nalanda', 'Nalgonda',
+  'Namakkal', 'Nandurbar', 'Narsinghpur', 'Nawada', 'Nawanshahr', 'Neemuch', 'Palamu', 'Panchkula',
+  'Panchmahal', 'Pauri Garhwal', 'Perambalur', 'Phek', 'Pilibhit', 'Pithoragarh', 'Porbandar',
+  'Pratapgarh', 'Pudukkottai', 'Rae Bareli', 'Raisen', 'Ramanathapuram', 'Ramgarh', 'Rewa',
+  'Rewari', 'Sabarkantha', 'Sagar', 'Saharsa', 'Samastipur', 'Sangrur', 'Saran', 'Sawai Madhopur',
+  'Seoni', 'Shahdol', 'Shajapur', 'Sheikhpura', 'Sheopur', 'Shivpuri', 'Sikar', 'Sirsa',
+  'Sivaganga', 'Solan', 'Subarnapur', 'Supaul', 'Surendranagar', 'Tehri Garhwal', 'Theni',
+  'Thoothukudi', 'Tikamgarh', 'Tinsukia', 'Tiruvannamalai', 'Tiruvallur', 'Tiruvallur', 'Tonk',
+  'Udalguri', 'Udhampur', 'Udupi', 'Umaria', 'Una', 'Unnao', 'Uttara Kannada', 'Valsad',
+  'Viluppuram', 'Wardha', 'Wayanad', 'West Champaran', 'Yadgir', 'Yamunanagar', 'Yavatmal'
 ];
 
 const SAMPLE_PRODUCTS = [
@@ -33,7 +77,7 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
   const [bundleAdded, setBundleAdded] = useState(false);
   const [viewingCount, setViewingCount] = useState(Math.floor(Math.random() * 16));
   const [notificationData, setNotificationData] = useState({
-    city: INDIAN_CITIES[Math.floor(Math.random() * INDIAN_CITIES.length)],
+    city: INDIAN_LOCATIONS[Math.floor(Math.random() * INDIAN_LOCATIONS.length)],
     product: SAMPLE_PRODUCTS[Math.floor(Math.random() * SAMPLE_PRODUCTS.length)],
     time: Math.floor(Math.random() * 10) + 1
   });
@@ -50,11 +94,11 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
   useEffect(() => {
     const notificationTimer = setInterval(() => {
       setNotificationData({
-        city: INDIAN_CITIES[Math.floor(Math.random() * INDIAN_CITIES.length)],
+        city: INDIAN_LOCATIONS[Math.floor(Math.random() * INDIAN_LOCATIONS.length)],
         product: SAMPLE_PRODUCTS[Math.floor(Math.random() * SAMPLE_PRODUCTS.length)],
         time: Math.floor(Math.random() * 10) + 1
       });
-    }, 5000);
+    }, 20000);
 
     return () => clearInterval(notificationTimer);
   }, []);
