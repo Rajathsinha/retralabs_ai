@@ -2,14 +2,14 @@ import { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { supabase } from '../lib/supabase';
 import { OrderFormData } from '../types';
-import { Trash2, Check, AlertTriangle, MessageCircle } from 'lucide-react';
+import { Trash2, Check, AlertTriangle, MessageCircle, Tag } from 'lucide-react';
 
 interface CheckoutPageProps {
   onNavigate: (page: string) => void;
 }
 
 export default function CheckoutPage({ onNavigate }: CheckoutPageProps) {
-  const { cart, removeFromCart, updateQuantity, clearCart, getTotal } = useCart();
+  const { cart, removeFromCart, updateQuantity, clearCart, getTotal, getSubtotal, getDiscount, getDiscountAmount } = useCart();
   const [formData, setFormData] = useState<OrderFormData>({
     customer_name: '',
     customer_email: '',
@@ -40,6 +40,11 @@ export default function CheckoutPage({ onNavigate }: CheckoutPageProps) {
       )
       .join('\n');
 
+    const discount = getDiscount();
+    const discountText = discount > 0
+      ? `\n*Subtotal:* ₹${getSubtotal().toLocaleString('en-IN')}\n*Discount (${discount}%):* -₹${getDiscountAmount().toLocaleString('en-IN')}`
+      : '';
+
     const message = `*New Order Request*
 
 *Customer Details:*
@@ -52,7 +57,7 @@ ${formData.shipping_address}
 
 *Order Items:*
 ${orderSummary}
-
+${discountText}
 *Total Amount: ₹${getTotal().toLocaleString('en-IN')}*
 
 I would like to complete payment via UPI.`;
@@ -88,7 +93,7 @@ I would like to complete payment via UPI.`;
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h1 className="text-4xl font-light text-gray-900 mb-8">Checkout</h1>
 
-        <div className="bg-blue-50 border-l-4 border-blue-500 p-6 mb-8 rounded-r-xl shadow-sm">
+        <div className="bg-blue-50 border-l-4 border-blue-500 p-6 mb-4 rounded-r-xl shadow-sm">
           <div className="flex items-start gap-4">
             <MessageCircle className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
             <div>
@@ -98,6 +103,32 @@ I would like to complete payment via UPI.`;
               </p>
               <p className="text-sm text-blue-700 italic">
                 We know this isn't ideal, but unfortunately there are no other payment options available at the moment. Thank you for your understanding.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 p-6 mb-8 rounded-r-xl shadow-sm">
+          <div className="flex items-start gap-4">
+            <Tag className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <h3 className="text-lg font-bold text-green-900 mb-2">Volume Discounts Available</h3>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                  <p className="text-green-800 font-medium">
+                    Buy 2 items: Get <strong>20% OFF</strong>
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                  <p className="text-green-800 font-medium">
+                    Buy 3+ items: Get <strong>25% OFF</strong>
+                  </p>
+                </div>
+              </div>
+              <p className="text-sm text-green-700 mt-3 italic">
+                Discount automatically applied at checkout based on total quantity.
               </p>
             </div>
           </div>
@@ -165,13 +196,37 @@ I would like to complete payment via UPI.`;
                 ))}
               </div>
 
-              <div className="mt-6 p-4 bg-gray-50 border border-gray-200">
-                <div className="flex justify-between items-center">
+              <div className="mt-6 p-4 bg-gray-50 border border-gray-200 space-y-3">
+                <div className="flex justify-between items-center text-gray-700">
+                  <span className="text-base">Subtotal:</span>
+                  <span className="text-base font-medium">
+                    ₹{getSubtotal().toLocaleString('en-IN')}
+                  </span>
+                </div>
+
+                {getDiscount() > 0 && (
+                  <div className="flex justify-between items-center text-green-600">
+                    <span className="text-base font-medium">
+                      Discount ({getDiscount()}%):
+                    </span>
+                    <span className="text-base font-semibold">
+                      -₹{getDiscountAmount().toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                )}
+
+                <div className="pt-3 border-t border-gray-300 flex justify-between items-center">
                   <span className="text-lg font-medium text-gray-900">Total:</span>
-                  <span className="text-2xl font-semibold text-gray-900">
+                  <span className="text-2xl font-bold text-gray-900">
                     ₹{getTotal().toLocaleString('en-IN')}
                   </span>
                 </div>
+
+                {getDiscount() > 0 && (
+                  <div className="pt-2 text-sm text-green-600 font-medium">
+                    You saved ₹{getDiscountAmount().toLocaleString('en-IN')}!
+                  </div>
+                )}
               </div>
             </div>
 

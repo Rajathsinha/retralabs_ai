@@ -8,6 +8,9 @@ interface CartContextType {
   updateQuantity: (variantId: string, quantity: number) => void;
   clearCart: () => void;
   getTotal: () => number;
+  getSubtotal: () => number;
+  getDiscount: () => number;
+  getDiscountAmount: () => number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -54,11 +57,32 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setCart([]);
   };
 
-  const getTotal = () => {
+  const getTotalQuantity = () => {
+    return cart.reduce((total, item) => total + item.quantity, 0);
+  };
+
+  const getDiscount = () => {
+    const totalQuantity = getTotalQuantity();
+    if (totalQuantity >= 3) return 25;
+    if (totalQuantity === 2) return 20;
+    return 0;
+  };
+
+  const getSubtotal = () => {
     return cart.reduce(
       (total, item) => total + item.variant.price_inr * item.quantity,
       0
     );
+  };
+
+  const getDiscountAmount = () => {
+    const subtotal = getSubtotal();
+    const discount = getDiscount();
+    return (subtotal * discount) / 100;
+  };
+
+  const getTotal = () => {
+    return getSubtotal() - getDiscountAmount();
   };
 
   return (
@@ -70,6 +94,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
         updateQuantity,
         clearCart,
         getTotal,
+        getSubtotal,
+        getDiscount,
+        getDiscountAmount,
       }}
     >
       {children}
