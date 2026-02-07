@@ -11,6 +11,7 @@ interface ProductDetailPageProps {
 
 export default function ProductDetailPage({ productId, onNavigate }: ProductDetailPageProps) {
   const [product, setProduct] = useState<ProductWithVariants | null>(null);
+  const [bacWater, setBacWater] = useState<ProductWithVariants | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [quantity, setQuantity] = useState(1);
@@ -62,6 +63,27 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
       if (variantsData.length > 0) {
         setSelectedVariant(variantsData[0]);
       }
+
+      const { data: bacWaterData, error: bacWaterError } = await supabase
+        .from('products')
+        .select('*')
+        .ilike('name', '%Bacteriostatic Water%')
+        .single();
+
+      if (!bacWaterError && bacWaterData) {
+        const { data: bacWaterVariants, error: bacWaterVariantsError } = await supabase
+          .from('product_variants')
+          .select('*')
+          .eq('product_id', bacWaterData.id)
+          .order('dosage_mg');
+
+        if (!bacWaterVariantsError && bacWaterVariants) {
+          setBacWater({
+            ...bacWaterData,
+            variants: bacWaterVariants,
+          });
+        }
+      }
     } catch (error) {
       console.error('Error loading product:', error);
     } finally {
@@ -79,8 +101,24 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
     onNavigate('checkout');
   };
 
+  const handleAddBundle = () => {
+    if (!product || !selectedVariant || !bacWater) return;
+
+    for (let i = 0; i < quantity; i++) {
+      addToCart(product, selectedVariant);
+    }
+
+    const bacWaterVariant = bacWater.variants.find(v => v.dosage_mg === 50);
+    if (bacWaterVariant) {
+      addToCart(bacWater, bacWaterVariant);
+    }
+
+    onNavigate('checkout');
+  };
+
   const isFlagship = product?.name === 'Retatrutide' || product?.name === 'Tirzepatide';
   const isBacWater = product?.name === 'Bacteriostatic Water (Pharma Grade)';
+  const bacWaterPrice = bacWater?.variants.find(v => v.dosage_mg === 50)?.price_inr || 800;
 
   if (loading) {
     return (
@@ -398,7 +436,7 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
               </div>
             </div>
 
-            {!isBacWater && (
+            {!isBacWater && bacWater && (
               <div className="border-2 border-blue-200 rounded-2xl p-6 bg-gradient-to-br from-blue-50 to-white">
                 <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
                   <Package className="w-5 h-5 text-blue-600" />
@@ -412,8 +450,8 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
                       </div>
                       <div className="flex-1">
                         <div className="font-bold text-slate-900 text-sm">Bacteriostatic Water</div>
-                        <div className="text-xs text-slate-600 mt-0.5">30ML - Pharma Grade</div>
-                        <div className="text-sm font-bold text-blue-600 mt-1">₹799</div>
+                        <div className="text-xs text-slate-600 mt-0.5">50ML - Pharma Grade</div>
+                        <div className="text-sm font-bold text-blue-600 mt-1">₹{bacWaterPrice.toLocaleString('en-IN')}</div>
                       </div>
                     </div>
                   </div>
@@ -422,11 +460,15 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
                   <div>
                     <div className="text-sm text-emerald-700">Bundle Price</div>
                     <div className="text-2xl font-bold text-emerald-900">
-                      ₹{(totalPrice + 799).toLocaleString('en-IN')}
+                      ₹{(totalPrice + bacWaterPrice).toLocaleString('en-IN')}
                     </div>
-                    <div className="text-xs text-emerald-600 mt-0.5">Save ₹100 on bundle</div>
+                    <div className="text-xs text-emerald-600 mt-0.5">Save with bundle</div>
                   </div>
-                  <button className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors">
+                  <button
+                    onClick={handleAddBundle}
+                    disabled={!selectedVariant}
+                    className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  >
                     Add Bundle
                   </button>
                 </div>

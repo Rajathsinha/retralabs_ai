@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { supabase } from '../lib/supabase';
 import { OrderFormData } from '../types';
-import { Trash2, Check } from 'lucide-react';
+import { Trash2, Check, AlertTriangle, MessageCircle } from 'lucide-react';
 
 interface CheckoutPageProps {
   onNavigate: (page: string) => void;
@@ -33,86 +33,36 @@ export default function CheckoutPage({ onNavigate }: CheckoutPageProps) {
       return;
     }
 
-    setIsSubmitting(true);
+    const orderSummary = cart
+      .map(
+        (item) =>
+          `• ${item.product.name} (${item.variant.dosage_mg}mg) - ₹${item.variant.price_inr.toLocaleString('en-IN')} × ${item.quantity}`
+      )
+      .join('\n');
 
-    try {
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          customer_name: formData.customer_name,
-          customer_email: formData.customer_email,
-          customer_phone: formData.customer_phone,
-          shipping_address: formData.shipping_address,
-          total_amount: getTotal(),
-          status: 'pending',
-        })
-        .select()
-        .single();
+    const message = `*New Order Request*
 
-      if (orderError) throw orderError;
+*Customer Details:*
+Name: ${formData.customer_name}
+Email: ${formData.customer_email}
+Phone: ${formData.customer_phone}
 
-      const orderItems = cart.map((item) => ({
-        order_id: order.id,
-        product_id: item.product.id,
-        variant_id: item.variant.id,
-        quantity: item.quantity,
-        unit_price: item.variant.price_inr,
-      }));
+*Shipping Address:*
+${formData.shipping_address}
 
-      const { error: itemsError } = await supabase
-        .from('order_items')
-        .insert(orderItems);
+*Order Items:*
+${orderSummary}
 
-      if (itemsError) throw itemsError;
+*Total Amount: ₹${getTotal().toLocaleString('en-IN')}*
 
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/paytm-payment/initiate`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          },
-          body: JSON.stringify({
-            orderId: order.id,
-            amount: getTotal(),
-            customerName: formData.customer_name,
-            customerEmail: formData.customer_email,
-            customerPhone: formData.customer_phone,
-          }),
-        }
-      );
+I would like to complete payment via UPI.`;
 
-      const paymentData = await response.json();
+    const whatsappUrl = `https://wa.me/919137218533?text=${encodeURIComponent(message)}`;
 
-      if (!response.ok) {
-        throw new Error(paymentData.error || 'Failed to initiate payment');
-      }
-
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = paymentData.paytmUrl;
-
-      Object.keys(paymentData.paytmParams).forEach((key) => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = key;
-        input.value = paymentData.paytmParams[key];
-        form.appendChild(input);
-      });
-
-      document.body.appendChild(form);
-      clearCart();
-      form.submit();
-    } catch (error) {
-      console.error('Error submitting order:', error);
-      alert(
-        error instanceof Error
-          ? error.message
-          : 'An error occurred while submitting your order. Please try again.'
-      );
-      setIsSubmitting(false);
-    }
+    clearCart();
+    window.open(whatsappUrl, '_blank');
+    setOrderSuccess(true);
+    setTimeout(() => onNavigate('home'), 3000);
   };
 
   if (orderSuccess) {
@@ -137,6 +87,21 @@ export default function CheckoutPage({ onNavigate }: CheckoutPageProps) {
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h1 className="text-4xl font-light text-gray-900 mb-8">Checkout</h1>
+
+        <div className="bg-blue-50 border-l-4 border-blue-500 p-6 mb-8 rounded-r-xl shadow-sm">
+          <div className="flex items-start gap-4">
+            <MessageCircle className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <h3 className="text-lg font-bold text-blue-900 mb-2">Payment Method Notice</h3>
+              <p className="text-blue-800 mb-3 leading-relaxed">
+                <strong>Online payment through our website is currently unavailable.</strong> We are working to improve this feature. At the moment, we only accept <strong>UPI payments through WhatsApp</strong>.
+              </p>
+              <p className="text-sm text-blue-700 italic">
+                We know this isn't ideal, but unfortunately there are no other payment options available at the moment. Thank you for your understanding.
+              </p>
+            </div>
+          </div>
+        </div>
 
         {cart.length === 0 ? (
           <div className="text-center py-12">
@@ -298,9 +263,10 @@ export default function CheckoutPage({ onNavigate }: CheckoutPageProps) {
                 <button
                   type="submit"
                   disabled={isSubmitting || !formData.disclaimer_accepted}
-                  className="w-full px-6 py-3 bg-blue-700 text-white font-medium hover:bg-blue-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  className="w-full px-6 py-3 bg-green-600 text-white font-medium hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  {isSubmitting ? 'Processing...' : 'Proceed to Payment'}
+                  <MessageCircle className="w-5 h-5" />
+                  {isSubmitting ? 'Processing...' : 'Continue on WhatsApp for Payment'}
                 </button>
               </form>
             </div>
