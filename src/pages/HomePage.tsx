@@ -1,4 +1,5 @@
-import { FlaskConical, ShieldCheck, PackageCheck, Globe, ExternalLink, BadgeCheck, IndianRupee, Sparkles } from 'lucide-react';
+import { FlaskConical, ShieldCheck, PackageCheck, Globe, BadgeCheck, IndianRupee, Sparkles, ArrowRight, Beaker, Truck, Award } from 'lucide-react';
+import ScrollReveal from '../components/ScrollReveal';
 
 interface HomePageProps {
   onNavigate: (page: string) => void;
@@ -6,175 +7,202 @@ interface HomePageProps {
 
 export default function HomePage({ onNavigate }: HomePageProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-transparent to-cyan-50 opacity-50"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 relative">
+    <div className="min-h-screen">
+      <section className="relative overflow-hidden bg-slate-950">
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-dot-pattern bg-dot-sm opacity-[0.04]" />
+          <div className="absolute top-1/4 -left-32 w-96 h-96 bg-accent-500/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl" />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 relative">
           <div className="text-center max-w-4xl mx-auto">
-            <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
-              <BadgeCheck className="w-4 h-4" />
+            <div className="inline-flex items-center gap-2 mb-8 px-5 py-2.5 bg-white/5 text-accent-300 text-sm font-medium rounded-full border border-white/10 backdrop-blur-sm animate-fade-in-down">
+              <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
               Research-Grade Peptides
             </div>
-            <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-4 tracking-tight leading-tight">
+
+            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight leading-[1.1] animate-fade-in-up">
               India's Only Trusted Reseller for{' '}
-              <span className="text-blue-700">Chinese Pure Peptides</span>
+              <span className="text-gradient">Chinese Pure Peptides</span>
             </h1>
-            <p className="text-xl text-gray-600 mb-8 leading-relaxed max-w-2xl mx-auto">
+
+            <p className="text-lg md:text-xl text-slate-400 mb-10 leading-relaxed max-w-2xl mx-auto animate-fade-in-up" style={{ animationDelay: '150ms' }}>
               100% genuine research-grade peptides at fair, transparent prices. Sourced directly from verified manufacturers.
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-6 mb-10">
-              <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                <div className="p-1.5 bg-green-100 rounded-full">
-                  <BadgeCheck className="w-4 h-4 text-green-600" />
+
+            <div className="flex flex-wrap items-center justify-center gap-6 mb-12 animate-fade-in-up" style={{ animationDelay: '250ms' }}>
+              {[
+                { icon: BadgeCheck, label: '100% Genuine', color: 'text-emerald-400' },
+                { icon: Sparkles, label: '99%+ Purity', color: 'text-accent-400' },
+                { icon: IndianRupee, label: 'Fair Pricing', color: 'text-amber-400' },
+              ].map((item) => (
+                <div key={item.label} className="flex items-center gap-2.5 text-sm font-medium text-slate-300">
+                  <div className="p-1.5 bg-white/10 rounded-lg">
+                    <item.icon className={`w-4 h-4 ${item.color}`} />
+                  </div>
+                  {item.label}
                 </div>
-                100% Genuine
-              </div>
-              <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                <div className="p-1.5 bg-blue-100 rounded-full">
-                  <Sparkles className="w-4 h-4 text-blue-600" />
-                </div>
-                99%+ Purity
-              </div>
-              <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                <div className="p-1.5 bg-amber-100 rounded-full">
-                  <IndianRupee className="w-4 h-4 text-amber-600" />
-                </div>
-                Fair Pricing
-              </div>
+              ))}
             </div>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up" style={{ animationDelay: '350ms' }}>
               <button
                 onClick={() => onNavigate('catalogue')}
-                className="px-8 py-4 bg-blue-700 text-white font-semibold hover:bg-blue-800 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                className="group px-8 py-4 bg-white text-slate-900 font-semibold rounded-xl hover:bg-slate-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
               >
                 View Catalogue
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
               <button
                 onClick={() => onNavigate('support')}
-                className="px-8 py-4 bg-white border-2 border-gray-300 text-gray-700 font-semibold hover:border-gray-400 hover:bg-gray-50 transition-all shadow-md hover:shadow-lg"
+                className="px-8 py-4 bg-white/5 border border-white/10 text-white font-semibold rounded-xl hover:bg-white/10 transition-all duration-300 backdrop-blur-sm"
               >
                 Contact Support
               </button>
             </div>
           </div>
         </div>
+
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent" />
       </section>
 
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-12 text-white shadow-2xl">
-          <div className="flex items-center justify-center mb-6">
-            <Globe className="w-12 h-12 text-cyan-400" />
-          </div>
-          <h2 className="text-3xl font-bold text-center mb-6">
-            Direct from Trusted Manufacturers
-          </h2>
-          <p className="text-lg text-slate-300 text-center max-w-3xl mx-auto leading-relaxed">
-            At RetraLabs, we source our peptides directly from trusted manufacturers from our partner facilities in China who offer genuine quality at transparent, fair pricing. Our goal is simple: to provide legitimate, research-grade peptides at reasonable prices without scams or shortcuts.
-          </p>
-          <div className="mt-8 flex justify-center">
-            <div className="inline-block px-6 py-3 bg-cyan-500/20 text-cyan-300 rounded-full text-sm font-medium border border-cyan-500/30">
-              Verified China Reseller • Transparent Sourcing
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-white py-20">
+      <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div className="text-center group">
-              <div className="flex justify-center mb-6">
-                <div className="p-4 bg-blue-100 rounded-2xl group-hover:bg-blue-200 transition-colors">
-                  <FlaskConical className="w-12 h-12 text-blue-700" />
-                </div>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">
-                Laboratory Grade
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                High-purity peptides manufactured to rigorous analytical standards.
-              </p>
+          <ScrollReveal>
+            <div className="text-center mb-16">
+              <span className="inline-block px-4 py-2 bg-slate-100 text-slate-600 text-xs font-bold rounded-full uppercase tracking-wider mb-4">
+                Why RetraLabs
+              </span>
+              <h2 className="section-heading">Built on Trust & Quality</h2>
             </div>
+          </ScrollReveal>
 
-            <div className="text-center group">
-              <div className="flex justify-center mb-6">
-                <div className="p-4 bg-blue-100 rounded-2xl group-hover:bg-blue-200 transition-colors">
-                  <ShieldCheck className="w-12 h-12 text-blue-700" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                icon: FlaskConical,
+                title: 'Laboratory Grade',
+                desc: 'High-purity peptides manufactured to rigorous analytical standards with HPLC verification.',
+                gradient: 'from-blue-50 to-blue-100',
+                iconBg: 'bg-blue-100',
+                iconColor: 'text-blue-700',
+              },
+              {
+                icon: ShieldCheck,
+                title: 'Batch Consistency',
+                desc: 'Each batch is tested for purity and consistency to ensure reliable research results.',
+                gradient: 'from-emerald-50 to-emerald-100',
+                iconBg: 'bg-emerald-100',
+                iconColor: 'text-emerald-700',
+              },
+              {
+                icon: PackageCheck,
+                title: 'Sterile Packaging',
+                desc: 'Supplied in sterile vials to maintain integrity during storage and handling.',
+                gradient: 'from-amber-50 to-amber-100',
+                iconBg: 'bg-amber-100',
+                iconColor: 'text-amber-700',
+              },
+            ].map((item, i) => (
+              <ScrollReveal key={item.title} delay={i * 120}>
+                <div className={`group p-8 rounded-2xl bg-gradient-to-br ${item.gradient} border border-slate-200/50 card-hover`}>
+                  <div className={`w-14 h-14 ${item.iconBg} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                    <item.icon className={`w-7 h-7 ${item.iconColor}`} />
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900 mb-3">{item.title}</h3>
+                  <p className="text-slate-600 leading-relaxed">{item.desc}</p>
                 </div>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">
-                Batch Consistency
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                Each batch is tested for purity and consistency to ensure reliable results.
-              </p>
-            </div>
-
-            <div className="text-center group">
-              <div className="flex justify-center mb-6">
-                <div className="p-4 bg-blue-100 rounded-2xl group-hover:bg-blue-200 transition-colors">
-                  <PackageCheck className="w-12 h-12 text-blue-700" />
-                </div>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">
-                Sterile Packaging
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                Supplied in sterile vials to maintain integrity during storage and handling.
-              </p>
-            </div>
+              </ScrollReveal>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Reddit community section temporarily hidden
-      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-3xl p-12 shadow-xl border border-orange-100">
-          <div className="flex items-center justify-center mb-6">
-            <div className="p-4 bg-white rounded-full shadow-md">
-              <svg className="w-12 h-12 text-orange-600" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/>
-              </svg>
+      <section className="py-20 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ScrollReveal>
+            <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-3xl p-10 md:p-16 text-white shadow-2xl relative overflow-hidden">
+              <div className="absolute inset-0 bg-dot-pattern bg-dot-sm opacity-[0.03]" />
+              <div className="absolute top-0 right-0 w-72 h-72 bg-accent-500/10 rounded-full blur-3xl" />
+
+              <div className="relative">
+                <div className="flex items-center justify-center mb-8">
+                  <div className="p-4 bg-white/10 rounded-2xl backdrop-blur-sm">
+                    <Globe className="w-10 h-10 text-accent-400" />
+                  </div>
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold text-center mb-6">
+                  Direct from Trusted Manufacturers
+                </h2>
+                <p className="text-lg text-slate-300 text-center max-w-3xl mx-auto leading-relaxed mb-8">
+                  We source our peptides directly from trusted manufacturers from our partner facilities in China who offer genuine quality at transparent, fair pricing. Our goal is simple: to provide legitimate, research-grade peptides at reasonable prices without scams or shortcuts.
+                </p>
+                <div className="flex flex-wrap justify-center gap-4">
+                  {['Verified China Reseller', 'Transparent Sourcing', 'COA Available'].map((tag) => (
+                    <span key={tag} className="px-5 py-2.5 bg-white/5 text-accent-300 rounded-full text-sm font-medium border border-white/10">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-4">
-            Crowdsourced Research
-          </h2>
-          <p className="text-lg text-gray-700 text-center mb-8 leading-relaxed max-w-3xl mx-auto">
-            For real-world laboratory discussions, protocol optimizations, and peer-reviewed dosing analysis, we strongly recommend visiting the Retatrutide research community on Reddit.
-          </p>
-          <div className="bg-white rounded-xl p-6 mb-6 border-2 border-orange-200">
-            <p className="text-sm text-cyan-600 font-semibold uppercase tracking-wide mb-2">
-              Target Community
-            </p>
-            <p className="text-2xl font-bold text-gray-900">r/retralabs</p>
-          </div>
-          <a
-            href="https://www.reddit.com/r/retralabs/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block w-full py-4 bg-orange-600 text-white font-bold text-center rounded-xl hover:bg-orange-700 transition-colors shadow-lg hover:shadow-xl"
-          >
-            <span className="flex items-center justify-center gap-2">
-              Visit Community on Reddit
-              <ExternalLink className="w-5 h-5" />
-            </span>
-          </a>
+          </ScrollReveal>
         </div>
       </section>
-      */}
 
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="max-w-3xl mx-auto bg-slate-100 rounded-2xl p-10">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">
-            Research Use Only
-          </h2>
-          <p className="text-gray-700 leading-relaxed text-center text-lg">
-            All products are intended solely for in vitro research and analytical applications.
-            These materials are not approved for human or veterinary use. Purchasers must
-            be affiliated with recognized research institutions or laboratories and comply
-            with all applicable regulations.
-          </p>
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ScrollReveal>
+            <div className="text-center mb-16">
+              <span className="inline-block px-4 py-2 bg-slate-100 text-slate-600 text-xs font-bold rounded-full uppercase tracking-wider mb-4">
+                Our Process
+              </span>
+              <h2 className="section-heading">How It Works</h2>
+            </div>
+          </ScrollReveal>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {[
+              { icon: Beaker, step: '01', title: 'Browse', desc: 'Explore our curated catalogue of verified peptides' },
+              { icon: PackageCheck, step: '02', title: 'Order', desc: 'Select your variants and place your order securely' },
+              { icon: Award, step: '03', title: 'Verify', desc: 'Receive COA verification for every product' },
+              { icon: Truck, step: '04', title: 'Receive', desc: 'Temperature-controlled shipping to your lab' },
+            ].map((item, i) => (
+              <ScrollReveal key={item.step} delay={i * 100}>
+                <div className="text-center group">
+                  <div className="relative inline-block mb-6">
+                    <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center group-hover:bg-slate-200 transition-colors duration-300">
+                      <item.icon className="w-7 h-7 text-slate-700" />
+                    </div>
+                    <span className="absolute -top-2 -right-2 w-7 h-7 bg-slate-900 text-white text-xs font-bold rounded-lg flex items-center justify-center">
+                      {item.step}
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-900 mb-2">{item.title}</h3>
+                  <p className="text-sm text-slate-600 leading-relaxed">{item.desc}</p>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ScrollReveal>
+            <div className="max-w-3xl mx-auto bg-white rounded-2xl p-10 border border-slate-200 shadow-sm">
+              <h2 className="text-3xl font-bold text-slate-900 mb-6 text-center">
+                Research Use Only
+              </h2>
+              <p className="text-slate-600 leading-relaxed text-center text-lg">
+                All products are intended solely for in vitro research and analytical applications.
+                These materials are not approved for human or veterinary use. Purchasers must
+                be affiliated with recognized research institutions or laboratories and comply
+                with all applicable regulations.
+              </p>
+            </div>
+          </ScrollReveal>
         </div>
       </section>
     </div>

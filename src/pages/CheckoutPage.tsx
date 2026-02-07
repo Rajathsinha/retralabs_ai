@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { useCart } from '../context/CartContext';
-import { supabase } from '../lib/supabase';
 import { OrderFormData } from '../types';
-import { Trash2, Check, AlertTriangle, MessageCircle, Tag } from 'lucide-react';
+import { Trash2, Check, MessageCircle, Tag, Minus, Plus, ShoppingBag } from 'lucide-react';
 
 interface CheckoutPageProps {
   onNavigate: (page: string) => void;
@@ -72,74 +71,69 @@ I would like to complete payment via UPI.`;
 
   if (orderSuccess) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto px-4">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Check className="w-8 h-8 text-green-600" />
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-4 animate-scale-in">
+          <div className="w-20 h-20 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <Check className="w-10 h-10 text-emerald-600" />
           </div>
-          <h2 className="text-2xl font-medium text-gray-900 mb-2">Order Submitted</h2>
-          <p className="text-gray-600 mb-4">
+          <h2 className="text-2xl font-bold text-slate-900 mb-3">Order Submitted</h2>
+          <p className="text-slate-600 mb-4 leading-relaxed">
             Thank you for your order. We will contact you shortly with order
             confirmation and shipping details.
           </p>
-          <p className="text-sm text-gray-500">Redirecting to homepage...</p>
+          <p className="text-sm text-slate-400">Redirecting to homepage...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-slate-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 className="text-4xl font-light text-gray-900 mb-8">Checkout</h1>
+        <h1 className="section-heading mb-8">Checkout</h1>
 
-        <div className="bg-blue-50 border-l-4 border-blue-500 p-6 mb-4 rounded-r-xl shadow-sm">
+        <div className="bg-blue-50 border border-blue-200 p-6 mb-4 rounded-2xl">
           <div className="flex items-start gap-4">
-            <MessageCircle className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div className="p-2 bg-blue-100 rounded-xl flex-shrink-0">
+              <MessageCircle className="w-5 h-5 text-blue-600" />
+            </div>
             <div>
-              <h3 className="text-lg font-bold text-blue-900 mb-2">Payment Method Notice</h3>
-              <p className="text-blue-800 mb-3 leading-relaxed">
-                <strong>Online payment through our website is currently unavailable.</strong> We are working to improve this feature. At the moment, we only accept <strong>UPI payments through WhatsApp</strong>.
-              </p>
-              <p className="text-sm text-blue-700 italic">
-                We know this isn't ideal, but unfortunately there are no other payment options available at the moment. Thank you for your understanding.
+              <h3 className="text-base font-bold text-blue-900 mb-1">Payment Method Notice</h3>
+              <p className="text-sm text-blue-800 leading-relaxed">
+                Online payment through our website is currently unavailable. At the moment, we only accept <strong>UPI payments through WhatsApp</strong>.
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 p-6 mb-8 rounded-r-xl shadow-sm">
+        <div className="bg-emerald-50 border border-emerald-200 p-6 mb-8 rounded-2xl">
           <div className="flex items-start gap-4">
-            <Tag className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
+            <div className="p-2 bg-emerald-100 rounded-xl flex-shrink-0">
+              <Tag className="w-5 h-5 text-emerald-600" />
+            </div>
             <div>
-              <h3 className="text-lg font-bold text-green-900 mb-2">Volume Discounts Available</h3>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-600 rounded-full"></div>
-                  <p className="text-green-800 font-medium">
-                    Buy 2 items: Get <strong>20% OFF</strong>
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-600 rounded-full"></div>
-                  <p className="text-green-800 font-medium">
-                    Buy 3+ items: Get <strong>25% OFF</strong>
-                  </p>
-                </div>
+              <h3 className="text-base font-bold text-emerald-900 mb-2">Volume Discounts</h3>
+              <div className="flex flex-wrap gap-3">
+                <span className="px-3 py-1.5 bg-emerald-100 text-emerald-800 text-sm font-medium rounded-lg">
+                  2 items = 20% OFF
+                </span>
+                <span className="px-3 py-1.5 bg-emerald-100 text-emerald-800 text-sm font-medium rounded-lg">
+                  3+ items = 25% OFF
+                </span>
               </div>
-              <p className="text-sm text-green-700 mt-3 italic">
-                Discount automatically applied at checkout based on total quantity.
-              </p>
             </div>
           </div>
         </div>
 
         {cart.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600 mb-6">Your cart is empty.</p>
+          <div className="text-center py-20">
+            <div className="w-20 h-20 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <ShoppingBag className="w-10 h-10 text-slate-400" />
+            </div>
+            <p className="text-slate-600 mb-6 text-lg">Your cart is empty.</p>
             <button
               onClick={() => onNavigate('catalogue')}
-              className="px-6 py-3 bg-blue-700 text-white font-medium hover:bg-blue-800 transition-colors"
+              className="btn-primary"
             >
               Browse Catalogue
             </button>
@@ -147,178 +141,154 @@ I would like to complete payment via UPI.`;
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div>
-              <h2 className="text-2xl font-medium text-gray-900 mb-6">
-                Order Summary
-              </h2>
-              <div className="space-y-4">
+              <h2 className="text-xl font-bold text-slate-900 mb-6">Order Summary</h2>
+              <div className="space-y-3">
                 {cart.map((item) => (
                   <div
                     key={item.variant.id}
-                    className="flex items-start justify-between p-4 border border-gray-200"
+                    className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-xl hover:border-slate-300 transition-colors"
                   >
-                    <div className="flex-1">
-                      <h3 className="font-medium text-gray-900">{item.product.name}</h3>
-                      <p className="text-sm text-gray-600">
-                        {item.variant.dosage_mg} mg
-                      </p>
-                      <p className="text-sm text-gray-900 mt-2">
-                        ₹{item.variant.price_inr.toLocaleString('en-IN')} × {item.quantity}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-slate-900">{item.product.name}</h3>
+                      <p className="text-sm text-slate-500">
+                        {item.variant.dosage_mg}mg - ₹{item.variant.price_inr.toLocaleString('en-IN')}
                       </p>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3 ml-4">
+                      <div className="flex items-center gap-1.5">
                         <button
-                          onClick={() =>
-                            updateQuantity(item.variant.id, item.quantity - 1)
-                          }
-                          className="w-8 h-8 border border-gray-300 flex items-center justify-center hover:bg-gray-50"
+                          onClick={() => updateQuantity(item.variant.id, item.quantity - 1)}
+                          className="w-8 h-8 border border-slate-200 rounded-lg flex items-center justify-center hover:bg-slate-50 transition-colors"
                         >
-                          -
+                          <Minus className="w-3.5 h-3.5 text-slate-600" />
                         </button>
-                        <span className="w-8 text-center">{item.quantity}</span>
+                        <span className="w-8 text-center text-sm font-semibold">{item.quantity}</span>
                         <button
-                          onClick={() =>
-                            updateQuantity(item.variant.id, item.quantity + 1)
-                          }
-                          className="w-8 h-8 border border-gray-300 flex items-center justify-center hover:bg-gray-50"
+                          onClick={() => updateQuantity(item.variant.id, item.quantity + 1)}
+                          className="w-8 h-8 border border-slate-200 rounded-lg flex items-center justify-center hover:bg-slate-50 transition-colors"
                         >
-                          +
+                          <Plus className="w-3.5 h-3.5 text-slate-600" />
                         </button>
                       </div>
                       <button
                         onClick={() => removeFromCart(item.variant.id)}
-                        className="text-red-600 hover:text-red-700"
+                        className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                       >
-                        <Trash2 className="w-5 h-5" />
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div className="mt-6 p-4 bg-gray-50 border border-gray-200 space-y-3">
-                <div className="flex justify-between items-center text-gray-700">
-                  <span className="text-base">Subtotal:</span>
-                  <span className="text-base font-medium">
-                    ₹{getSubtotal().toLocaleString('en-IN')}
-                  </span>
+              <div className="mt-6 p-5 bg-white border border-slate-200 rounded-xl space-y-3">
+                <div className="flex justify-between items-center text-slate-600">
+                  <span>Subtotal</span>
+                  <span className="font-medium">₹{getSubtotal().toLocaleString('en-IN')}</span>
                 </div>
 
                 {getDiscount() > 0 && (
-                  <div className="flex justify-between items-center text-green-600">
-                    <span className="text-base font-medium">
-                      Discount ({getDiscount()}%):
-                    </span>
-                    <span className="text-base font-semibold">
-                      -₹{getDiscountAmount().toLocaleString('en-IN')}
-                    </span>
+                  <div className="flex justify-between items-center text-emerald-600">
+                    <span className="font-medium">Discount ({getDiscount()}%)</span>
+                    <span className="font-semibold">-₹{getDiscountAmount().toLocaleString('en-IN')}</span>
                   </div>
                 )}
 
-                <div className="pt-3 border-t border-gray-300 flex justify-between items-center">
-                  <span className="text-lg font-medium text-gray-900">Total:</span>
-                  <span className="text-2xl font-bold text-gray-900">
+                <div className="pt-3 border-t border-slate-200 flex justify-between items-center">
+                  <span className="text-lg font-semibold text-slate-900">Total</span>
+                  <span className="text-2xl font-bold text-slate-900">
                     ₹{getTotal().toLocaleString('en-IN')}
                   </span>
                 </div>
 
                 {getDiscount() > 0 && (
-                  <div className="pt-2 text-sm text-green-600 font-medium">
-                    You saved ₹{getDiscountAmount().toLocaleString('en-IN')}!
+                  <div className="flex items-center gap-2 pt-2">
+                    <Check className="w-4 h-4 text-emerald-500" />
+                    <span className="text-sm text-emerald-600 font-medium">
+                      You saved ₹{getDiscountAmount().toLocaleString('en-IN')}
+                    </span>
                   </div>
                 )}
               </div>
             </div>
 
             <div>
-              <h2 className="text-2xl font-medium text-gray-900 mb-6">
-                Shipping Information
-              </h2>
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <h2 className="text-xl font-bold text-slate-900 mb-6">Shipping Information</h2>
+              <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Full Name *
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Full Name
                   </label>
                   <input
                     type="text"
                     required
                     value={formData.customer_name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, customer_name: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-700"
+                    onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
+                    className="input-field"
+                    placeholder="Enter your full name"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address *
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Email Address
                   </label>
                   <input
                     type="email"
                     required
                     value={formData.customer_email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, customer_email: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-700"
+                    onChange={(e) => setFormData({ ...formData, customer_email: e.target.value })}
+                    className="input-field"
+                    placeholder="you@email.com"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Phone Number *
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Phone Number
                   </label>
                   <input
                     type="tel"
                     required
                     value={formData.customer_phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, customer_phone: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-700"
+                    onChange={(e) => setFormData({ ...formData, customer_phone: e.target.value })}
+                    className="input-field"
+                    placeholder="+91 XXXXX XXXXX"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Shipping Address *
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Shipping Address
                   </label>
                   <textarea
                     required
                     rows={4}
                     value={formData.shipping_address}
-                    onChange={(e) =>
-                      setFormData({ ...formData, shipping_address: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-700"
+                    onChange={(e) => setFormData({ ...formData, shipping_address: e.target.value })}
+                    className="input-field resize-none"
+                    placeholder="Full shipping address with PIN code"
                   />
                 </div>
 
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200">
                   <input
                     type="checkbox"
                     id="disclaimer"
                     checked={formData.disclaimer_accepted}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        disclaimer_accepted: e.target.checked,
-                      })
-                    }
-                    className="mt-1"
+                    onChange={(e) => setFormData({ ...formData, disclaimer_accepted: e.target.checked })}
+                    className="mt-0.5 w-4 h-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
                   />
-                  <label htmlFor="disclaimer" className="text-sm text-gray-700">
+                  <label htmlFor="disclaimer" className="text-sm text-slate-600 leading-relaxed">
                     I confirm that these products are being purchased for research purposes
-                    only, in accordance with applicable regulations and institutional
-                    guidelines.
+                    only, in accordance with applicable regulations and institutional guidelines.
                   </label>
                 </div>
 
                 <button
                   type="submit"
                   disabled={isSubmitting || !formData.disclaimer_accepted}
-                  className="w-full px-6 py-3 bg-green-600 text-white font-medium hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full px-6 py-4 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-all duration-300 disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0"
                 >
                   <MessageCircle className="w-5 h-5" />
                   {isSubmitting ? 'Processing...' : 'Continue on WhatsApp for Payment'}
