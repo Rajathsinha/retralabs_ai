@@ -5,6 +5,7 @@ import Footer from './components/Footer';
 import WhatsAppButton from './components/WhatsAppButton';
 import HomePage from './pages/HomePage';
 import CataloguePage from './pages/CataloguePage';
+import ProductDetailPage from './pages/ProductDetailPage';
 import CheckoutPage from './pages/CheckoutPage';
 import SupportPage from './pages/SupportPage';
 import ReviewsPage from './pages/ReviewsPage';
@@ -17,10 +18,19 @@ import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsPage from './pages/TermsPage';
 import RefundPolicyPage from './pages/RefundPolicyPage';
 
-type Page = 'home' | 'catalogue' | 'checkout' | 'support' | 'reviews' | 'payment-success' | 'payment-failed' | 'track-order' | 'about' | 'contact' | 'privacy' | 'terms' | 'refund';
+type Page = 'home' | 'catalogue' | 'product' | 'checkout' | 'support' | 'reviews' | 'payment-success' | 'payment-failed' | 'track-order' | 'about' | 'contact' | 'privacy' | 'terms' | 'refund';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+
+  const handleNavigate = (page: string, productId?: string) => {
+    setCurrentPage(page as Page);
+    if (productId) {
+      setSelectedProductId(productId);
+    }
+    window.scrollTo(0, 0);
+  };
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -39,7 +49,13 @@ function App() {
       case 'home':
         return <HomePage onNavigate={setCurrentPage} />;
       case 'catalogue':
-        return <CataloguePage onNavigate={setCurrentPage} />;
+        return <CataloguePage onNavigate={handleNavigate} />;
+      case 'product':
+        return selectedProductId ? (
+          <ProductDetailPage productId={selectedProductId} onNavigate={setCurrentPage} />
+        ) : (
+          <CataloguePage onNavigate={handleNavigate} />
+        );
       case 'checkout':
         return <CheckoutPage onNavigate={setCurrentPage} />;
       case 'support':

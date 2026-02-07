@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
-import { ProductWithVariants, ProductVariant } from '../types';
-import { useCart } from '../context/CartContext';
+import { ProductWithVariants } from '../types';
 import { ShieldCheck, Microscope } from 'lucide-react';
-import ProductModal from '../components/ProductModal';
 
 // Demo products for when Supabase isn't configured
 const DEMO_PRODUCTS: ProductWithVariants[] = [
@@ -82,16 +80,12 @@ const DEMO_PRODUCTS: ProductWithVariants[] = [
 ];
 
 interface CataloguePageProps {
-  onNavigate: (page: string) => void;
+  onNavigate: (page: string, productId?: string) => void;
 }
 
 export default function CataloguePage({ onNavigate }: CataloguePageProps) {
   const [products, setProducts] = useState<ProductWithVariants[]>([]);
   const [loading, setLoading] = useState(true);
-  const [addedVariantId, setAddedVariantId] = useState<string | null>(null);
-  const [selectedProduct, setSelectedProduct] = useState<ProductWithVariants | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const { addToCart } = useCart();
 
   useEffect(() => {
     loadProducts();
@@ -150,25 +144,7 @@ export default function CataloguePage({ onNavigate }: CataloguePageProps) {
   }
 
   const handleProductClick = (product: ProductWithVariants) => {
-    setSelectedProduct(product);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setTimeout(() => setSelectedProduct(null), 300);
-  };
-
-  const handleAddToCart = (variant: ProductVariant) => {
-    if (!selectedProduct) return;
-
-    addToCart(selectedProduct, variant);
-    setAddedVariantId(variant.id);
-
-    setTimeout(() => {
-      handleCloseModal();
-      onNavigate('checkout');
-    }, 500);
+    onNavigate('product', product.id);
   };
 
   if (loading) {
@@ -264,16 +240,6 @@ export default function CataloguePage({ onNavigate }: CataloguePageProps) {
           </div>
         )}
       </section>
-
-      {selectedProduct && (
-        <ProductModal
-          product={selectedProduct}
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-          onAddToCart={handleAddToCart}
-          addedVariantId={addedVariantId}
-        />
-      )}
     </div>
   );
 }
