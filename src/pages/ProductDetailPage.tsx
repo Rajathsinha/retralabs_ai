@@ -3,6 +3,7 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { ProductWithVariants, ProductVariant } from '../types';
 import { useCart } from '../context/CartContext';
 import { ChevronRight, Star, Check, Package, Truck, Shield, Thermometer, AlertTriangle, MapPin, Phone, Minus, Plus } from 'lucide-react';
+import { getViewingCount, getSoldCount } from '../utils/productMetrics';
 
 interface ProductDetailPageProps {
   productId: string;
@@ -294,12 +295,18 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
               <p className="text-lg text-slate-600 mb-6 leading-relaxed">{product.description}</p>
 
               <div className="flex items-center gap-3 mb-8">
-                <div className="bg-red-50 border border-red-200 px-4 py-2 rounded-lg flex items-center gap-2">
-                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                  <span className="text-sm font-semibold text-red-700">15 people viewing now</span>
-                </div>
+                {getViewingCount(product.id) > 0 && (
+                  <div className="bg-red-50 border border-red-200 px-4 py-2 rounded-lg flex items-center gap-2">
+                    <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                    <span className="text-sm font-semibold text-red-700">
+                      {getViewingCount(product.id)} {getViewingCount(product.id) === 1 ? 'person' : 'people'} viewing now
+                    </span>
+                  </div>
+                )}
                 <div className="bg-orange-50 border border-orange-200 px-4 py-2 rounded-lg">
-                  <span className="text-sm font-semibold text-orange-700">12 sold in last 24h</span>
+                  <span className="text-sm font-semibold text-orange-700">
+                    {getSoldCount(product.id, product.name, product.category)} sold in last 24h
+                  </span>
                 </div>
               </div>
             </div>
