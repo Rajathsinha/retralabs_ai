@@ -57,14 +57,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setCart([]);
   };
 
-  const getTotalQuantity = () => {
-    return cart.reduce((total, item) => total + item.quantity, 0);
+  const isBacWater = (name: string) =>
+    name.toLowerCase().includes('bacteriostatic water');
+
+  const getDiscountableQuantity = () => {
+    return cart.reduce(
+      (total, item) => total + (isBacWater(item.product.name) ? 0 : item.quantity),
+      0
+    );
   };
 
   const getDiscount = () => {
-    const totalQuantity = getTotalQuantity();
-    if (totalQuantity >= 3) return 25;
-    if (totalQuantity === 2) return 20;
+    const qty = getDiscountableQuantity();
+    if (qty >= 3) return 25;
+    if (qty === 2) return 20;
     return 0;
   };
 
@@ -75,10 +81,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
     );
   };
 
+  const getDiscountableSubtotal = () => {
+    return cart.reduce(
+      (total, item) =>
+        total + (isBacWater(item.product.name) ? 0 : item.variant.price_inr * item.quantity),
+      0
+    );
+  };
+
   const getDiscountAmount = () => {
-    const subtotal = getSubtotal();
     const discount = getDiscount();
-    return (subtotal * discount) / 100;
+    return Math.round((getDiscountableSubtotal() * discount) / 100);
   };
 
   const getTotal = () => {

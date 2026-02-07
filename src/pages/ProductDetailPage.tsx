@@ -140,7 +140,7 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
   const basePrice = selectedVariant ? selectedVariant.price_inr * quantity : 0;
   const subtotal = bundleAdded ? basePrice + bacWaterPrice : basePrice;
   const totalItems = quantity + (bundleAdded ? 1 : 0);
-  const discountPercent = totalItems >= 3 ? 25 : totalItems === 2 ? 20 : 0;
+  const discountPercent = isBacWater ? 0 : totalItems >= 3 ? 25 : totalItems === 2 ? 20 : 0;
   const discountAmount = Math.round((subtotal * discountPercent) / 100);
   const totalPrice = subtotal - discountAmount;
 
