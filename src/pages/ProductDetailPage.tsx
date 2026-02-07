@@ -187,8 +187,8 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
               <div className="mt-4 grid grid-cols-3 gap-3">
                 {[
                   { value: '24h', label: 'Fast Ship' },
-                  { value: '4.8', label: 'Rating' },
                   { value: '2K+', label: 'Orders' },
+                  { value: '99%', label: 'Purity' },
                 ].map((stat) => (
                   <div key={stat.label} className="bg-white border border-slate-200 rounded-xl p-3 text-center">
                     <div className="text-lg font-bold text-slate-900">{stat.value}</div>
