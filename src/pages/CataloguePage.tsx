@@ -119,7 +119,7 @@ export default function CataloguePage({ onNavigate }: CataloguePageProps) {
 
       if (variantsError) throw variantsError;
 
-      const productOrder = ['Retatrutide', 'Tirzepatide', 'GHK-Cu', 'IGF-1 LR3', 'HGH 191AA'];
+      const productOrder = ['Retatrutide', 'Tirzepatide', 'GHK-Cu', 'IGF-1 LR3', 'HGH 191AA', 'Bacteriostatic Water (Pharma Grade)'];
 
       const sortedProducts = productsData.sort((a, b) => {
         const indexA = productOrder.indexOf(a.name);

@@ -25,6 +25,7 @@ export default function ProductModal({ product, isOpen, onClose, onAddToCart, ad
   if (!isOpen) return null;
 
   const isFlagship = product.name === 'Retatrutide' || product.name === 'Tirzepatide';
+  const isBacWater = product.name === 'Bacteriostatic Water (Pharma Grade)';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
@@ -74,7 +75,7 @@ export default function ProductModal({ product, isOpen, onClose, onAddToCart, ad
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-1">
                       <h3 className="text-2xl font-bold text-gray-900">
-                        {variant.dosage_mg}mg
+                        {isBacWater ? `${variant.dosage_mg}ML` : `${variant.dosage_mg}mg`}
                       </h3>
                       {variant.in_stock ? (
                         <span className="px-3 py-1 bg-cyan-400 text-white text-xs font-bold rounded-full">
