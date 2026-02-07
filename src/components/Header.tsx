@@ -1,6 +1,8 @@
-import { ShoppingCart } from 'lucide-react';
+import { useState } from 'react';
+import { ShoppingCart, Calculator } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import Logo from './Logo';
+import ReconstitutionCalculator from './ReconstitutionCalculator';
 
 interface HeaderProps {
   onNavigate: (page: string) => void;
@@ -10,9 +12,15 @@ interface HeaderProps {
 export default function Header({ onNavigate, currentPage }: HeaderProps) {
   const { cart } = useCart();
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
+  const [showCalculator, setShowCalculator] = useState(false);
 
   return (
-    <header className="bg-white border-b border-gray-200 relative z-50">
+    <>
+      <ReconstitutionCalculator
+        isOpen={showCalculator}
+        onClose={() => setShowCalculator(false)}
+      />
+      <header className="bg-white border-b border-gray-200 relative z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex justify-between items-center">
           <button
@@ -75,6 +83,13 @@ export default function Header({ onNavigate, currentPage }: HeaderProps) {
             >
               Support
             </button>
+            <button
+              onClick={() => setShowCalculator(true)}
+              className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors flex items-center gap-1.5"
+            >
+              <Calculator className="w-4 h-4" />
+              Calculator
+            </button>
           </nav>
 
           <button
@@ -91,5 +106,6 @@ export default function Header({ onNavigate, currentPage }: HeaderProps) {
         </div>
       </div>
     </header>
+    </>
   );
 }
