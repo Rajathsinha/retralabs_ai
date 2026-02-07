@@ -61,7 +61,7 @@ ${discountText}
 
 I would like to complete payment via UPI.`;
 
-    const whatsappUrl = `https://wa.me/919137218533?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/918217824384?text=${encodeURIComponent(message)}`;
 
     clearCart();
     window.open(whatsappUrl, '_blank');
