@@ -168,10 +168,13 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
                   <Shield className="w-6 h-6 text-emerald-600" />
                   <div className="flex-1">
                     <div className="font-bold text-emerald-900 text-lg">99.45% Purity</div>
-                    <div className="text-sm text-emerald-700">HPLC Verified</div>
+                    <div className="text-sm text-emerald-700">HPLC Verified • COA Available</div>
                   </div>
-                  <button className="text-emerald-600 hover:text-emerald-700 font-semibold text-sm">
-                    View COA →
+                  <button
+                    onClick={() => onNavigate('support')}
+                    className="text-emerald-600 hover:text-emerald-700 font-semibold text-sm whitespace-nowrap"
+                  >
+                    Contact Sales →
                   </button>
                 </div>
               </div>
