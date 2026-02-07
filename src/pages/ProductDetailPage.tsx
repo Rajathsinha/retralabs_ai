@@ -434,7 +434,7 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
                   </div>
                 )}
                 <div className="flex items-center justify-between text-sm pt-2 border-t border-slate-700">
-                  <span className="text-slate-300">Subtotal ({totalItems} {totalItems === 1 ? 'item' : 'items'})</span>
+                  <span className="text-slate-300">Subtotal ({quantity + (bundleAdded ? 1 : 0)} {quantity + (bundleAdded ? 1 : 0) === 1 ? 'item' : 'items'})</span>
                   <span className="text-slate-200 font-medium">₹{subtotal.toLocaleString('en-IN')}</span>
                 </div>
 
@@ -462,7 +462,7 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
                   </div>
                 )}
 
-                {discountPercent === 0 && totalItems === 1 && (
+                {discountPercent === 0 && quantity === 1 && (
                   <div className="bg-amber-900/40 border border-amber-600/50 rounded-lg px-3 py-2 flex items-center gap-2">
                     <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
                     <span className="text-sm text-amber-300">Add 1 more item to get <strong>20% OFF</strong></span>
