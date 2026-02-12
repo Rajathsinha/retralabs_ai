@@ -67,29 +67,46 @@ export default function HomePage({ onNavigate }: HomePageProps) {
         <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent" />
       </section>
 
-      <section className="py-24 bg-gradient-to-b from-white via-slate-50/30 to-white relative overflow-hidden">
+      <section className="py-32 bg-gradient-to-b from-white via-slate-50/30 to-white relative overflow-hidden">
         <div className="absolute inset-0 bg-dot-pattern bg-dot-sm opacity-[0.02]" />
-        <div className="absolute top-20 left-10 w-32 h-32 bg-blue-200/30 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-10 w-40 h-40 bg-emerald-200/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+
+        <div className="absolute top-20 left-10 w-32 h-32 bg-blue-200/30 rounded-full blur-3xl animate-glow-pulse" />
+        <div className="absolute bottom-20 right-10 w-40 h-40 bg-emerald-200/30 rounded-full blur-3xl animate-glow-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-amber-200/20 rounded-full blur-3xl animate-glow-pulse" style={{ animationDelay: '2s' }} />
+
+        <div className="absolute top-40 left-1/4 w-3 h-3 bg-blue-400 rounded-full animate-float" />
+        <div className="absolute top-60 right-1/4 w-2 h-2 bg-emerald-400 rounded-full animate-float-delayed" />
+        <div className="absolute bottom-40 left-1/3 w-2.5 h-2.5 bg-amber-400 rounded-full animate-float" style={{ animationDelay: '1.5s' }} />
+        <div className="absolute top-1/3 right-1/3 w-2 h-2 bg-blue-300 rounded-full animate-float-delayed" style={{ animationDelay: '2.5s' }} />
+        <div className="absolute bottom-1/3 right-1/5 w-3 h-3 bg-emerald-300 rounded-full animate-float" style={{ animationDelay: '3s' }} />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <ScrollReveal>
-            <div className="text-center mb-20">
-              <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-50 via-emerald-50 to-amber-50 text-slate-700 text-xs font-bold rounded-full uppercase tracking-wider mb-6 border border-slate-200/50 shadow-sm">
-                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                Why RetraLabs
-                <Sparkles className="w-3.5 h-3.5 text-blue-500" />
+            <div className="text-center mb-24">
+              <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-50 via-emerald-50 to-amber-50 text-slate-700 text-xs font-bold rounded-full uppercase tracking-wider mb-8 border border-slate-200/50 shadow-lg hover:shadow-xl transition-all duration-300 animate-bounce-subtle relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-400/0 via-white/40 to-blue-400/0 animate-shimmer" />
+                <Sparkles className="w-4 h-4 text-amber-500 animate-spin" style={{ animationDuration: '3s' }} />
+                <span className="relative z-10">Why RetraLabs</span>
+                <Sparkles className="w-4 h-4 text-blue-500 animate-spin" style={{ animationDuration: '4s' }} />
               </div>
-              <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-                Built on Trust & <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-emerald-600 to-amber-600">Quality</span>
+
+              <h2 className="text-5xl md:text-6xl font-bold text-slate-900 mb-6 leading-tight">
+                Built on Trust &{' '}
+                <span className="relative inline-block">
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-emerald-600 to-amber-600 animate-gradient-shift">
+                    Quality
+                  </span>
+                  <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-emerald-600 to-amber-600 opacity-20 blur-xl animate-gradient-shift" />
+                </span>
               </h2>
-              <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+
+              <p className="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
                 Every product meets the highest standards for research excellence
               </p>
             </div>
           </ScrollReveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {[
               {
                 icon: FlaskConical,
@@ -99,8 +116,9 @@ export default function HomePage({ onNavigate }: HomePageProps) {
                 iconBg: 'from-blue-500 to-blue-600',
                 iconColor: 'text-white',
                 borderColor: 'border-blue-200',
-                glowColor: 'group-hover:shadow-blue-200/50',
-                decoration: 'bg-blue-400/20',
+                glowColor: 'shadow-blue-300/60',
+                decoration: 'bg-blue-400/30',
+                particleColor: 'bg-blue-400',
               },
               {
                 icon: ShieldCheck,
@@ -110,8 +128,9 @@ export default function HomePage({ onNavigate }: HomePageProps) {
                 iconBg: 'from-emerald-500 to-emerald-600',
                 iconColor: 'text-white',
                 borderColor: 'border-emerald-200',
-                glowColor: 'group-hover:shadow-emerald-200/50',
-                decoration: 'bg-emerald-400/20',
+                glowColor: 'shadow-emerald-300/60',
+                decoration: 'bg-emerald-400/30',
+                particleColor: 'bg-emerald-400',
               },
               {
                 icon: PackageCheck,
@@ -121,34 +140,61 @@ export default function HomePage({ onNavigate }: HomePageProps) {
                 iconBg: 'from-amber-500 to-amber-600',
                 iconColor: 'text-white',
                 borderColor: 'border-amber-200',
-                glowColor: 'group-hover:shadow-amber-200/50',
-                decoration: 'bg-amber-400/20',
+                glowColor: 'shadow-amber-300/60',
+                decoration: 'bg-amber-400/30',
+                particleColor: 'bg-amber-400',
               },
             ].map((item, i) => (
-              <ScrollReveal key={item.title} delay={i * 120}>
-                <div className={`group relative p-8 rounded-3xl bg-gradient-to-br ${item.gradient} border-2 ${item.borderColor} transition-all duration-500 hover:scale-105 hover:-translate-y-2 hover:shadow-2xl ${item.glowColor} cursor-pointer`}>
-                  <div className={`absolute -top-3 -right-3 w-24 h-24 ${item.decoration} rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-                  <div className={`absolute -bottom-2 -left-2 w-20 h-20 ${item.decoration} rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+              <ScrollReveal key={item.title} delay={i * 150}>
+                <div
+                  className={`group relative p-10 rounded-[2rem] bg-gradient-to-br ${item.gradient} border-2 ${item.borderColor} transition-all duration-700 hover:scale-110 hover:-translate-y-4 shadow-xl hover:shadow-2xl ${item.glowColor} cursor-pointer perspective-1000`}
+                  style={{
+                    transformStyle: 'preserve-3d',
+                    transition: 'all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                  }}
+                >
+                  <div className={`absolute inset-0 rounded-[2rem] bg-gradient-to-r ${item.gradient} opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-700`} />
 
-                  <div className="relative">
-                    <div className={`w-16 h-16 bg-gradient-to-br ${item.iconBg} rounded-2xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 relative`}>
-                      <div className="absolute inset-0 bg-white/20 rounded-2xl blur-sm animate-pulse" />
-                      <item.icon className={`w-8 h-8 ${item.iconColor} relative z-10 group-hover:scale-110 transition-transform duration-300`} />
+                  <div className="absolute -inset-0.5 rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                    <div className={`absolute inset-0 rounded-[2rem] bg-gradient-to-r ${item.iconBg} opacity-20 animate-rotate-border blur-sm`} />
+                  </div>
+
+                  <div className={`absolute -top-4 -right-4 w-32 h-32 ${item.decoration} rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-all duration-700 animate-scale-pulse`} />
+                  <div className={`absolute -bottom-3 -left-3 w-28 h-28 ${item.decoration} rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-all duration-700 animate-scale-pulse`} style={{ animationDelay: '0.5s' }} />
+                  <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 ${item.decoration} rounded-full blur-3xl opacity-0 group-hover:opacity-80 transition-all duration-700`} />
+
+                  <div className={`absolute top-6 right-6 w-1.5 h-1.5 ${item.particleColor} rounded-full animate-float opacity-60`} />
+                  <div className={`absolute bottom-10 left-8 w-1 h-1 ${item.particleColor} rounded-full animate-float-delayed opacity-60`} />
+                  <div className={`absolute top-1/3 right-12 w-1 h-1 ${item.particleColor} rounded-full animate-float opacity-40`} style={{ animationDelay: '1s' }} />
+
+                  <div className="relative" style={{ transform: 'translateZ(20px)' }}>
+                    <div className="relative mb-8 inline-block">
+                      <div className={`w-20 h-20 bg-gradient-to-br ${item.iconBg} rounded-3xl flex items-center justify-center shadow-2xl group-hover:scale-125 group-hover:rotate-12 transition-all duration-700 relative overflow-hidden`}>
+                        <div className="absolute inset-0 bg-white/30 rounded-3xl blur-md animate-pulse" />
+                        <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/50 to-white/0 animate-shimmer" />
+                        <item.icon className={`w-10 h-10 ${item.iconColor} relative z-10 group-hover:scale-110 transition-transform duration-500`} />
+                      </div>
+                      <div className={`absolute -inset-2 bg-gradient-to-br ${item.iconBg} rounded-3xl opacity-0 group-hover:opacity-30 blur-xl transition-opacity duration-700 animate-pulse`} />
                     </div>
 
-                    <h3 className="text-2xl font-bold text-slate-900 mb-4 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-slate-900 group-hover:to-slate-600 transition-all duration-300">
+                    <h3 className="text-2xl font-bold text-slate-900 mb-5 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-slate-900 group-hover:via-slate-700 group-hover:to-slate-900 transition-all duration-500 group-hover:scale-105">
                       {item.title}
                     </h3>
 
-                    <p className="text-slate-600 leading-relaxed text-[15px] group-hover:text-slate-700 transition-colors duration-300">
+                    <p className="text-slate-600 leading-relaxed text-[15.5px] group-hover:text-slate-800 transition-all duration-500 mb-6">
                       {item.desc}
                     </p>
 
-                    <div className="mt-6 flex items-center gap-2 text-sm font-semibold text-slate-400 group-hover:text-slate-600 transition-colors duration-300">
-                      <span>Learn more</span>
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                    <div className="flex items-center gap-2 text-sm font-bold text-slate-400 group-hover:text-slate-700 transition-all duration-500 group-hover:gap-3">
+                      <span className="relative">
+                        Learn more
+                        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-slate-700 to-transparent group-hover:w-full transition-all duration-500" />
+                      </span>
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-2 group-hover:scale-125 transition-all duration-500" />
                     </div>
                   </div>
+
+                  <div className="absolute inset-0 rounded-[2rem] border-2 border-white/50 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
                 </div>
               </ScrollReveal>
             ))}
