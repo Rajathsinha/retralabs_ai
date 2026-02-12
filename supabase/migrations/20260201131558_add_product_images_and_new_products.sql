@@ -53,8 +53,9 @@ SELECT
   dosage,
   price
 FROM (VALUES 
-  (10, 8000),
-  (50, 32000),
-  (100, 55000)
+  (50, 7000),   -- 10IU x 5 vials
+  (100, 11000), -- 10IU x 10 vials
+  (120, 13000), -- 24IU x 5 vials
+  (240, 18000)  -- 24IU x 10 vials
 ) AS variants(dosage, price)
 ON CONFLICT DO NOTHING;

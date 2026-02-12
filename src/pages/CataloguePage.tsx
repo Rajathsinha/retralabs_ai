@@ -68,14 +68,10 @@ const DEMO_PRODUCTS: ProductWithVariants[] = [
     image_url: '/hgh-191aa.jpg',
     created_at: new Date().toISOString(),
     variants: [
-      { id: '5a', product_id: '5', dosage_mg: 50, price_inr: 6000, in_stock: true, vial_configuration: '10IU x 5 vials', created_at: new Date().toISOString() },
-      { id: '5b', product_id: '5', dosage_mg: 100, price_inr: 10000, in_stock: true, vial_configuration: '10IU x 10 vials', created_at: new Date().toISOString() },
-      { id: '5c', product_id: '5', dosage_mg: 60, price_inr: 7000, in_stock: true, vial_configuration: '12IU x 5 vials', created_at: new Date().toISOString() },
-      { id: '5d', product_id: '5', dosage_mg: 120, price_inr: 11000, in_stock: true, vial_configuration: '12IU x 10 vials', created_at: new Date().toISOString() },
-      { id: '5e', product_id: '5', dosage_mg: 75, price_inr: 8000, in_stock: true, vial_configuration: '15IU x 5 vials', created_at: new Date().toISOString() },
-      { id: '5f', product_id: '5', dosage_mg: 150, price_inr: 14000, in_stock: true, vial_configuration: '15IU x 10 vials', created_at: new Date().toISOString() },
-      { id: '5g', product_id: '5', dosage_mg: 120, price_inr: 16000, in_stock: true, vial_configuration: '24IU x 5 vials', created_at: new Date().toISOString() },
-      { id: '5h', product_id: '5', dosage_mg: 240, price_inr: 21000, in_stock: true, vial_configuration: '24IU x 10 vials', created_at: new Date().toISOString() },
+      { id: '5a', product_id: '5', dosage_mg: 50, price_inr: 7000, in_stock: true, vial_configuration: '10IU x 5 vials', created_at: new Date().toISOString() },
+      { id: '5b', product_id: '5', dosage_mg: 100, price_inr: 11000, in_stock: true, vial_configuration: '10IU x 10 vials', created_at: new Date().toISOString() },
+      { id: '5g', product_id: '5', dosage_mg: 120, price_inr: 13000, in_stock: true, vial_configuration: '24IU x 5 vials', created_at: new Date().toISOString() },
+      { id: '5h', product_id: '5', dosage_mg: 240, price_inr: 18000, in_stock: true, vial_configuration: '24IU x 10 vials', created_at: new Date().toISOString() },
     ]
   },
   {
