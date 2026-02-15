@@ -246,13 +246,31 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
                   <button
                     key={variant.id}
                     onClick={() => setSelectedVariant(variant)}
-                    className={`p-4 rounded-xl border-2 transition-all duration-200 text-center ${
+                    className={`relative p-4 rounded-xl border-2 transition-all duration-200 text-center ${
                       selectedVariant?.id === variant.id
-                        ? 'border-slate-900 bg-slate-50 shadow-sm'
+                        ? variant.is_recommended
+                          ? 'border-emerald-500 bg-emerald-50 shadow-md'
+                          : 'border-slate-900 bg-slate-50 shadow-sm'
+                        : variant.is_recommended
+                        ? 'border-emerald-300 bg-emerald-50/50 hover:border-emerald-400'
                         : 'border-slate-200 bg-white hover:border-slate-300'
                     }`}
                   >
-                    <div className={`font-bold text-lg mb-0.5 ${selectedVariant?.id === variant.id ? 'text-slate-900' : 'text-slate-700'}`}>
+                    {variant.badge_text && (
+                      <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-bold rounded uppercase tracking-wide shadow-lg whitespace-nowrap">
+                        {variant.badge_text}
+                      </div>
+                    )}
+                    {variant.is_recommended && (
+                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg">
+                        <Star className="w-3 h-3 text-white fill-current" />
+                      </div>
+                    )}
+                    <div className={`font-bold text-lg mb-0.5 ${
+                      selectedVariant?.id === variant.id
+                        ? variant.is_recommended ? 'text-emerald-900' : 'text-slate-900'
+                        : 'text-slate-700'
+                    }`}>
                       ₹{variant.price_inr.toLocaleString('en-IN')}
                     </div>
                     <div className="text-sm text-slate-500 font-medium">
@@ -263,7 +281,7 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
                     )}
                     {selectedVariant?.id === variant.id && (
                       <div className="mt-2 flex justify-center">
-                        <Check className="w-4 h-4 text-slate-900" />
+                        <Check className={`w-4 h-4 ${variant.is_recommended ? 'text-emerald-600' : 'text-slate-900'}`} />
                       </div>
                     )}
                   </button>

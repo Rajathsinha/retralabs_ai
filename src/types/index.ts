@@ -14,6 +14,8 @@ export interface ProductVariant {
   price_inr: number;
   in_stock: boolean;
   vial_configuration?: string;
+  is_recommended?: boolean;
+  badge_text?: string;
   created_at: string;
 }
 
