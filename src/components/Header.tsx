@@ -12,6 +12,7 @@ interface HeaderProps {
 const NAV_ITEMS = [
   { key: 'home', label: 'Home' },
   { key: 'catalogue', label: 'Catalogue' },
+  { key: 'reviews', label: 'Reviews' },
   { key: 'track-order', label: 'Track Order' },
   { key: 'support', label: 'Support' },
 ];

@@ -1,6 +1,22 @@
-import { ExternalLink, Star } from 'lucide-react';
+import { ExternalLink, Star, Shield, Award } from 'lucide-react';
+import { useEffect } from 'react';
 
 export default function ReviewsPage() {
+  const trustpilotBusinessId = import.meta.env.VITE_TRUSTPILOT_BUSINESS_ID || 'YOUR_TRUSTPILOT_BUSINESS_ID';
+
+  useEffect(() => {
+    const trustpilotScript = document.createElement('script');
+    trustpilotScript.src = '//widget.trustpilot.com/bootstrap/v5/tp.widget.bootstrap.min.js';
+    trustpilotScript.async = true;
+    document.body.appendChild(trustpilotScript);
+
+    return () => {
+      if (trustpilotScript.parentNode) {
+        trustpilotScript.parentNode.removeChild(trustpilotScript);
+      }
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -9,8 +25,54 @@ export default function ReviewsPage() {
             Customer Reviews
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Real experiences from our research community
+            Real experiences from our research community verified by Trustpilot
           </p>
+        </div>
+
+        <div className="max-w-5xl mx-auto mb-16">
+          <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-3xl p-12 shadow-xl border border-emerald-200">
+            <div className="flex items-center justify-center mb-6">
+              <div className="p-4 bg-white rounded-full shadow-md">
+                <Award className="w-12 h-12 text-emerald-600" />
+              </div>
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900 text-center mb-4 flex items-center justify-center gap-3">
+              Verified by Trustpilot
+              <Shield className="w-8 h-8 text-emerald-600" />
+            </h2>
+            <p className="text-lg text-gray-700 text-center mb-8 leading-relaxed">
+              All reviews are verified by Trustpilot, ensuring authentic feedback from real customers.
+            </p>
+
+            <div
+              className="trustpilot-widget bg-white rounded-2xl p-6 mb-6"
+              data-locale="en-US"
+              data-template-id="5419b6a8b0d04a076446a9ad"
+              data-businessunit-id={trustpilotBusinessId}
+              data-style-height="24px"
+              data-style-width="100%"
+              data-theme="light"
+            >
+              <a href="https://www.trustpilot.com/review/retralabs.in" target="_blank" rel="noopener noreferrer">
+                Trustpilot
+              </a>
+            </div>
+
+            <div
+              className="trustpilot-widget bg-white rounded-2xl p-6 shadow-lg"
+              data-locale="en-US"
+              data-template-id="539ad0ffdec7e10e686debee"
+              data-businessunit-id={trustpilotBusinessId}
+              data-style-height="500px"
+              data-style-width="100%"
+              data-theme="light"
+              data-stars="4,5"
+            >
+              <a href="https://www.trustpilot.com/review/retralabs.in" target="_blank" rel="noopener noreferrer">
+                Trustpilot
+              </a>
+            </div>
+          </div>
         </div>
 
         <div className="max-w-5xl mx-auto mb-12">
