@@ -1,34 +1,6 @@
-import { ExternalLink, Star, Shield, Award } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { ExternalLink, Star, Award } from 'lucide-react';
 
 export default function ReviewsPage() {
-  const trustpilotBusinessId = import.meta.env.VITE_TRUSTPILOT_BUSINESS_ID || '6979766a0f4152620862a8e6';
-  const [loadError, setLoadError] = useState(false);
-
-  useEffect(() => {
-    const checkWidget = () => {
-      if (typeof window !== 'undefined' && (window as any).Trustpilot) {
-        (window as any).Trustpilot.loadFromElement(document.querySelectorAll('.trustpilot-widget'), true);
-      }
-    };
-
-    const loadTimeout = setTimeout(() => {
-      if (!(window as any).Trustpilot) {
-        setLoadError(true);
-      } else {
-        checkWidget();
-      }
-    }, 3000);
-
-    if ((window as any).Trustpilot) {
-      checkWidget();
-      clearTimeout(loadTimeout);
-    }
-
-    return () => {
-      clearTimeout(loadTimeout);
-    };
-  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
@@ -49,61 +21,27 @@ export default function ReviewsPage() {
                 <Award className="w-12 h-12 text-emerald-600" />
               </div>
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 text-center mb-4 flex items-center justify-center gap-3">
+            <h2 className="text-3xl font-bold text-gray-900 text-center mb-4">
               Verified by Trustpilot
-              <Shield className="w-8 h-8 text-emerald-600" />
             </h2>
             <p className="text-lg text-gray-700 text-center mb-8 leading-relaxed">
               All reviews are verified by Trustpilot, ensuring authentic feedback from real customers.
             </p>
 
-            {loadError ? (
-              <div className="bg-white rounded-2xl p-8 text-center border-2 border-dashed border-gray-300">
-                <p className="text-gray-600 mb-4">
-                  Trustpilot widgets are being blocked by your browser extension or privacy settings.
-                </p>
-                <a
-                  href="https://www.trustpilot.com/review/retralabs.in"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-colors"
-                >
-                  View Reviews on Trustpilot
-                  <ExternalLink className="w-4 h-4" />
-                </a>
-              </div>
-            ) : (
-              <>
-                <div
-                  className="trustpilot-widget bg-white rounded-2xl p-6 mb-6"
-                  data-locale="en-US"
-                  data-template-id="5419b6a8b0d04a076446a9ad"
-                  data-businessunit-id={trustpilotBusinessId}
-                  data-style-height="24px"
-                  data-style-width="100%"
-                  data-theme="light"
-                >
-                  <a href="https://www.trustpilot.com/review/retralabs.in" target="_blank" rel="noopener noreferrer">
-                    Trustpilot
-                  </a>
-                </div>
-
-                <div
-                  className="trustpilot-widget bg-white rounded-2xl p-6 shadow-lg"
-                  data-locale="en-US"
-                  data-template-id="539ad0ffdec7e10e686debee"
-                  data-businessunit-id={trustpilotBusinessId}
-                  data-style-height="500px"
-                  data-style-width="100%"
-                  data-theme="light"
-                  data-stars="4,5"
-                >
-                  <a href="https://www.trustpilot.com/review/retralabs.in" target="_blank" rel="noopener noreferrer">
-                    Trustpilot
-                  </a>
-                </div>
-              </>
-            )}
+            <div className="bg-white rounded-2xl p-8 text-center border-2 border-dashed border-gray-300">
+              <p className="text-gray-600 mb-4">
+                View our verified customer reviews on Trustpilot
+              </p>
+              <a
+                href="https://www.trustpilot.com/review/retralabs.in"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-colors"
+              >
+                View Reviews on Trustpilot
+                <ExternalLink className="w-4 h-4" />
+              </a>
+            </div>
           </div>
         </div>
 
