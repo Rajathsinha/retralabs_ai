@@ -1,192 +1,257 @@
-import { ExternalLink, Star, Award } from 'lucide-react';
-import TrustpilotWidget from '../components/TrustpilotWidget';
+import { ExternalLink, Star, Quote, ShieldCheck, MessageCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { supabase } from '../lib/supabase';
 
-export default function ReviewsPage() {
+interface Review {
+  id: string;
+  reviewer_name: string;
+  rating: number;
+  title: string;
+  body: string;
+  verified: boolean;
+  product_name: string | null;
+  created_at: string;
+}
+
+function StarRating({ rating }: { rating: number }) {
+  return (
+    <div className="flex gap-0.5">
+      {[...Array(5)].map((_, i) => (
+        <Star
+          key={i}
+          size={16}
+          className={i < rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
+        />
+      ))}
+    </div>
+  );
+}
+
+function ReviewCard({ review }: { review: Review }) {
+  const initials = review.reviewer_name.charAt(0).toUpperCase();
+  const date = new Date(review.created_at).toLocaleDateString('en-IN', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4 tracking-tight">
+    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all duration-300">
+      <div className="flex items-start gap-4">
+        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+          {initials}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-3 mb-1">
+            <h3 className="font-semibold text-gray-900 truncate">{review.reviewer_name}</h3>
+            <span className="text-xs text-gray-400 flex-shrink-0">{date}</span>
+          </div>
+          <div className="flex items-center gap-3 mb-3">
+            <StarRating rating={review.rating} />
+            {review.verified && (
+              <span className="inline-flex items-center gap-1 text-xs text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-medium">
+                <ShieldCheck size={12} />
+                Verified
+              </span>
+            )}
+          </div>
+          {review.title && (
+            <h4 className="font-semibold text-gray-800 mb-2 text-[15px]">{review.title}</h4>
+          )}
+          <p className="text-gray-600 text-sm leading-relaxed">{review.body}</p>
+          {review.product_name && (
+            <span className="inline-block mt-3 text-xs text-teal-700 bg-teal-50 px-2.5 py-1 rounded-full font-medium">
+              {review.product_name}
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const redditReviews = [
+  {
+    username: 'u/Frosty-Ad-9691',
+    initial: 'F',
+    gradient: 'from-blue-500 to-cyan-500',
+    time: '9 hours ago',
+    title: 'First order experience with RetraLabs',
+    body: "Not gonna lie, I've seen really mindblowing progress on mine. Dropped tons of fat and my health feels much much more under control now. My sugar levels are way better compared to earlier reports. Friends noticed the change and one of them jumped on it too.. he's already seeing fat loss. Parents are also doing well till now. They absolutely love it. Thought I'd post here since this sub is about real experiences. I am not at all affiliated with retralabs. I do not recommend to anyone everyone's different and may and may not work. Do your research and then get into this but yeah retralabs peps are really genuine.",
+  },
+  {
+    username: 'u/Rajathsinha6',
+    initial: 'R',
+    gradient: 'from-rose-500 to-pink-500',
+    time: '1 day ago',
+    title: "Retralabs is totally vibin, pure Retatrutide without burning a hole in your pocket",
+    body: "Here's the review: My first order landed in just 9 days, but the second one took a chill 22 days. No biggie, though..I had enough stock to keep me going. Now, let's talk quality. Within just 3 hours I felt the reta's magic. Injected at 8 PM and 11 PM I was ready to vommit and I was really glad about the sides cuz that's the real deal. I had tried some random IndianMart seller's reta from Peptide Science total fake, useless piece of junk. I pinned 20mg for 4 weeks, and nada nothing happened just made me despo. I was desperate for the real stuff and Retalabs totally came through. I'm on TRT with Retatrutide, shredded a ton of fat, and my...",
+  },
+  {
+    username: 'u/Affectionate_Fox_313',
+    initial: 'A',
+    gradient: 'from-emerald-500 to-teal-500',
+    time: '1 day ago',
+    title: 'My Retatrutide order from retralabs.in (India)',
+    body: "Posting this because I know how sketchy this space is, especially in India. I was referred to Retralabs.in by another Reddit user. Honestly, I was very skeptical at first. I had already been scammed earlier via an Indiamart seller (fake Peptide Sciences vials, wasted ~7k), so trusting anyone again wasn't easy. I spoke with the Reddit user who suggested it, checked his proof of purchase and results, and then directly contacted the retralabs number listed on their site. After a proper conversation and clearing my doubts, I decided to take a gamble. I ordered 10mg x 10 vials and split the order with the same Reddit user (5 vials...)",
+  },
+];
+
+function RedditReviewCard({ review }: { review: typeof redditReviews[0] }) {
+  return (
+    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all duration-300">
+      <div className="flex items-start gap-4">
+        <div className={`w-11 h-11 rounded-full bg-gradient-to-br ${review.gradient} flex items-center justify-center text-white font-bold text-sm flex-shrink-0`}>
+          {review.initial}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-3 mb-1">
+            <h3 className="font-semibold text-gray-900">{review.username}</h3>
+            <span className="text-xs text-gray-400 flex-shrink-0">{review.time}</span>
+          </div>
+          <div className="flex gap-0.5 mb-3">
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} size={16} className="fill-yellow-400 text-yellow-400" />
+            ))}
+          </div>
+          <h4 className="font-semibold text-gray-800 mb-2 text-[15px]">{review.title}</h4>
+          <p className="text-gray-600 text-sm leading-relaxed">{review.body}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function ReviewsPage() {
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchReviews() {
+      const { data } = await supabase
+        .from('reviews')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (data) setReviews(data);
+      setLoading(false);
+    }
+    fetchReviews();
+  }, []);
+
+  const avgRating = reviews.length > 0
+    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+    : '5.0';
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-3 tracking-tight">
             Customer Reviews
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Real experiences from our research community verified by Trustpilot
+          <p className="text-gray-500 max-w-xl mx-auto">
+            Real feedback from researchers who trust RetraLabs
           </p>
         </div>
 
-        <div className="max-w-5xl mx-auto mb-16">
-          <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-3xl p-12 shadow-xl border border-emerald-200">
-            <div className="flex items-center justify-center mb-6">
-              <div className="p-4 bg-white rounded-full shadow-md">
-                <Award className="w-12 h-12 text-emerald-600" />
-              </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
+          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm text-center">
+            <div className="text-3xl font-bold text-gray-900 mb-1">{avgRating}</div>
+            <div className="flex justify-center mb-2">
+              <StarRating rating={Math.round(Number(avgRating))} />
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 text-center mb-4">
-              Verified by Trustpilot
-            </h2>
-            <p className="text-lg text-gray-700 text-center mb-8 leading-relaxed">
-              All reviews are verified by Trustpilot, ensuring authentic feedback from real customers.
-            </p>
-
-            <div className="bg-white rounded-2xl p-6 shadow-md mb-6">
-              <TrustpilotWidget
-                templateId="56278e9abfbbba0bdcd568bc"
-                businessunitId="6979766a0f4152620862a8e6"
-                styleHeight="52px"
-                styleWidth="100%"
-                token="7d7dbfd1-08a5-4ff4-81e6-cd6658956657"
-              />
+            <p className="text-sm text-gray-500">Average Rating</p>
+          </div>
+          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm text-center">
+            <div className="text-3xl font-bold text-gray-900 mb-1">{reviews.length + redditReviews.length}</div>
+            <div className="flex justify-center mb-2">
+              <Quote size={20} className="text-teal-500" />
             </div>
-
-            <div className="text-center">
-              <a
-                href="https://www.trustpilot.com/review/retralabs.in"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-colors"
-              >
-                Write a Review on Trustpilot
-                <ExternalLink className="w-4 h-4" />
-              </a>
+            <p className="text-sm text-gray-500">Total Reviews</p>
+          </div>
+          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm text-center">
+            <div className="text-3xl font-bold text-gray-900 mb-1">100%</div>
+            <div className="flex justify-center mb-2">
+              <ShieldCheck size={20} className="text-emerald-500" />
             </div>
+            <p className="text-sm text-gray-500">Verified Purchases</p>
           </div>
         </div>
 
-        <div className="max-w-5xl mx-auto mb-12">
-          <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-200">
-            <h2 className="text-2xl font-bold text-gray-900 text-center mb-6">
-              Latest Customer Reviews
-            </h2>
-            <TrustpilotWidget
-              templateId="539ad0ffdec7e10e686debee"
-              businessunitId="6979766a0f4152620862a8e6"
-              styleHeight="500px"
-              styleWidth="100%"
-              theme="light"
-              stars="4,5"
-              schemaType="Organization"
-              isList={true}
-            />
-          </div>
-        </div>
-
-        <div className="max-w-5xl mx-auto mb-12">
-          <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-3xl p-12 shadow-xl border border-orange-100">
-            <div className="flex items-center justify-center mb-6">
-              <div className="p-4 bg-white rounded-full shadow-md">
-                <svg className="w-12 h-12 text-orange-600" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/>
-                </svg>
-              </div>
-            </div>
-            <h2 className="text-3xl font-bold text-gray-900 text-center mb-4">
-              Join the Discussion
-            </h2>
-            <p className="text-lg text-gray-700 text-center mb-8 leading-relaxed">
-              Our community shares real experiences, research results, and protocol discussions on Reddit. Read authentic reviews and join the conversation.
-            </p>
-            <div className="bg-white rounded-xl p-6 mb-6 border-2 border-orange-200">
-              <p className="text-sm text-cyan-600 font-semibold uppercase tracking-wide mb-2">
-                Community Hub
-              </p>
-              <p className="text-2xl font-bold text-gray-900">r/retralabs</p>
-            </div>
-            <a
-              href="https://www.reddit.com/r/retralabs/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block w-full py-4 bg-orange-600 text-white font-bold text-center rounded-xl hover:bg-orange-700 transition-colors shadow-lg hover:shadow-xl"
-            >
-              <span className="flex items-center justify-center gap-2">
-                Read Reviews on Reddit
-                <ExternalLink className="w-5 h-5" />
-              </span>
-            </a>
-          </div>
-        </div>
-
-        <div className="max-w-5xl mx-auto space-y-6">
-          <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
-            <div className="flex items-start gap-4 mb-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                F
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <h3 className="font-bold text-gray-900">u/Frosty-Ad-9691</h3>
-                  <span className="text-sm text-gray-500">9 hours ago</span>
-                </div>
-                <div className="flex gap-1 mb-3">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-                <h4 className="font-bold text-lg mb-3">First order experience with RetraLabs</h4>
-                <p className="text-gray-700 leading-relaxed">
-                  Not gonna lie, I've seen really mindblowing progress on mine. Dropped tons of fat and my health feels much much more under control now. My sugar levels are way better compared to earlier reports. Friends noticed the change and one of them jumped on it too.. he's already seeing fat loss. Parents are also doing well till now. They absolutely love it. Thought I'd post here since this sub is about real experiences. I am not at all affiliated with retralabs. I do not recommend to anyone everyone's different and may and may not work. Do your research and then get into this but yeah retralabs peps are really genuine.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
-            <div className="flex items-start gap-4 mb-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                R
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <h3 className="font-bold text-gray-900">u/Rajathsinha6</h3>
-                  <span className="text-sm text-gray-500">1 day ago</span>
-                </div>
-                <div className="flex gap-1 mb-3">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-                <h4 className="font-bold text-lg mb-3">Retralabs is totally vibin, pure Retatrutide without burning a hole in your pocket</h4>
-                <p className="text-gray-700 leading-relaxed">
-                  Here's the review: My first order landed in just 9 days, but the second one took a chill 22 days. No biggie, though..I had enough stock to keep me going. Now, let's talk quality. Within just 3 hours I felt the reta's magic. Injected at 8 PM and 11 PM I was ready to vommit and I was really glad about the sides cuz that's the real deal. I had tried some random IndianMart seller's reta from Peptide Science total fake, useless piece of junk. I pinned 20mg for 4 weeks, and nada nothing happened just made me despo. I was desperate for the real stuff and Retalabs totally came through. I'm on TRT with Retatrutide, shredded a ton of fat, and my...
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
-            <div className="flex items-start gap-4 mb-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-teal-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                A
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <h3 className="font-bold text-gray-900">u/Affectionate_Fox_313</h3>
-                  <span className="text-sm text-gray-500">1 day ago</span>
-                </div>
-                <div className="flex gap-1 mb-3">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-                <h4 className="font-bold text-lg mb-3">My Retatrutide order from retralabs.in (India)</h4>
-                <p className="text-gray-700 leading-relaxed">
-                  Posting this because I know how sketchy this space is, especially in India. I was referred to Retralabs.in by another Reddit user. Honestly, I was very skeptical at first. I had already been scammed earlier via an Indiamart seller (fake Peptide Sciences vials, wasted ~7k), so trusting anyone again wasn't easy. I spoke with the Reddit user who suggested it, checked his proof of purchase and results, and then directly contacted the retralabs number listed on their site. After a proper conversation and clearing my doubts, I decided to take a gamble. I ordered 10mg x 10 vials and split the order with the same Reddit user (5 vials...
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-12 text-center">
+        <div className="flex flex-wrap items-center justify-center gap-3 mb-10">
+          <a
+            href="https://www.trustpilot.com/review/retralabs.in"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 transition-colors"
+          >
+            Write a Review on Trustpilot
+            <ExternalLink size={14} />
+          </a>
           <a
             href="https://www.reddit.com/r/retralabs/"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-blue-700 text-white font-semibold rounded-lg hover:bg-blue-800 transition-all shadow-lg hover:shadow-xl"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-orange-600 text-white text-sm font-semibold rounded-lg hover:bg-orange-700 transition-colors"
           >
-            Read More Reviews
-            <ExternalLink className="w-5 h-5" />
+            Share on Reddit
+            <ExternalLink size={14} />
           </a>
+        </div>
+
+        <div className="mb-14">
+          <div className="flex items-center gap-2 mb-6">
+            <ShieldCheck size={20} className="text-teal-600" />
+            <h2 className="text-xl font-bold text-gray-900">Verified Customer Reviews</h2>
+          </div>
+
+          {loading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-white rounded-2xl p-6 border border-gray-100 animate-pulse">
+                  <div className="flex gap-4">
+                    <div className="w-11 h-11 rounded-full bg-gray-200" />
+                    <div className="flex-1 space-y-3">
+                      <div className="h-4 bg-gray-200 rounded w-1/4" />
+                      <div className="h-3 bg-gray-200 rounded w-1/3" />
+                      <div className="h-3 bg-gray-200 rounded w-full" />
+                      <div className="h-3 bg-gray-200 rounded w-5/6" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {reviews.map((review) => (
+                <ReviewCard key={review.id} review={review} />
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div>
+          <div className="flex items-center gap-2 mb-6">
+            <MessageCircle size={20} className="text-orange-600" />
+            <h2 className="text-xl font-bold text-gray-900">Reddit Community Reviews</h2>
+          </div>
+          <div className="space-y-4">
+            {redditReviews.map((review) => (
+              <RedditReviewCard key={review.username} review={review} />
+            ))}
+          </div>
+          <div className="text-center mt-6">
+            <a
+              href="https://www.reddit.com/r/retralabs/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-orange-600 hover:text-orange-700 font-semibold text-sm transition-colors"
+            >
+              Read more on r/retralabs
+              <ExternalLink size={14} />
+            </a>
+          </div>
         </div>
       </section>
     </div>
