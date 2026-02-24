@@ -66,6 +66,7 @@ export default function ReviewsPage() {
               theme="light"
               stars="4,5"
               schemaType="Organization"
+              isList={true}
             />
           </div>
         </div>
