@@ -1,16 +1,36 @@
 import { ExternalLink, Star, Shield, Award } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function ReviewsPage() {
   const trustpilotBusinessId = import.meta.env.VITE_TRUSTPILOT_BUSINESS_ID || 'YOUR_TRUSTPILOT_BUSINESS_ID';
+  const [widgetLoaded, setWidgetLoaded] = useState(false);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
+    const loadTimeout = setTimeout(() => {
+      if (!widgetLoaded) {
+        setLoadError(true);
+      }
+    }, 5000);
+
     const trustpilotScript = document.createElement('script');
-    trustpilotScript.src = '//widget.trustpilot.com/bootstrap/v5/tp.widget.bootstrap.min.js';
+    trustpilotScript.src = 'https://widget.trustpilot.com/bootstrap/v5/tp.widget.bootstrap.min.js';
     trustpilotScript.async = true;
+
+    trustpilotScript.onload = () => {
+      setWidgetLoaded(true);
+      clearTimeout(loadTimeout);
+    };
+
+    trustpilotScript.onerror = () => {
+      setLoadError(true);
+      clearTimeout(loadTimeout);
+    };
+
     document.body.appendChild(trustpilotScript);
 
     return () => {
+      clearTimeout(loadTimeout);
       if (trustpilotScript.parentNode) {
         trustpilotScript.parentNode.removeChild(trustpilotScript);
       }
@@ -44,34 +64,53 @@ export default function ReviewsPage() {
               All reviews are verified by Trustpilot, ensuring authentic feedback from real customers.
             </p>
 
-            <div
-              className="trustpilot-widget bg-white rounded-2xl p-6 mb-6"
-              data-locale="en-US"
-              data-template-id="5419b6a8b0d04a076446a9ad"
-              data-businessunit-id={trustpilotBusinessId}
-              data-style-height="24px"
-              data-style-width="100%"
-              data-theme="light"
-            >
-              <a href="https://www.trustpilot.com/review/retralabs.in" target="_blank" rel="noopener noreferrer">
-                Trustpilot
-              </a>
-            </div>
+            {loadError ? (
+              <div className="bg-white rounded-2xl p-8 text-center border-2 border-dashed border-gray-300">
+                <p className="text-gray-600 mb-4">
+                  Trustpilot widgets are being blocked by your browser extension or privacy settings.
+                </p>
+                <a
+                  href="https://www.trustpilot.com/review/retralabs.in"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-colors"
+                >
+                  View Reviews on Trustpilot
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              </div>
+            ) : (
+              <>
+                <div
+                  className="trustpilot-widget bg-white rounded-2xl p-6 mb-6"
+                  data-locale="en-US"
+                  data-template-id="5419b6a8b0d04a076446a9ad"
+                  data-businessunit-id={trustpilotBusinessId}
+                  data-style-height="24px"
+                  data-style-width="100%"
+                  data-theme="light"
+                >
+                  <a href="https://www.trustpilot.com/review/retralabs.in" target="_blank" rel="noopener noreferrer">
+                    Trustpilot
+                  </a>
+                </div>
 
-            <div
-              className="trustpilot-widget bg-white rounded-2xl p-6 shadow-lg"
-              data-locale="en-US"
-              data-template-id="539ad0ffdec7e10e686debee"
-              data-businessunit-id={trustpilotBusinessId}
-              data-style-height="500px"
-              data-style-width="100%"
-              data-theme="light"
-              data-stars="4,5"
-            >
-              <a href="https://www.trustpilot.com/review/retralabs.in" target="_blank" rel="noopener noreferrer">
-                Trustpilot
-              </a>
-            </div>
+                <div
+                  className="trustpilot-widget bg-white rounded-2xl p-6 shadow-lg"
+                  data-locale="en-US"
+                  data-template-id="539ad0ffdec7e10e686debee"
+                  data-businessunit-id={trustpilotBusinessId}
+                  data-style-height="500px"
+                  data-style-width="100%"
+                  data-theme="light"
+                  data-stars="4,5"
+                >
+                  <a href="https://www.trustpilot.com/review/retralabs.in" target="_blank" rel="noopener noreferrer">
+                    Trustpilot
+                  </a>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
