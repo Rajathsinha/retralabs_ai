@@ -1,43 +1,7 @@
 import { ExternalLink, Star, Award } from 'lucide-react';
-import { useEffect } from 'react';
+import TrustpilotWidget from '../components/TrustpilotWidget';
 
 export default function ReviewsPage() {
-  useEffect(() => {
-    const loadTrustpilot = () => {
-      if (typeof window !== 'undefined' && (window as any).Trustpilot) {
-        try {
-          const widgets = document.querySelectorAll('.trustpilot-widget');
-          if (widgets.length > 0) {
-            (window as any).Trustpilot.loadFromElement(widgets, true);
-          }
-        } catch (error) {
-          console.error('Trustpilot loading error:', error);
-        }
-      }
-    };
-
-    const attemptLoad = () => {
-      if ((window as any).Trustpilot) {
-        setTimeout(loadTrustpilot, 100);
-        return true;
-      }
-      return false;
-    };
-
-    if (!attemptLoad()) {
-      let attempts = 0;
-      const maxAttempts = 50;
-
-      const checkInterval = setInterval(() => {
-        attempts++;
-        if (attemptLoad() || attempts >= maxAttempts) {
-          clearInterval(checkInterval);
-        }
-      }, 200);
-
-      return () => clearInterval(checkInterval);
-    }
-  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
@@ -66,23 +30,13 @@ export default function ReviewsPage() {
             </p>
 
             <div className="bg-white rounded-2xl p-6 shadow-md mb-6">
-              <div
-                className="trustpilot-widget"
-                data-locale="en-US"
-                data-template-id="56278e9abfbbba0bdcd568bc"
-                data-businessunit-id="6979766a0f4152620862a8e6"
-                data-style-height="52px"
-                data-style-width="100%"
-                data-token="7d7dbfd1-08a5-4ff4-81e6-cd6658956657"
-              >
-                <a
-                  href="https://www.trustpilot.com/review/retralabs.in"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Trustpilot
-                </a>
-              </div>
+              <TrustpilotWidget
+                templateId="56278e9abfbbba0bdcd568bc"
+                businessunitId="6979766a0f4152620862a8e6"
+                styleHeight="52px"
+                styleWidth="100%"
+                token="7d7dbfd1-08a5-4ff4-81e6-cd6658956657"
+              />
             </div>
 
             <div className="text-center">
@@ -104,25 +58,15 @@ export default function ReviewsPage() {
             <h2 className="text-2xl font-bold text-gray-900 text-center mb-6">
               Latest Customer Reviews
             </h2>
-            <div
-              className="trustpilot-widget"
-              data-locale="en-US"
-              data-template-id="539ad0ffdec7e10e686debee"
-              data-businessunit-id="6979766a0f4152620862a8e6"
-              data-style-height="500px"
-              data-style-width="100%"
-              data-theme="light"
-              data-stars="4,5"
-              data-schema-type="Organization"
-            >
-              <a
-                href="https://www.trustpilot.com/review/retralabs.in"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Trustpilot
-              </a>
-            </div>
+            <TrustpilotWidget
+              templateId="539ad0ffdec7e10e686debee"
+              businessunitId="6979766a0f4152620862a8e6"
+              styleHeight="500px"
+              styleWidth="100%"
+              theme="light"
+              stars="4,5"
+              schemaType="Organization"
+            />
           </div>
         </div>
 
