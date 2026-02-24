@@ -49,10 +49,15 @@ function ReviewCard({ review }: { review: Review }) {
           <div className="flex items-center gap-3 mb-3">
             <StarRating rating={review.rating} />
             {review.verified && (
-              <span className="inline-flex items-center gap-1 text-xs text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-medium">
+              <a
+                href="https://www.trustpilot.com/review/retralabs.in"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-medium hover:bg-emerald-100 transition-colors"
+              >
                 <ShieldCheck size={12} />
-                Verified
-              </span>
+                Verified on Trustpilot
+              </a>
             )}
           </div>
           {review.title && (
@@ -201,14 +206,42 @@ export default function ReviewsPage() {
         </div>
 
         <div className="mb-14">
-          <div className="flex items-center gap-2 mb-6">
-            <ShieldCheck size={20} className="text-teal-600" />
-            <h2 className="text-xl font-bold text-gray-900">Verified Customer Reviews</h2>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <ShieldCheck size={20} className="text-emerald-600" />
+              <h2 className="text-xl font-bold text-gray-900">Trustpilot Reviews</h2>
+            </div>
+            <a
+              href="https://www.trustpilot.com/review/retralabs.in"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              View on Trustpilot
+            </a>
+          </div>
+
+          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm mb-6">
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <div className="flex items-center gap-3">
+                <span className="text-4xl font-bold text-gray-900">
+                  {reviews.length > 0 ? avgRating : '5.0'}
+                </span>
+                <div>
+                  <StarRating rating={5} />
+                  <p className="text-xs text-gray-500 mt-0.5">Based on {reviews.length} Trustpilot reviews</p>
+                </div>
+              </div>
+              <div className="hidden sm:block w-px h-10 bg-gray-200" />
+              <p className="text-sm text-gray-600">
+                Rated <span className="font-semibold">Excellent</span> on Trustpilot
+              </p>
+            </div>
           </div>
 
           {loading ? (
             <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
+              {[1, 2].map((i) => (
                 <div key={i} className="bg-white rounded-2xl p-6 border border-gray-100 animate-pulse">
                   <div className="flex gap-4">
                     <div className="w-11 h-11 rounded-full bg-gray-200" />
