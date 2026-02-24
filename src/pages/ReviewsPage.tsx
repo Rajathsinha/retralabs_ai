@@ -6,27 +6,34 @@ export default function ReviewsPage() {
     const loadTrustpilot = () => {
       if (typeof window !== 'undefined' && (window as any).Trustpilot) {
         try {
-          (window as any).Trustpilot.loadFromElement(
-            document.querySelectorAll('.trustpilot-widget'),
-            true
-          );
+          const widgets = document.querySelectorAll('.trustpilot-widget');
+          if (widgets.length > 0) {
+            (window as any).Trustpilot.loadFromElement(widgets, true);
+          }
         } catch (error) {
           console.error('Trustpilot loading error:', error);
         }
       }
     };
 
-    if ((window as any).Trustpilot) {
-      loadTrustpilot();
-    } else {
+    const attemptLoad = () => {
+      if ((window as any).Trustpilot) {
+        setTimeout(loadTrustpilot, 100);
+        return true;
+      }
+      return false;
+    };
+
+    if (!attemptLoad()) {
+      let attempts = 0;
+      const maxAttempts = 50;
+
       const checkInterval = setInterval(() => {
-        if ((window as any).Trustpilot) {
-          loadTrustpilot();
+        attempts++;
+        if (attemptLoad() || attempts >= maxAttempts) {
           clearInterval(checkInterval);
         }
-      }, 100);
-
-      setTimeout(() => clearInterval(checkInterval), 5000);
+      }, 200);
 
       return () => clearInterval(checkInterval);
     }
