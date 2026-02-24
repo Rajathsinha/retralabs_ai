@@ -2,38 +2,31 @@ import { ExternalLink, Star, Shield, Award } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export default function ReviewsPage() {
-  const trustpilotBusinessId = import.meta.env.VITE_TRUSTPILOT_BUSINESS_ID || 'YOUR_TRUSTPILOT_BUSINESS_ID';
-  const [widgetLoaded, setWidgetLoaded] = useState(false);
+  const trustpilotBusinessId = import.meta.env.VITE_TRUSTPILOT_BUSINESS_ID || '6979766a0f4152620862a8e6';
   const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
-    const loadTimeout = setTimeout(() => {
-      if (!widgetLoaded) {
-        setLoadError(true);
+    const checkWidget = () => {
+      if (typeof window !== 'undefined' && (window as any).Trustpilot) {
+        (window as any).Trustpilot.loadFromElement(document.querySelectorAll('.trustpilot-widget'), true);
       }
-    }, 5000);
-
-    const trustpilotScript = document.createElement('script');
-    trustpilotScript.src = 'https://widget.trustpilot.com/bootstrap/v5/tp.widget.bootstrap.min.js';
-    trustpilotScript.async = true;
-
-    trustpilotScript.onload = () => {
-      setWidgetLoaded(true);
-      clearTimeout(loadTimeout);
     };
 
-    trustpilotScript.onerror = () => {
-      setLoadError(true);
-      clearTimeout(loadTimeout);
-    };
+    const loadTimeout = setTimeout(() => {
+      if (!(window as any).Trustpilot) {
+        setLoadError(true);
+      } else {
+        checkWidget();
+      }
+    }, 3000);
 
-    document.body.appendChild(trustpilotScript);
+    if ((window as any).Trustpilot) {
+      checkWidget();
+      clearTimeout(loadTimeout);
+    }
 
     return () => {
       clearTimeout(loadTimeout);
-      if (trustpilotScript.parentNode) {
-        trustpilotScript.parentNode.removeChild(trustpilotScript);
-      }
     };
   }, []);
 
