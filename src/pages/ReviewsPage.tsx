@@ -1,6 +1,7 @@
 import { ExternalLink, Star, Quote, ShieldCheck, MessageCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { Card, CardBody, Button, Chip, Skeleton } from '@heroui/react';
 
 interface Review {
   id: string;
@@ -36,42 +37,46 @@ function ReviewCard({ review }: { review: Review }) {
   });
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all duration-300">
-      <div className="flex items-start gap-4">
-        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-          {initials}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-3 mb-1">
-            <h3 className="font-semibold text-gray-900 truncate">{review.reviewer_name}</h3>
-            <span className="text-xs text-gray-400 flex-shrink-0">{date}</span>
+    <Card shadow="sm" className="hover:shadow-md transition-all duration-300">
+      <CardBody className="p-6">
+        <div className="flex items-start gap-4">
+          <div className="w-11 h-11 rounded-full bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+            {initials}
           </div>
-          <div className="flex items-center gap-3 mb-3">
-            <StarRating rating={review.rating} />
-            {review.verified && (
-              <a
-                href="https://www.trustpilot.com/review/retralabs.in"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-xs text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-medium hover:bg-emerald-100 transition-colors"
-              >
-                <ShieldCheck size={12} />
-                Verified on Trustpilot
-              </a>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-3 mb-1">
+              <h3 className="font-semibold text-gray-900 truncate">{review.reviewer_name}</h3>
+              <span className="text-xs text-gray-400 flex-shrink-0">{date}</span>
+            </div>
+            <div className="flex items-center gap-3 mb-3">
+              <StarRating rating={review.rating} />
+              {review.verified && (
+                <Chip
+                  size="sm"
+                  color="success"
+                  variant="flat"
+                  startContent={<ShieldCheck size={12} />}
+                  as="a"
+                  href="https://www.trustpilot.com/review/retralabs.in"
+                  className="cursor-pointer"
+                >
+                  Verified on Trustpilot
+                </Chip>
+              )}
+            </div>
+            {review.title && (
+              <h4 className="font-semibold text-gray-800 mb-2 text-[15px]">{review.title}</h4>
+            )}
+            <p className="text-gray-600 text-sm leading-relaxed">{review.body}</p>
+            {review.product_name && (
+              <Chip size="sm" color="secondary" variant="flat" className="mt-3">
+                {review.product_name}
+              </Chip>
             )}
           </div>
-          {review.title && (
-            <h4 className="font-semibold text-gray-800 mb-2 text-[15px]">{review.title}</h4>
-          )}
-          <p className="text-gray-600 text-sm leading-relaxed">{review.body}</p>
-          {review.product_name && (
-            <span className="inline-block mt-3 text-xs text-teal-700 bg-teal-50 px-2.5 py-1 rounded-full font-medium">
-              {review.product_name}
-            </span>
-          )}
         </div>
-      </div>
-    </div>
+      </CardBody>
+    </Card>
   );
 }
 
@@ -104,26 +109,28 @@ const redditReviews = [
 
 function RedditReviewCard({ review }: { review: typeof redditReviews[0] }) {
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all duration-300">
-      <div className="flex items-start gap-4">
-        <div className={`w-11 h-11 rounded-full bg-gradient-to-br ${review.gradient} flex items-center justify-center text-white font-bold text-sm flex-shrink-0`}>
-          {review.initial}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-3 mb-1">
-            <h3 className="font-semibold text-gray-900">{review.username}</h3>
-            <span className="text-xs text-gray-400 flex-shrink-0">{review.time}</span>
+    <Card shadow="sm" className="hover:shadow-md transition-all duration-300">
+      <CardBody className="p-6">
+        <div className="flex items-start gap-4">
+          <div className={`w-11 h-11 rounded-full bg-gradient-to-br ${review.gradient} flex items-center justify-center text-white font-bold text-sm flex-shrink-0`}>
+            {review.initial}
           </div>
-          <div className="flex gap-0.5 mb-3">
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} size={16} className="fill-yellow-400 text-yellow-400" />
-            ))}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-3 mb-1">
+              <h3 className="font-semibold text-gray-900">{review.username}</h3>
+              <span className="text-xs text-gray-400 flex-shrink-0">{review.time}</span>
+            </div>
+            <div className="flex gap-0.5 mb-3">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} size={16} className="fill-yellow-400 text-yellow-400" />
+              ))}
+            </div>
+            <h4 className="font-semibold text-gray-800 mb-2 text-[15px]">{review.title}</h4>
+            <p className="text-gray-600 text-sm leading-relaxed">{review.body}</p>
           </div>
-          <h4 className="font-semibold text-gray-800 mb-2 text-[15px]">{review.title}</h4>
-          <p className="text-gray-600 text-sm leading-relaxed">{review.body}</p>
         </div>
-      </div>
-    </div>
+      </CardBody>
+    </Card>
   );
 }
 
@@ -161,48 +168,56 @@ export default function ReviewsPage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
-          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm text-center">
-            <div className="text-3xl font-bold text-gray-900 mb-1">{avgRating}</div>
-            <div className="flex justify-center mb-2">
-              <StarRating rating={Math.round(Number(avgRating))} />
-            </div>
-            <p className="text-sm text-gray-500">Average Rating</p>
-          </div>
-          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm text-center">
-            <div className="text-3xl font-bold text-gray-900 mb-1">{reviews.length + redditReviews.length}</div>
-            <div className="flex justify-center mb-2">
-              <Quote size={20} className="text-teal-500" />
-            </div>
-            <p className="text-sm text-gray-500">Total Reviews</p>
-          </div>
-          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm text-center">
-            <div className="text-3xl font-bold text-gray-900 mb-1">100%</div>
-            <div className="flex justify-center mb-2">
-              <ShieldCheck size={20} className="text-emerald-500" />
-            </div>
-            <p className="text-sm text-gray-500">Verified Purchases</p>
-          </div>
+          <Card shadow="sm">
+            <CardBody className="p-6 text-center">
+              <div className="text-3xl font-bold text-gray-900 mb-1">{avgRating}</div>
+              <div className="flex justify-center mb-2">
+                <StarRating rating={Math.round(Number(avgRating))} />
+              </div>
+              <p className="text-sm text-gray-500">Average Rating</p>
+            </CardBody>
+          </Card>
+          <Card shadow="sm">
+            <CardBody className="p-6 text-center">
+              <div className="text-3xl font-bold text-gray-900 mb-1">{reviews.length + redditReviews.length}</div>
+              <div className="flex justify-center mb-2">
+                <Quote size={20} className="text-teal-500" />
+              </div>
+              <p className="text-sm text-gray-500">Total Reviews</p>
+            </CardBody>
+          </Card>
+          <Card shadow="sm">
+            <CardBody className="p-6 text-center">
+              <div className="text-3xl font-bold text-gray-900 mb-1">100%</div>
+              <div className="flex justify-center mb-2">
+                <ShieldCheck size={20} className="text-emerald-500" />
+              </div>
+              <p className="text-sm text-gray-500">Verified Purchases</p>
+            </CardBody>
+          </Card>
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-3 mb-10">
-          <a
+          <Button
+            as="a"
             href="https://www.trustpilot.com/review/retralabs.in"
             target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 transition-colors"
+            color="success"
+            endContent={<ExternalLink size={14} />}
+            className="font-semibold"
           >
             Write a Review on Trustpilot
-            <ExternalLink size={14} />
-          </a>
-          <a
+          </Button>
+          <Button
+            as="a"
             href="https://www.reddit.com/r/retralabs/"
             target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-orange-600 text-white text-sm font-semibold rounded-lg hover:bg-orange-700 transition-colors"
+            color="warning"
+            endContent={<ExternalLink size={14} />}
+            className="font-semibold bg-orange-600"
           >
             Share on Reddit
-            <ExternalLink size={14} />
-          </a>
+          </Button>
         </div>
 
         <div className="mb-14">
@@ -211,17 +226,20 @@ export default function ReviewsPage() {
               <ShieldCheck size={20} className="text-emerald-600" />
               <h2 className="text-xl font-bold text-gray-900">Trustpilot Reviews</h2>
             </div>
-            <a
+            <Button
+              as="a"
               href="https://www.trustpilot.com/review/retralabs.in"
               target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+              variant="light"
+              size="sm"
+              className="text-gray-500"
             >
               View on Trustpilot
-            </a>
+            </Button>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm mb-6">
+          <Card shadow="sm" className="mb-6">
+            <CardBody className="p-6">
             <div className="flex flex-col sm:flex-row items-center gap-4">
               <div className="flex items-center gap-3">
                 <span className="text-4xl font-bold text-gray-900">
@@ -237,22 +255,25 @@ export default function ReviewsPage() {
                 Rated <span className="font-semibold">Excellent</span> on Trustpilot
               </p>
             </div>
-          </div>
+          </CardBody>
+          </Card>
 
           {loading ? (
             <div className="space-y-4">
               {[1, 2].map((i) => (
-                <div key={i} className="bg-white rounded-2xl p-6 border border-gray-100 animate-pulse">
-                  <div className="flex gap-4">
-                    <div className="w-11 h-11 rounded-full bg-gray-200" />
-                    <div className="flex-1 space-y-3">
-                      <div className="h-4 bg-gray-200 rounded w-1/4" />
-                      <div className="h-3 bg-gray-200 rounded w-1/3" />
-                      <div className="h-3 bg-gray-200 rounded w-full" />
-                      <div className="h-3 bg-gray-200 rounded w-5/6" />
+                <Card key={i} shadow="sm">
+                  <CardBody className="p-6">
+                    <div className="flex gap-4">
+                      <Skeleton className="w-11 h-11 rounded-full" />
+                      <div className="flex-1 space-y-3">
+                        <Skeleton className="h-4 w-1/4 rounded-lg" />
+                        <Skeleton className="h-3 w-1/3 rounded-lg" />
+                        <Skeleton className="h-3 w-full rounded-lg" />
+                        <Skeleton className="h-3 w-5/6 rounded-lg" />
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  </CardBody>
+                </Card>
               ))}
             </div>
           ) : (
@@ -275,15 +296,17 @@ export default function ReviewsPage() {
             ))}
           </div>
           <div className="text-center mt-6">
-            <a
+            <Button
+              as="a"
               href="https://www.reddit.com/r/retralabs/"
               target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-orange-600 hover:text-orange-700 font-semibold text-sm transition-colors"
+              variant="light"
+              color="warning"
+              endContent={<ExternalLink size={14} />}
+              className="font-semibold text-orange-600"
             >
               Read more on r/retralabs
-              <ExternalLink size={14} />
-            </a>
+            </Button>
           </div>
         </div>
       </section>

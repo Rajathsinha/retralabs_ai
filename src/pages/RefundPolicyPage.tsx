@@ -1,3 +1,5 @@
+import { Card, CardBody } from '@heroui/react';
+
 export default function RefundPolicyPage() {
   return (
     <div className="min-h-screen bg-gray-50">
@@ -5,7 +7,8 @@ export default function RefundPolicyPage() {
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Refund & Cancellation Policy</h1>
         <p className="text-gray-600 mb-8">Last Updated: February 1, 2026</p>
 
-        <div className="bg-white rounded-xl shadow-sm p-8 space-y-8">
+        <Card shadow="sm">
+          <CardBody className="p-8 space-y-8">
           <section>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Overview</h2>
             <p className="text-gray-700 leading-relaxed">
@@ -186,7 +189,8 @@ export default function RefundPolicyPage() {
               </p>
             </div>
           </section>
-        </div>
+          </CardBody>
+        </Card>
       </div>
     </div>
   );

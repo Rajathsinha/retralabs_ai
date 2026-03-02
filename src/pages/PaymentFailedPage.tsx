@@ -1,4 +1,5 @@
 import { X } from 'lucide-react';
+import { Button } from '@heroui/react';
 
 interface PaymentFailedPageProps {
   onNavigate: (page: string) => void;
@@ -19,18 +20,12 @@ export default function PaymentFailedPage({ onNavigate }: PaymentFailedPageProps
           If you continue to experience issues, please contact our support team.
         </p>
         <div className="flex gap-4 justify-center">
-          <button
-            onClick={() => onNavigate('checkout')}
-            className="px-6 py-3 bg-blue-700 text-white font-medium hover:bg-blue-800 transition-colors"
-          >
+          <Button color="primary" onPress={() => onNavigate('checkout')} className="font-medium">
             Try Again
-          </button>
-          <button
-            onClick={() => onNavigate('home')}
-            className="px-6 py-3 border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
-          >
+          </Button>
+          <Button variant="bordered" onPress={() => onNavigate('home')} className="font-medium">
             Return to Home
-          </button>
+          </Button>
         </div>
       </div>
     </div>

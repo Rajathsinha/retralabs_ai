@@ -1,6 +1,12 @@
+import { heroui } from "@heroui/react";
+
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  content: [
+    './index.html',
+    './src/**/*.{js,ts,jsx,tsx}',
+    './node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}',
+  ],
   theme: {
     extend: {
       fontFamily: {
@@ -106,5 +112,55 @@ export default {
       },
     },
   },
-  plugins: [],
+  darkMode: "class",
+  plugins: [
+    heroui({
+      themes: {
+        light: {
+          colors: {
+            primary: {
+              50: '#eef8ff',
+              100: '#d8eeff',
+              200: '#b9e0ff',
+              300: '#89cfff',
+              400: '#52b4ff',
+              500: '#2a91ff',
+              600: '#1170f5',
+              700: '#0c5ae1',
+              800: '#1049b6',
+              900: '#14408f',
+              DEFAULT: '#1170f5',
+              foreground: '#ffffff',
+            },
+            secondary: {
+              50: '#ecfeff',
+              100: '#cffafe',
+              200: '#a5f3fc',
+              300: '#67e8f9',
+              400: '#22d3ee',
+              500: '#06b6d4',
+              600: '#0891b2',
+              700: '#0e7490',
+              800: '#155e75',
+              900: '#164e63',
+              DEFAULT: '#06b6d4',
+              foreground: '#ffffff',
+            },
+            success: {
+              DEFAULT: '#10b981',
+              foreground: '#ffffff',
+            },
+            warning: {
+              DEFAULT: '#f59e0b',
+              foreground: '#ffffff',
+            },
+            danger: {
+              DEFAULT: '#ef4444',
+              foreground: '#ffffff',
+            },
+          },
+        },
+      },
+    }),
+  ],
 };

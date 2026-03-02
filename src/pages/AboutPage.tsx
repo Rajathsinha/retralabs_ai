@@ -1,10 +1,13 @@
+import { Card, CardBody } from '@heroui/react';
+
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-8">About Us</h1>
 
-        <div className="bg-white rounded-xl shadow-sm p-8 space-y-6">
+        <Card shadow="sm">
+          <CardBody className="p-8 space-y-6">
           <section>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Who We Are</h2>
             <p className="text-gray-700 leading-relaxed">
@@ -45,7 +48,8 @@ export default function AboutPage() {
               standards for research-grade materials.
             </p>
           </section>
-        </div>
+          </CardBody>
+        </Card>
       </div>
     </div>
   );

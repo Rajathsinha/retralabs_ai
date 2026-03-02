@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Search, Package, Truck, CheckCircle, Clock, XCircle, MapPin, MessageSquare } from 'lucide-react';
+import { Search, Package, Truck, CheckCircle, MapPin, MessageSquare } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { getProductImageUrl, BAC_WATER_IMAGE_URL } from '../utils/imageUrl';
+import { Button, Card, CardBody, Input, Chip } from '@heroui/react';
 
 interface OrderTrackingPageProps {
   onNavigate: (page: string) => void;
@@ -103,25 +104,6 @@ export default function OrderTrackingPage({ onNavigate }: OrderTrackingPageProps
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return <Clock className="w-6 h-6 text-gray-400" />;
-      case 'paid':
-        return <CheckCircle className="w-6 h-6 text-blue-500" />;
-      case 'processing':
-        return <Package className="w-6 h-6 text-yellow-500" />;
-      case 'shipped':
-        return <Truck className="w-6 h-6 text-blue-600" />;
-      case 'delivered':
-        return <CheckCircle className="w-6 h-6 text-green-600" />;
-      case 'cancelled':
-        return <XCircle className="w-6 h-6 text-red-500" />;
-      default:
-        return <Clock className="w-6 h-6 text-gray-400" />;
-    }
-  };
-
   const getStatusText = (status: string) => {
     switch (status) {
       case 'pending':
@@ -188,60 +170,54 @@ export default function OrderTrackingPage({ onNavigate }: OrderTrackingPageProps
 
           <form onSubmit={trackOrder} className="max-w-2xl">
             <div className="grid md:grid-cols-2 gap-4 mb-4">
-              <div>
-                <label htmlFor="orderId" className="block text-sm font-medium text-gray-700 mb-2">
-                  Order ID
-                </label>
-                <input
-                  type="text"
-                  id="orderId"
-                  value={orderId}
-                  onChange={(e) => setOrderId(e.target.value)}
-                  placeholder="Enter your order ID"
-                  className="w-full px-4 py-3 border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  className="w-full px-4 py-3 border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
+              <Input
+                type="text"
+                label="Order ID"
+                value={orderId}
+                onValueChange={setOrderId}
+                placeholder="Enter your order ID"
+                variant="bordered"
+                isRequired
+              />
+              <Input
+                type="email"
+                label="Email Address"
+                value={email}
+                onValueChange={setEmail}
+                placeholder="Enter your email"
+                variant="bordered"
+                isRequired
+              />
             </div>
 
             {error && (
               <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-sm">
                 <p className="text-red-700 mb-2">{error}</p>
                 <p className="text-red-600 mb-3">Please contact Support for assistance.</p>
-                <a
+                <Button
+                  as="a"
                   href="https://wa.me/918217824384?text=Hello%2C%20I%20need%20help%20tracking%20my%20order%20on%20RetraLabs"
                   target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-lg transition-colors"
+                  color="success"
+                  size="sm"
+                  startContent={<MessageSquare className="w-4 h-4" />}
+                  className="font-semibold"
                 >
-                  <MessageSquare className="w-4 h-4" />
                   Chat on WhatsApp
-                </a>
+                </Button>
               </div>
             )}
 
-            <button
+            <Button
               type="submit"
-              disabled={loading}
-              className="w-full md:w-auto px-8 py-3 bg-blue-700 text-white font-medium hover:bg-blue-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+              color="primary"
+              isDisabled={loading}
+              isLoading={loading}
+              startContent={!loading && <Search className="w-5 h-5" />}
+              className="font-medium"
             >
-              <Search className="w-5 h-5" />
               {loading ? 'Tracking...' : 'Track Order'}
-            </button>
+            </Button>
           </form>
         </div>
       </div>
@@ -262,9 +238,9 @@ export default function OrderTrackingPage({ onNavigate }: OrderTrackingPageProps
                       })}
                     </p>
                   </div>
-                  <span className={`px-4 py-2 text-sm font-medium ${getStatusColor(orderDetails.order_status)}`}>
+                  <Chip variant="flat" className={getStatusColor(orderDetails.order_status)}>
                     {getStatusText(orderDetails.order_status)}
-                  </span>
+                  </Chip>
                 </div>
 
                 {orderDetails.order_status !== 'cancelled' && orderDetails.order_status !== 'pending' && (
@@ -318,7 +294,8 @@ export default function OrderTrackingPage({ onNavigate }: OrderTrackingPageProps
                 )}
               </div>
 
-              <div className="bg-white shadow-sm border border-gray-200 p-6">
+              <Card shadow="sm">
+                <CardBody className="p-6">
                 <h2 className="text-lg font-medium text-gray-900 mb-4">Order Items</h2>
                 <div className="space-y-4">
                   {orderDetails.order_items.map((item, index) => (
@@ -362,11 +339,13 @@ export default function OrderTrackingPage({ onNavigate }: OrderTrackingPageProps
                     ₹{orderDetails.total_amount.toLocaleString('en-IN')}
                   </span>
                 </div>
-              </div>
+                </CardBody>
+              </Card>
             </div>
 
             <div className="space-y-6">
-              <div className="bg-white shadow-sm border border-gray-200 p-6">
+              <Card shadow="sm">
+                <CardBody className="p-6">
                 <h2 className="text-lg font-medium text-gray-900 mb-4">Customer Details</h2>
                 <div className="space-y-3 text-sm">
                   <div>
@@ -382,27 +361,34 @@ export default function OrderTrackingPage({ onNavigate }: OrderTrackingPageProps
                     <span className="text-gray-900 font-medium">{orderDetails.customer_phone}</span>
                   </div>
                 </div>
-              </div>
+                </CardBody>
+              </Card>
 
-              <div className="bg-white shadow-sm border border-gray-200 p-6">
-                <h2 className="text-lg font-medium text-gray-900 mb-4">Shipping Address</h2>
-                <p className="text-sm text-gray-700 whitespace-pre-line">
-                  {orderDetails.shipping_address}
-                </p>
-              </div>
+              <Card shadow="sm">
+                <CardBody className="p-6">
+                  <h2 className="text-lg font-medium text-gray-900 mb-4">Shipping Address</h2>
+                  <p className="text-sm text-gray-700 whitespace-pre-line">
+                    {orderDetails.shipping_address}
+                  </p>
+                </CardBody>
+              </Card>
 
-              <div className="bg-white shadow-sm border border-gray-200 p-6">
-                <h2 className="text-lg font-medium text-gray-900 mb-4">Need Help?</h2>
-                <p className="text-sm text-gray-600 mb-4">
-                  Contact our support team for assistance with your order.
-                </p>
-                <button
-                  onClick={() => onNavigate('support')}
-                  className="w-full px-4 py-2 border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
-                >
-                  Contact Support
-                </button>
-              </div>
+              <Card shadow="sm">
+                <CardBody className="p-6">
+                  <h2 className="text-lg font-medium text-gray-900 mb-4">Need Help?</h2>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Contact our support team for assistance with your order.
+                  </p>
+                  <Button
+                    fullWidth
+                    variant="bordered"
+                    onPress={() => onNavigate('support')}
+                    className="font-medium"
+                  >
+                    Contact Support
+                  </Button>
+                </CardBody>
+              </Card>
             </div>
           </div>
         </div>
