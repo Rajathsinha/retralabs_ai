@@ -1,4 +1,5 @@
 import { FlaskConical, ShieldCheck, PackageCheck, Globe, BadgeCheck, IndianRupee, Sparkles, ArrowRight, Beaker, Truck, Award } from 'lucide-react';
+import { Button, Card, CardBody, Chip } from '@heroui/react';
 import ScrollReveal from '../components/ScrollReveal';
 
 interface HomePageProps {
@@ -11,16 +12,20 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       <section className="relative overflow-hidden bg-slate-950">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-dot-pattern bg-dot-sm opacity-[0.04]" />
-          <div className="absolute top-1/4 -left-32 w-96 h-96 bg-accent-500/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl" />
+          <div className="absolute top-1/4 -left-32 w-96 h-96 bg-secondary/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 relative">
           <div className="text-center max-w-4xl mx-auto">
-            <div className="inline-flex items-center gap-2 mb-8 px-5 py-2.5 bg-white/5 text-accent-300 text-sm font-medium rounded-full border border-white/10 backdrop-blur-sm animate-fade-in-down">
-              <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+            <Chip
+              variant="bordered"
+              color="secondary"
+              startContent={<div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />}
+              className="mb-8 px-4 py-2 border-white/10 bg-white/5 text-secondary-300 animate-fade-in-down"
+            >
               Research-Grade Peptides
-            </div>
+            </Chip>
 
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight leading-[1.1] animate-fade-in-up">
               India's Only Trusted Reseller for{' '}
@@ -34,7 +39,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             <div className="flex flex-wrap items-center justify-center gap-6 mb-12 animate-fade-in-up" style={{ animationDelay: '250ms' }}>
               {[
                 { icon: BadgeCheck, label: '100% Genuine', color: 'text-emerald-400' },
-                { icon: Sparkles, label: '99%+ Purity', color: 'text-accent-400' },
+                { icon: Sparkles, label: '99%+ Purity', color: 'text-secondary-400' },
                 { icon: IndianRupee, label: 'Fair Pricing', color: 'text-amber-400' },
               ].map((item) => (
                 <div key={item.label} className="flex items-center gap-2.5 text-sm font-medium text-slate-300">
@@ -47,19 +52,23 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up" style={{ animationDelay: '350ms' }}>
-              <button
-                onClick={() => onNavigate('catalogue')}
-                className="group px-8 py-4 bg-white text-slate-900 font-semibold rounded-xl hover:bg-slate-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
+              <Button
+                color="default"
+                size="lg"
+                onPress={() => onNavigate('catalogue')}
+                endContent={<ArrowRight className="w-4 h-4" />}
+                className="bg-white text-slate-900 font-semibold shadow-lg hover:shadow-xl px-8"
               >
                 View Catalogue
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </button>
-              <button
-                onClick={() => onNavigate('support')}
-                className="px-8 py-4 bg-white/5 border border-white/10 text-white font-semibold rounded-xl hover:bg-white/10 transition-all duration-300 backdrop-blur-sm"
+              </Button>
+              <Button
+                variant="bordered"
+                size="lg"
+                onPress={() => onNavigate('support')}
+                className="border-white/10 text-white font-semibold bg-white/5 backdrop-blur-sm px-8"
               >
                 Contact Support
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -71,9 +80,9 @@ export default function HomePage({ onNavigate }: HomePageProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal>
             <div className="text-center mb-16">
-              <span className="inline-block px-4 py-2 bg-slate-100 text-slate-600 text-xs font-bold rounded-full uppercase tracking-wider mb-4">
+              <Chip variant="flat" color="default" className="mb-4 uppercase tracking-wider text-xs font-bold">
                 Why RetraLabs
-              </span>
+              </Chip>
               <h2 className="section-heading">Built on Trust & Quality</h2>
             </div>
           </ScrollReveal>
@@ -106,13 +115,15 @@ export default function HomePage({ onNavigate }: HomePageProps) {
               },
             ].map((item, i) => (
               <ScrollReveal key={item.title} delay={i * 120}>
-                <div className={`group p-8 rounded-2xl bg-gradient-to-br ${item.gradient} border border-slate-200/50 card-hover`}>
-                  <div className={`w-14 h-14 ${item.iconBg} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                    <item.icon className={`w-7 h-7 ${item.iconColor}`} />
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-3">{item.title}</h3>
-                  <p className="text-slate-600 leading-relaxed">{item.desc}</p>
-                </div>
+                <Card shadow="none" classNames={{ base: `bg-gradient-to-br ${item.gradient} border border-slate-200/50` }} className="card-hover">
+                  <CardBody className="p-8">
+                    <div className={`w-14 h-14 ${item.iconBg} rounded-2xl flex items-center justify-center mb-6`}>
+                      <item.icon className={`w-7 h-7 ${item.iconColor}`} />
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-900 mb-3">{item.title}</h3>
+                    <p className="text-slate-600 leading-relaxed">{item.desc}</p>
+                  </CardBody>
+                </Card>
               </ScrollReveal>
             ))}
           </div>
@@ -122,14 +133,15 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       <section className="py-20 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal>
-            <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-3xl p-10 md:p-16 text-white shadow-2xl relative overflow-hidden">
+            <Card shadow="lg" classNames={{ base: 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white overflow-hidden rounded-3xl' }}>
+              <CardBody className="p-10 md:p-16 relative">
               <div className="absolute inset-0 bg-dot-pattern bg-dot-sm opacity-[0.03]" />
-              <div className="absolute top-0 right-0 w-72 h-72 bg-accent-500/10 rounded-full blur-3xl" />
+              <div className="absolute top-0 right-0 w-72 h-72 bg-secondary/10 rounded-full blur-3xl" />
 
               <div className="relative">
                 <div className="flex items-center justify-center mb-8">
                   <div className="p-4 bg-white/10 rounded-2xl backdrop-blur-sm">
-                    <Globe className="w-10 h-10 text-accent-400" />
+                    <Globe className="w-10 h-10 text-secondary-400" />
                   </div>
                 </div>
                 <h2 className="text-3xl md:text-4xl font-bold text-center mb-6">
@@ -140,13 +152,14 @@ export default function HomePage({ onNavigate }: HomePageProps) {
                 </p>
                 <div className="flex flex-wrap justify-center gap-4">
                   {['Verified China Reseller', 'Transparent Sourcing', 'COA Available'].map((tag) => (
-                    <span key={tag} className="px-5 py-2.5 bg-white/5 text-accent-300 rounded-full text-sm font-medium border border-white/10">
+                    <Chip key={tag} variant="bordered" color="secondary" className="border-white/10 bg-white/5 text-secondary-300">
                       {tag}
-                    </span>
+                    </Chip>
                   ))}
                 </div>
               </div>
-            </div>
+              </CardBody>
+            </Card>
           </ScrollReveal>
         </div>
       </section>
@@ -155,9 +168,9 @@ export default function HomePage({ onNavigate }: HomePageProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal>
             <div className="text-center mb-16">
-              <span className="inline-block px-4 py-2 bg-slate-100 text-slate-600 text-xs font-bold rounded-full uppercase tracking-wider mb-4">
+              <Chip variant="flat" color="default" className="mb-4 uppercase tracking-wider text-xs font-bold">
                 Our Process
-              </span>
+              </Chip>
               <h2 className="section-heading">How It Works</h2>
             </div>
           </ScrollReveal>
@@ -175,9 +188,9 @@ export default function HomePage({ onNavigate }: HomePageProps) {
                     <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center group-hover:bg-slate-200 transition-colors duration-300">
                       <item.icon className="w-7 h-7 text-slate-700" />
                     </div>
-                    <span className="absolute -top-2 -right-2 w-7 h-7 bg-slate-900 text-white text-xs font-bold rounded-lg flex items-center justify-center">
+                    <Chip size="sm" variant="solid" classNames={{ base: 'absolute -top-2 -right-2 bg-slate-900 text-white min-w-7 h-7' }}>
                       {item.step}
-                    </span>
+                    </Chip>
                   </div>
                   <h3 className="text-lg font-bold text-slate-900 mb-2">{item.title}</h3>
                   <p className="text-sm text-slate-600 leading-relaxed">{item.desc}</p>
@@ -191,17 +204,19 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       <section className="py-20 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal>
-            <div className="max-w-3xl mx-auto bg-white rounded-2xl p-10 border border-slate-200 shadow-sm">
-              <h2 className="text-3xl font-bold text-slate-900 mb-6 text-center">
-                Research Use Only
-              </h2>
-              <p className="text-slate-600 leading-relaxed text-center text-lg">
-                All products are intended solely for in vitro research and analytical applications.
-                These materials are not approved for human or veterinary use. Purchasers must
-                be affiliated with recognized research institutions or laboratories and comply
-                with all applicable regulations.
-              </p>
-            </div>
+            <Card shadow="sm" className="max-w-3xl mx-auto">
+              <CardBody className="p-10 text-center">
+                <h2 className="text-3xl font-bold text-slate-900 mb-6">
+                  Research Use Only
+                </h2>
+                <p className="text-slate-600 leading-relaxed text-lg">
+                  All products are intended solely for in vitro research and analytical applications.
+                  These materials are not approved for human or veterinary use. Purchasers must
+                  be affiliated with recognized research institutions or laboratories and comply
+                  with all applicable regulations.
+                </p>
+              </CardBody>
+            </Card>
           </ScrollReveal>
         </div>
       </section>

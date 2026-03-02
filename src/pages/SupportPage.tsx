@@ -1,4 +1,5 @@
 import { Mail, HelpCircle, Package, Thermometer, MessageSquare, Clock } from 'lucide-react';
+import { Card, CardBody, Accordion, AccordionItem, Link } from '@heroui/react';
 
 export default function SupportPage() {
   const faqs = [
@@ -43,65 +44,70 @@ export default function SupportPage() {
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-          <div className="border border-gray-200 p-6 hover:border-blue-300 transition-colors">
-            <Mail className="w-8 h-8 text-blue-700 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Email Support</h3>
-            <p className="text-gray-600 mb-4">
-              Our team typically responds within 24 hours.
-            </p>
-            <a
-              href="mailto:support@retralabs.in"
-              className="text-blue-700 hover:text-blue-800 font-medium"
-            >
-              support@retralabs.in
-            </a>
-          </div>
-
-          <div className="border border-gray-200 p-6 hover:border-green-300 transition-colors bg-gradient-to-br from-green-50 to-white">
-            <MessageSquare className="w-8 h-8 text-green-600 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">WhatsApp Support</h3>
-            <div className="flex items-center gap-2 mb-3">
-              <Clock className="w-4 h-4 text-green-600" />
-              <p className="text-sm font-semibold text-green-700">
-                9AM-6PM • SLA: 1 Hour
+          <Card shadow="sm" className="hover:shadow-md transition-shadow">
+            <CardBody className="p-6">
+              <Mail className="w-8 h-8 text-blue-700 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Email Support</h3>
+              <p className="text-gray-600 mb-4">
+                Our team typically responds within 24 hours.
               </p>
-            </div>
-            <p className="text-xs text-gray-600 mb-3">
-              Outside hours: Response depends on agent availability
-            </p>
-            <a
-              href="https://wa.me/918217824384?text=Hello%2C%20I%20need%20support%20with%20RetraLabs"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-green-600 hover:text-green-700 font-bold inline-flex items-center gap-1"
-            >
-              +91 8217824384
-            </a>
-          </div>
+              <Link href="mailto:support@retralabs.in" color="primary" className="font-medium">
+                support@retralabs.in
+              </Link>
+            </CardBody>
+          </Card>
 
-          <div className="border border-gray-200 p-6 hover:border-blue-300 transition-colors">
-            <Package className="w-8 h-8 text-blue-700 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Order Status</h3>
-            <p className="text-gray-600 mb-4">
-              Track your order or inquire about delivery.
-            </p>
-            <p className="text-sm text-gray-500">
-              Email us with your order number for updates.
-            </p>
-          </div>
+          <Card shadow="sm" classNames={{ base: 'bg-gradient-to-br from-green-50 to-white hover:shadow-md transition-shadow' }}>
+            <CardBody className="p-6">
+              <MessageSquare className="w-8 h-8 text-green-600 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">WhatsApp Support</h3>
+              <div className="flex items-center gap-2 mb-3">
+                <Clock className="w-4 h-4 text-green-600" />
+                <p className="text-sm font-semibold text-green-700">
+                  9AM-6PM • SLA: 1 Hour
+                </p>
+              </div>
+              <p className="text-xs text-gray-600 mb-3">
+                Outside hours: Response depends on agent availability
+              </p>
+              <Link
+                href="https://wa.me/918217824384?text=Hello%2C%20I%20need%20support%20with%20RetraLabs"
+                isExternal
+                color="success"
+                className="font-bold"
+              >
+                +91 8217824384
+              </Link>
+            </CardBody>
+          </Card>
 
-          <div className="border border-gray-200 p-6 hover:border-blue-300 transition-colors">
-            <Thermometer className="w-8 h-8 text-blue-700 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Technical Support
-            </h3>
-            <p className="text-gray-600 mb-4">
-              Questions about storage, handling, or protocols.
-            </p>
-            <p className="text-sm text-gray-500">
-              Contact our scientific team for assistance.
-            </p>
-          </div>
+          <Card shadow="sm" className="hover:shadow-md transition-shadow">
+            <CardBody className="p-6">
+              <Package className="w-8 h-8 text-blue-700 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Order Status</h3>
+              <p className="text-gray-600 mb-4">
+                Track your order or inquire about delivery.
+              </p>
+              <p className="text-sm text-gray-500">
+                Email us with your order number for updates.
+              </p>
+            </CardBody>
+          </Card>
+
+          <Card shadow="sm" className="hover:shadow-md transition-shadow">
+            <CardBody className="p-6">
+              <Thermometer className="w-8 h-8 text-blue-700 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Technical Support
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Questions about storage, handling, or protocols.
+              </p>
+              <p className="text-sm text-gray-500">
+                Contact our scientific team for assistance.
+              </p>
+            </CardBody>
+          </Card>
         </div>
 
         <div className="max-w-4xl">
@@ -112,33 +118,36 @@ export default function SupportPage() {
             </h2>
           </div>
 
-          <div className="space-y-6">
+          <Accordion variant="bordered">
             {faqs.map((faq, index) => (
-              <div key={index} className="border-b border-gray-200 pb-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-3">
-                  {faq.question}
-                </h3>
-                <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
-              </div>
+              <AccordionItem
+                key={index}
+                title={faq.question}
+                classNames={{ title: 'text-lg font-medium text-gray-900' }}
+              >
+                <p className="text-gray-600 leading-relaxed pb-2">{faq.answer}</p>
+              </AccordionItem>
             ))}
-          </div>
+          </Accordion>
         </div>
 
-        <div className="mt-16 p-8 bg-blue-50 border border-blue-100">
-          <h3 className="text-xl font-medium text-gray-900 mb-3">
-            Research Use Disclaimer
-          </h3>
-          <p className="text-gray-700 leading-relaxed">
-            All products sold by RetraLabs are intended solely for in vitro research
-            and analytical purposes. These materials are not approved for human or
-            animal consumption, therapeutic applications, or any clinical use.
-            Purchasers must be affiliated with recognized research institutions or
-            laboratories and must comply with all applicable local, state, and federal
-            regulations. By purchasing these products, you acknowledge that you are a
-            qualified research professional and will use these materials in accordance
-            with proper laboratory safety protocols.
-          </p>
-        </div>
+        <Card shadow="none" classNames={{ base: 'mt-16 bg-blue-50 border border-blue-100' }}>
+          <CardBody className="p-8">
+            <h3 className="text-xl font-medium text-gray-900 mb-3">
+              Research Use Disclaimer
+            </h3>
+            <p className="text-gray-700 leading-relaxed">
+              All products sold by RetraLabs are intended solely for in vitro research
+              and analytical purposes. These materials are not approved for human or
+              animal consumption, therapeutic applications, or any clinical use.
+              Purchasers must be affiliated with recognized research institutions or
+              laboratories and must comply with all applicable local, state, and federal
+              regulations. By purchasing these products, you acknowledge that you are a
+              qualified research professional and will use these materials in accordance
+              with proper laboratory safety protocols.
+            </p>
+          </CardBody>
+        </Card>
       </section>
     </div>
   );

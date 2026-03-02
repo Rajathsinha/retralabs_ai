@@ -3,7 +3,8 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { getProductImageUrl, BAC_WATER_IMAGE_URL } from '../utils/imageUrl';
 import { ProductWithVariants, ProductVariant } from '../types';
 import { useCart } from '../context/CartContext';
-import { ChevronRight, Star, Check, Package, Truck, Shield, AlertTriangle, MapPin, Phone, Minus, Plus, ShoppingCart } from 'lucide-react';
+import { Star, Check, Package, Truck, Shield, AlertTriangle, MapPin, Phone, Minus, Plus, ShoppingCart } from 'lucide-react';
+import { Button, Card, CardBody, Chip, Spinner, Breadcrumbs, BreadcrumbItem } from '@heroui/react';
 
 interface ProductDetailPageProps {
   productId: string;
@@ -95,7 +96,7 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-slate-600 mb-4" />
+          <Spinner size="lg" color="primary" className="mb-4" />
           <p className="text-slate-500">Loading product...</p>
         </div>
       </div>
@@ -107,9 +108,9 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-slate-500 mb-4">Product not found</p>
-          <button onClick={() => onNavigate('catalogue')} className="text-brand-600 hover:text-brand-700 font-semibold">
+          <Button color="primary" variant="light" onPress={() => onNavigate('catalogue')}>
             Back to Catalogue
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -125,13 +126,11 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
     <div className="min-h-screen bg-slate-50 pb-24 lg:pb-0">
       <div className="bg-white border-b border-slate-200 py-3">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2 text-sm">
-            <button onClick={() => onNavigate('home')} className="text-slate-500 hover:text-slate-900 transition-colors">Home</button>
-            <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-            <button onClick={() => onNavigate('catalogue')} className="text-slate-500 hover:text-slate-900 transition-colors">Products</button>
-            <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-            <span className="text-slate-900 font-medium">{product.name}</span>
-          </div>
+          <Breadcrumbs size="sm">
+            <BreadcrumbItem onPress={() => onNavigate('home')}>Home</BreadcrumbItem>
+            <BreadcrumbItem onPress={() => onNavigate('catalogue')}>Products</BreadcrumbItem>
+            <BreadcrumbItem isCurrent>{product.name}</BreadcrumbItem>
+          </Breadcrumbs>
         </div>
       </div>
 
@@ -208,9 +207,9 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
           <div className="lg:col-span-3 space-y-6">
             <div>
               {product.category && (
-                <span className="inline-block mb-3 px-3 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-full uppercase tracking-wider">
+                <Chip variant="flat" color="default" size="sm" className="mb-3 uppercase tracking-wider text-xs font-bold">
                   {product.category}
-                </span>
+                </Chip>
               )}
               <h1 className="text-4xl lg:text-5xl font-bold text-slate-900 mb-4 tracking-tight">{product.name}</h1>
               <p className="text-lg text-slate-600 leading-relaxed">{product.description}</p>
@@ -226,14 +225,12 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
             </div>
 
             <div className="flex items-center gap-3">
-              <span className="px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-lg text-sm font-semibold text-emerald-700 flex items-center gap-1.5">
-                <div className="w-2 h-2 bg-emerald-500 rounded-full" />
+              <Chip color="success" variant="flat" size="sm" startContent={<div className="w-2 h-2 bg-emerald-500 rounded-full" />}>
                 In Stock
-              </span>
-              <span className="px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg text-sm font-semibold text-blue-700 flex items-center gap-1.5">
-                <Shield className="w-3.5 h-3.5" />
+              </Chip>
+              <Chip color="primary" variant="flat" size="sm" startContent={<Shield className="w-3.5 h-3.5" />}>
                 COA Verified
-              </span>
+              </Chip>
             </div>
 
             <div className="bg-white border border-slate-200 rounded-2xl p-6">
@@ -289,31 +286,38 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
               </div>
             </div>
 
-            <div className="bg-white border border-slate-200 rounded-2xl p-6">
+            <Card shadow="none" classNames={{ base: 'border border-slate-200' }}>
+              <CardBody className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold text-slate-900">Quantity</h3>
-                <span className="text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full">Per Kit</span>
+                <Chip size="sm" variant="flat">Per Kit</Chip>
               </div>
               <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  disabled={quantity <= 1}
-                  className="w-11 h-11 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 flex items-center justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                <Button
+                  isIconOnly
+                  variant="bordered"
+                  size="md"
+                  onPress={() => setQuantity(Math.max(1, quantity - 1))}
+                  isDisabled={quantity <= 1}
+                  className="rounded-xl"
                 >
                   <Minus className="w-4 h-4 text-slate-700" />
-                </button>
+                </Button>
                 <input
                   type="number"
                   value={quantity}
                   onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
                   className="w-20 h-11 text-center border border-slate-200 rounded-xl font-bold text-lg focus:outline-none focus:border-slate-400"
                 />
-                <button
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="w-11 h-11 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 flex items-center justify-center transition-all"
+                <Button
+                  isIconOnly
+                  variant="bordered"
+                  size="md"
+                  onPress={() => setQuantity(quantity + 1)}
+                  className="rounded-xl"
                 >
                   <Plus className="w-4 h-4 text-slate-700" />
-                </button>
+                </Button>
               </div>
 
               {quantity > 1 && !isBacWater && (
@@ -331,7 +335,8 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
                   <span className="text-sm text-amber-800">Add 1 more item to get <strong>20% OFF</strong></span>
                 </div>
               )}
-            </div>
+              </CardBody>
+            </Card>
 
             {!isBacWater && bacWater && (
               <div className="bg-white border border-slate-200 rounded-2xl p-6">
@@ -348,17 +353,16 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
                     <div className="font-bold text-slate-900">₹{bacWaterPrice.toLocaleString('en-IN')}</div>
                   </div>
                 </div>
-                <button
-                  onClick={() => setBundleAdded(!bundleAdded)}
-                  disabled={!selectedVariant}
-                  className={`w-full py-3 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
-                    bundleAdded
-                      ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
-                  }`}
+                <Button
+                  fullWidth
+                  color={bundleAdded ? 'success' : 'default'}
+                  variant={bundleAdded ? 'solid' : 'bordered'}
+                  isDisabled={!selectedVariant}
+                  onPress={() => setBundleAdded(!bundleAdded)}
+                  className="font-semibold text-sm"
                 >
                   {bundleAdded ? <><Check className="w-4 h-4" /> Bundle Added</> : 'Add to Bundle'}
-                </button>
+                </Button>
               </div>
             )}
 
@@ -431,14 +435,17 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
                 </div>
               </div>
 
-              <button
-                onClick={handleAddToCart}
-                disabled={!selectedVariant}
-                className="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl transition-all disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center gap-2.5 text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0"
+              <Button
+                fullWidth
+                color="primary"
+                size="lg"
+                isDisabled={!selectedVariant}
+                onPress={handleAddToCart}
+                startContent={<ShoppingCart className="w-5 h-5" />}
+                className="font-bold text-lg bg-slate-900 shadow-lg hover:shadow-xl"
               >
-                <ShoppingCart className="w-5 h-5" />
                 Order Now
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -458,14 +465,16 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
               <span className="text-xs text-emerald-600 font-semibold">{discountPercent}% OFF applied</span>
             )}
           </div>
-          <button
-            onClick={handleAddToCart}
-            disabled={!selectedVariant}
-            className="flex-1 py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl transition-all disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          <Button
+            color="primary"
+            size="lg"
+            isDisabled={!selectedVariant}
+            onPress={handleAddToCart}
+            startContent={<ShoppingCart className="w-5 h-5" />}
+            className="flex-1 font-bold bg-slate-900"
           >
-            <ShoppingCart className="w-5 h-5" />
             Order Now
-          </button>
+          </Button>
         </div>
       </div>
     </div>

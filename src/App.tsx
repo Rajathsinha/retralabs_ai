@@ -40,14 +40,14 @@ class ErrorBoundary extends Component<
     if (this.state.hasError) {
       return (
         <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-          <div className="max-w-md w-full bg-white rounded-2xl p-8 shadow-lg">
+          <div className="max-w-md w-full bg-white rounded-2xl p-8 shadow-lg border border-slate-200">
             <h1 className="text-2xl font-bold text-slate-900 mb-4">Something went wrong</h1>
-            <p className="text-slate-600 mb-4">
+            <p className="text-slate-600 mb-6">
               {this.state.error?.message || 'An unexpected error occurred'}
             </p>
             <button
               onClick={() => window.location.reload()}
-              className="w-full px-6 py-3 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 transition-colors"
+              className="w-full px-6 py-3 bg-primary text-white font-semibold rounded-xl hover:opacity-90 transition-opacity"
             >
               Reload Page
             </button>

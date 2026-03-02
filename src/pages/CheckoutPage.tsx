@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { OrderFormData } from '../types';
 import { Trash2, Check, MessageCircle, Tag, Minus, Plus, ShoppingBag } from 'lucide-react';
+import { Button, Card, CardBody, Input, Textarea, Checkbox, Chip } from '@heroui/react';
 
 interface CheckoutPageProps {
   onNavigate: (page: string) => void;
@@ -114,12 +115,8 @@ I would like to complete payment via UPI.`;
             <div>
               <h3 className="text-base font-bold text-emerald-900 mb-2">Volume Discounts</h3>
               <div className="flex flex-wrap gap-3">
-                <span className="px-3 py-1.5 bg-emerald-100 text-emerald-800 text-sm font-medium rounded-lg">
-                  2 items = 20% OFF
-                </span>
-                <span className="px-3 py-1.5 bg-emerald-100 text-emerald-800 text-sm font-medium rounded-lg">
-                  3+ items = 25% OFF
-                </span>
+                <Chip color="success" variant="flat">2 items = 20% OFF</Chip>
+                <Chip color="success" variant="flat">3+ items = 25% OFF</Chip>
               </div>
             </div>
           </div>
@@ -131,12 +128,9 @@ I would like to complete payment via UPI.`;
               <ShoppingBag className="w-10 h-10 text-slate-400" />
             </div>
             <p className="text-slate-600 mb-6 text-lg">Your cart is empty.</p>
-            <button
-              onClick={() => onNavigate('catalogue')}
-              className="btn-primary"
-            >
+            <Button color="primary" onPress={() => onNavigate('catalogue')}>
               Browse Catalogue
-            </button>
+            </Button>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -156,32 +150,24 @@ I would like to complete payment via UPI.`;
                     </div>
                     <div className="flex items-center gap-3 ml-4">
                       <div className="flex items-center gap-1.5">
-                        <button
-                          onClick={() => updateQuantity(item.variant.id, item.quantity - 1)}
-                          className="w-8 h-8 border border-slate-200 rounded-lg flex items-center justify-center hover:bg-slate-50 transition-colors"
-                        >
+                        <Button isIconOnly size="sm" variant="bordered" onPress={() => updateQuantity(item.variant.id, item.quantity - 1)}>
                           <Minus className="w-3.5 h-3.5 text-slate-600" />
-                        </button>
+                        </Button>
                         <span className="w-8 text-center text-sm font-semibold">{item.quantity}</span>
-                        <button
-                          onClick={() => updateQuantity(item.variant.id, item.quantity + 1)}
-                          className="w-8 h-8 border border-slate-200 rounded-lg flex items-center justify-center hover:bg-slate-50 transition-colors"
-                        >
+                        <Button isIconOnly size="sm" variant="bordered" onPress={() => updateQuantity(item.variant.id, item.quantity + 1)}>
                           <Plus className="w-3.5 h-3.5 text-slate-600" />
-                        </button>
+                        </Button>
                       </div>
-                      <button
-                        onClick={() => removeFromCart(item.variant.id)}
-                        className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                      >
+                      <Button isIconOnly size="sm" variant="light" color="danger" onPress={() => removeFromCart(item.variant.id)}>
                         <Trash2 className="w-4 h-4" />
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div className="mt-6 p-5 bg-white border border-slate-200 rounded-xl space-y-3">
+              <Card shadow="none" classNames={{ base: 'mt-6 border border-slate-200' }}>
+              <CardBody className="p-5 space-y-3">
                 <div className="flex justify-between items-center text-slate-600">
                   <span>Subtotal</span>
                   <span className="font-medium">₹{getSubtotal().toLocaleString('en-IN')}</span>
@@ -209,90 +195,78 @@ I would like to complete payment via UPI.`;
                     </span>
                   </div>
                 )}
-              </div>
+              </CardBody>
+              </Card>
             </div>
 
             <div>
               <h2 className="text-xl font-bold text-slate-900 mb-6">Shipping Information</h2>
               <form onSubmit={handleSubmit} className="space-y-5">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.customer_name}
-                    onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
-                    className="input-field"
-                    placeholder="Enter your full name"
-                  />
+                <Input
+                  type="text"
+                  label="Full Name"
+                  isRequired
+                  value={formData.customer_name}
+                  onValueChange={(val) => setFormData({ ...formData, customer_name: val })}
+                  variant="bordered"
+                  placeholder="Enter your full name"
+                />
+
+                <Input
+                  type="email"
+                  label="Email Address"
+                  isRequired
+                  value={formData.customer_email}
+                  onValueChange={(val) => setFormData({ ...formData, customer_email: val })}
+                  variant="bordered"
+                  placeholder="you@email.com"
+                />
+
+                <Input
+                  type="tel"
+                  label="Phone Number"
+                  isRequired
+                  value={formData.customer_phone}
+                  onValueChange={(val) => setFormData({ ...formData, customer_phone: val })}
+                  variant="bordered"
+                  placeholder="+91 XXXXX XXXXX"
+                />
+
+                <Textarea
+                  label="Shipping Address"
+                  isRequired
+                  minRows={4}
+                  value={formData.shipping_address}
+                  onValueChange={(val) => setFormData({ ...formData, shipping_address: val })}
+                  variant="bordered"
+                  placeholder="Full shipping address with PIN code"
+                />
+
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                  <Checkbox
+                    isSelected={formData.disclaimer_accepted}
+                    onValueChange={(val) => setFormData({ ...formData, disclaimer_accepted: val })}
+                    size="sm"
+                  >
+                    <span className="text-sm text-slate-600 leading-relaxed">
+                      I confirm that these products are being purchased for research purposes
+                      only, in accordance with applicable regulations and institutional guidelines.
+                    </span>
+                  </Checkbox>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={formData.customer_email}
-                    onChange={(e) => setFormData({ ...formData, customer_email: e.target.value })}
-                    className="input-field"
-                    placeholder="you@email.com"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    required
-                    value={formData.customer_phone}
-                    onChange={(e) => setFormData({ ...formData, customer_phone: e.target.value })}
-                    className="input-field"
-                    placeholder="+91 XXXXX XXXXX"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Shipping Address
-                  </label>
-                  <textarea
-                    required
-                    rows={4}
-                    value={formData.shipping_address}
-                    onChange={(e) => setFormData({ ...formData, shipping_address: e.target.value })}
-                    className="input-field resize-none"
-                    placeholder="Full shipping address with PIN code"
-                  />
-                </div>
-
-                <div className="flex items-start gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200">
-                  <input
-                    type="checkbox"
-                    id="disclaimer"
-                    checked={formData.disclaimer_accepted}
-                    onChange={(e) => setFormData({ ...formData, disclaimer_accepted: e.target.checked })}
-                    className="mt-0.5 w-4 h-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
-                  />
-                  <label htmlFor="disclaimer" className="text-sm text-slate-600 leading-relaxed">
-                    I confirm that these products are being purchased for research purposes
-                    only, in accordance with applicable regulations and institutional guidelines.
-                  </label>
-                </div>
-
-                <button
+                <Button
                   type="submit"
-                  disabled={isSubmitting || !formData.disclaimer_accepted}
-                  className="w-full px-6 py-4 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-all duration-300 disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0"
+                  fullWidth
+                  color="success"
+                  size="lg"
+                  isDisabled={isSubmitting || !formData.disclaimer_accepted}
+                  isLoading={isSubmitting}
+                  startContent={!isSubmitting && <MessageCircle className="w-5 h-5" />}
+                  className="font-semibold shadow-lg hover:shadow-xl"
                 >
-                  <MessageCircle className="w-5 h-5" />
                   {isSubmitting ? 'Processing...' : 'Continue on WhatsApp for Payment'}
-                </button>
+                </Button>
               </form>
             </div>
           </div>

@@ -1,3 +1,5 @@
+import { Card, CardBody, Link } from '@heroui/react';
+
 export default function TermsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
@@ -5,7 +7,8 @@ export default function TermsPage() {
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Terms and Conditions</h1>
         <p className="text-gray-600 mb-8">Last Updated: February 1, 2026</p>
 
-        <div className="bg-white rounded-xl shadow-sm p-8 space-y-8">
+        <Card shadow="sm">
+          <CardBody className="p-8 space-y-8">
           <section>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Agreement to Terms</h2>
             <p className="text-gray-700 leading-relaxed">
@@ -157,7 +160,7 @@ export default function TermsPage() {
             <p className="text-gray-700 leading-relaxed">
               For questions about these Terms and Conditions, please contact us at:
             </p>
-            <p className="text-cyan-600 font-medium mt-2">support@retralabs.in</p>
+            <Link href="mailto:support@retralabs.in" color="secondary" className="font-medium mt-2 block">support@retralabs.in</Link>
           </section>
 
           <section className="border-t border-gray-200 pt-6">
@@ -166,7 +169,8 @@ export default function TermsPage() {
               these Terms and Conditions.
             </p>
           </section>
-        </div>
+          </CardBody>
+        </Card>
       </div>
     </div>
   );

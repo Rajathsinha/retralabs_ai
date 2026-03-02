@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Mail, MessageSquare, Clock, ChevronDown, AlertTriangle } from 'lucide-react';
+import { Mail, MessageSquare, Clock, AlertTriangle } from 'lucide-react';
+import { Card, CardBody, Accordion, AccordionItem, Link } from '@heroui/react';
 import ScrollReveal from '../components/ScrollReveal';
 
 const FAQ_ITEMS = [
@@ -16,33 +16,6 @@ const FAQ_ITEMS = [
     a: 'Yes, certificates of analysis are available upon request for all products. Please contact us with your order details.',
   },
 ];
-
-function AccordionItem({ q, a }: { q: string; a: string }) {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <div className="border border-slate-200 rounded-xl overflow-hidden transition-colors hover:border-slate-300">
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between p-5 text-left"
-      >
-        <span className="font-semibold text-slate-900 pr-4">{q}</span>
-        <ChevronDown
-          className={`w-5 h-5 text-slate-400 flex-shrink-0 transition-transform duration-300 ${
-            open ? 'rotate-180' : ''
-          }`}
-        />
-      </button>
-      <div
-        className={`overflow-hidden transition-all duration-300 ease-out ${
-          open ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'
-        }`}
-      >
-        <p className="px-5 pb-5 text-slate-600 leading-relaxed">{a}</p>
-      </div>
-    </div>
-  );
-}
 
 export default function ContactPage() {
   return (
@@ -89,18 +62,20 @@ export default function ContactPage() {
             },
           ].map((item, i) => (
             <ScrollReveal key={item.title} delay={i * 100}>
-              <div className={`p-6 rounded-2xl border ${item.color} card-hover`}>
-                <div className={`w-12 h-12 ${item.iconBg} rounded-xl flex items-center justify-center mb-4`}>
-                  <item.icon className={`w-5 h-5 ${item.iconColor}`} />
-                </div>
-                <h3 className="font-bold text-slate-900 mb-1">{item.title}</h3>
-                <p className="text-sm text-slate-500 mb-3">{item.desc}</p>
-                {item.link && (
-                  <a href={item.link} className="text-sm font-semibold text-brand-600 hover:text-brand-700 transition-colors">
-                    {item.linkText}
-                  </a>
-                )}
-              </div>
+              <Card shadow="none" classNames={{ base: `border ${item.color}` }} className="card-hover">
+                <CardBody className="p-6">
+                  <div className={`w-12 h-12 ${item.iconBg} rounded-xl flex items-center justify-center mb-4`}>
+                    <item.icon className={`w-5 h-5 ${item.iconColor}`} />
+                  </div>
+                  <h3 className="font-bold text-slate-900 mb-1">{item.title}</h3>
+                  <p className="text-sm text-slate-500 mb-3">{item.desc}</p>
+                  {item.link && (
+                    <Link href={item.link} color="primary" className="text-sm font-semibold">
+                      {item.linkText}
+                    </Link>
+                  )}
+                </CardBody>
+              </Card>
             </ScrollReveal>
           ))}
         </div>
@@ -108,11 +83,13 @@ export default function ContactPage() {
         <ScrollReveal>
           <div className="mb-12">
             <h2 className="text-2xl font-bold text-slate-900 mb-6">Frequently Asked Questions</h2>
-            <div className="space-y-3">
-              {FAQ_ITEMS.map((item) => (
-                <AccordionItem key={item.q} q={item.q} a={item.a} />
+            <Accordion variant="bordered">
+              {FAQ_ITEMS.map((item, index) => (
+                <AccordionItem key={index} title={item.q} classNames={{ title: 'font-semibold text-slate-900' }}>
+                  <p className="text-slate-600 leading-relaxed pb-2">{item.a}</p>
+                </AccordionItem>
               ))}
-            </div>
+            </Accordion>
           </div>
         </ScrollReveal>
 
