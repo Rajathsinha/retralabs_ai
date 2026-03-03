@@ -1,291 +1,315 @@
 import { useState, useEffect, useRef } from 'react';
+import { Modal, ModalContent, useDisclosure } from '@heroui/react';
+import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
 import {
-  ShoppingCart,
-  Calculator,
-  Menu,
-  X,
-  Home,
-  Grid3X3,
-  Star,
-  Truck,
-  Headphones,
+  ShoppingCart, Calculator, Menu, X,
+  Home, FlaskConical, Star, Users, HelpCircle,
+  Search, ChevronDown, Check,
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useCurrency, CURRENCIES } from '../context/CurrencyContext';
 import Logo from './Logo';
 import ReconstitutionCalculator from './ReconstitutionCalculator';
-
-interface HeaderProps {
-  onNavigate: (page: string) => void;
-  currentPage: string;
-}
+import SearchModal from './SearchModal';
 
 const NAV_ITEMS = [
-  { key: 'home', label: 'Home', icon: Home },
-  { key: 'catalogue', label: 'Catalogue', icon: Grid3X3 },
-  { key: 'reviews', label: 'Reviews', icon: Star },
-  { key: 'track-order', label: 'Track Order', icon: Truck },
-  { key: 'support', label: 'Support', icon: Headphones },
+  { path: '/',          label: 'Home',      icon: Home },
+  { path: '/catalogue', label: 'Catalogue', icon: FlaskConical },
+  { path: '/reviews',   label: 'Reviews',   icon: Star },
+  { path: '/about',     label: 'About',     icon: Users },
+  { path: '/support',   label: 'Support',   icon: HelpCircle },
 ];
 
-export default function Header({ onNavigate, currentPage }: HeaderProps) {
-  const { cart } = useCart();
-  const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
-  const [showCalculator, setShowCalculator] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const [closing, setClosing] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
+export default function Header() {
+  const { cart }                    = useCart();
+  const { currency, setCurrencyCode } = useCurrency();
+  const cartCount                   = cart.reduce((n, i) => n + i.quantity, 0);
+  const location                    = useLocation();
+  const navigate                    = useNavigate();
+  const [open,       setOpen]       = useState(false);
+  const [scrolled,   setScrolled]   = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [currencyOpen, setCurrencyOpen] = useState(false);
+  const currencyRef = useRef<HTMLDivElement>(null);
 
+  const { isOpen: calcOpen, onOpen: openCalc, onClose: closeCalc } = useDisclosure();
+
+  /* ── Scroll blur ── */
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  useEffect(() => {
-    if (mobileOpen) closeMobile();
-  }, [currentPage]);
+  /* ── Close drawer on navigate ── */
+  useEffect(() => { setOpen(false); }, [location.pathname]);
 
+  /* ── Cmd/Ctrl+K → open search ── */
   useEffect(() => {
-    if (mobileOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen(prev => !prev);
+      }
     };
-  }, [mobileOpen]);
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
 
-  const closeMobile = () => {
-    if (!mobileOpen) return;
-    setClosing(true);
-    setTimeout(() => {
-      setMobileOpen(false);
-      setClosing(false);
-    }, 250);
-  };
+  /* ── Close currency dropdown on outside click ── */
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (currencyRef.current && !currencyRef.current.contains(e.target as Node)) {
+        setCurrencyOpen(false);
+      }
+    };
+    if (currencyOpen) document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [currencyOpen]);
 
-  const handleNav = (page: string) => {
-    onNavigate(page);
-    closeMobile();
-  };
+  const active = (path: string) =>
+    path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
 
-  const openMobile = () => {
-    setClosing(false);
-    setMobileOpen(true);
-  };
+  const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.userAgent);
 
   return (
     <>
-      <ReconstitutionCalculator
-        isOpen={showCalculator}
-        onClose={() => setShowCalculator(false)}
-      />
+      {/* ── Search modal (portal to body) ── */}
+      <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
 
+      {/* ── Calculator Modal ── */}
+      <Modal
+        isOpen={calcOpen}
+        onClose={closeCalc}
+        size="2xl"
+        scrollBehavior="inside"
+        classNames={{
+          base:     'bg-transparent shadow-none',
+          backdrop: 'bg-slate-950/80 backdrop-blur-sm',
+          wrapper:  'items-center',
+        }}
+        hideCloseButton
+      >
+        <ModalContent>
+          {() => <ReconstitutionCalculator isOpen={calcOpen} onClose={closeCalc} />}
+        </ModalContent>
+      </Modal>
+
+      {/* ── Header shell ── */}
       <header
-        className={`sticky top-0 z-50 transition-all duration-300 ${
+        className={`sticky top-0 z-50 border-b transition-all duration-300 ${
           scrolled
-            ? 'bg-white/95 backdrop-blur-lg shadow-md border-b border-slate-100'
-            : 'bg-white border-b border-slate-200'
+            ? 'bg-slate-950/95 backdrop-blur-md border-white/8 shadow-[0_2px_20px_rgba(0,0,0,0.5)]'
+            : 'bg-slate-950 border-white/[0.06]'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16 md:h-18">
-            <button
-              onClick={() => handleNav('home')}
-              className="hover:opacity-80 transition-opacity relative z-50"
-            >
-              <Logo size="md" />
-            </button>
 
-            <nav className="hidden md:flex items-center gap-1">
-              {NAV_ITEMS.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <button
-                    key={item.key}
-                    onClick={() => handleNav(item.key)}
-                    className={`relative px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-1.5 ${
-                      currentPage === item.key
-                        ? 'text-slate-900 bg-slate-100'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    {item.label}
-                    {currentPage === item.key && (
-                      <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-0.5 bg-accent-500 rounded-full" />
-                    )}
-                  </button>
-                );
-              })}
+          {/* ── Header row ── */}
+          <div className="flex items-center justify-between h-14">
+
+            {/* LEFT — Logo */}
+            <RouterLink to="/" className="hover:opacity-75 transition-opacity flex-shrink-0">
+              <Logo size="md" variant="light" />
+            </RouterLink>
+
+            {/* CENTER — Desktop nav */}
+            <nav className="hidden md:flex flex-1 items-center justify-center gap-0.5">
+              {NAV_ITEMS.map(({ path, label, icon: Icon }) => (
+                <RouterLink
+                  key={path}
+                  to={path}
+                  className={`relative flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium tracking-wide transition-all duration-200 rounded-lg ${
+                    active(path)
+                      ? 'text-white'
+                      : 'text-white/45 hover:text-white/80 hover:bg-white/5'
+                  }`}
+                >
+                  <Icon className={`w-3.5 h-3.5 flex-shrink-0 ${active(path) ? 'text-cyan-400' : 'text-white/30'}`} />
+                  {label}
+                  {active(path) && (
+                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-0.5 bg-cyan-400 rounded-full" />
+                  )}
+                </RouterLink>
+              ))}
+
+              {/* Calculator */}
               <button
-                onClick={() => setShowCalculator(true)}
-                className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-all duration-200 flex items-center gap-1.5"
+                onClick={openCalc}
+                className="flex items-center gap-1.5 px-3.5 py-2 ml-1 rounded-lg text-sm font-medium text-white/45 hover:text-white/80 hover:bg-white/5 transition-all duration-200"
               >
-                <Calculator className="w-4 h-4" />
+                <Calculator className="w-3.5 h-3.5 text-white/30" />
                 Calculator
               </button>
             </nav>
 
-            <div className="flex items-center gap-2">
+            {/* RIGHT — Search | Currency | Cart | Hamburger */}
+            <div className="flex items-center gap-1.5">
+
+              {/* Search button — desktop: pill with shortcut hint, mobile: icon */}
               <button
-                onClick={() => handleNav('checkout')}
-                className="relative p-2.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-all duration-200"
+                onClick={() => setSearchOpen(true)}
+                aria-label="Search products"
+                className="flex items-center gap-2 rounded-lg text-white/50 hover:text-white/80 transition-all duration-200
+                           px-2 py-2
+                           md:px-3 md:py-1.5 md:border md:border-white/10 md:hover:border-white/20 md:hover:bg-white/5 md:text-sm"
               >
-                <ShoppingCart className="w-5 h-5" />
-                {cartItemCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 bg-accent-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-sm animate-scale-in">
-                    {cartItemCount}
+                <Search className="w-4 h-4 flex-shrink-0" />
+                <span className="hidden md:flex items-center gap-2 text-sm text-white/35">
+                  Search products…
+                  <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-white/8 border border-white/10 text-[11px] font-mono text-white/30">
+                    {isMac ? '⌘' : 'ctrl'} K
+                  </span>
+                </span>
+              </button>
+
+              {/* Currency picker */}
+              <div className="relative" ref={currencyRef}>
+                <button
+                  onClick={() => setCurrencyOpen(o => !o)}
+                  className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-white/50 hover:text-white/80 border border-white/10 hover:border-white/20 hover:bg-white/5 transition-all duration-200"
+                >
+                  <span className="text-base leading-none">{currency.flag}</span>
+                  <span>{currency.code}</span>
+                  <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${currencyOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* Dropdown */}
+                {currencyOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-52 bg-slate-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
+                    <p className="px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-white/25 border-b border-white/8">
+                      Currency
+                    </p>
+                    {Object.values(CURRENCIES).map(c => (
+                      <button
+                        key={c.code}
+                        onClick={() => { setCurrencyCode(c.code); setCurrencyOpen(false); }}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-left hover:bg-white/6 transition-colors"
+                      >
+                        <span className="text-base leading-none w-5">{c.flag}</span>
+                        <span className="flex-1 text-white/80">{c.name}</span>
+                        <span className="text-white/40 text-xs font-mono">{c.symbol}</span>
+                        {c.code === currency.code && (
+                          <Check className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Cart */}
+              <button
+                onClick={() => navigate('/checkout')}
+                aria-label="View cart"
+                className="relative flex items-center gap-2 p-2 md:px-4 md:py-1.5 rounded-lg text-sm font-medium text-white/60 hover:text-white border border-transparent md:border-white/10 md:hover:border-white/25 hover:bg-white/8 transition-all duration-200"
+              >
+                <ShoppingCart className="w-5 h-5 md:w-4 md:h-4" />
+                <span className="hidden md:inline">Cart</span>
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 md:static md:top-auto md:right-auto bg-cyan-500 text-white text-[10px] font-bold min-w-[16px] h-4 px-0.5 rounded-full flex items-center justify-center leading-none">
+                    {cartCount}
                   </span>
                 )}
               </button>
 
+              {/* Hamburger — mobile only */}
               <button
-                onClick={() => (mobileOpen ? closeMobile() : openMobile())}
-                className="md:hidden p-2.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-all duration-200 relative z-50"
+                onClick={() => setOpen(!open)}
+                aria-label={open ? 'Close menu' : 'Open menu'}
+                className="md:hidden p-2 rounded-lg text-white/60 hover:text-white hover:bg-white/8 transition-all duration-200"
               >
-                <div className="relative w-5 h-5">
-                  <Menu
-                    className={`w-5 h-5 absolute inset-0 transition-all duration-300 ${
-                      mobileOpen ? 'opacity-0 rotate-90 scale-75' : 'opacity-100 rotate-0 scale-100'
-                    }`}
-                  />
-                  <X
-                    className={`w-5 h-5 absolute inset-0 transition-all duration-300 ${
-                      mobileOpen ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-75'
-                    }`}
-                  />
-                </div>
+                {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
             </div>
           </div>
         </div>
-      </header>
 
-      {mobileOpen && (
-        <div className="fixed inset-0 z-40 md:hidden">
-          <div
-            className={`absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300 ${
-              closing ? 'opacity-0' : 'opacity-100'
-            }`}
-            style={{ animation: closing ? undefined : 'fadeIn 0.3s ease-out' }}
-            onClick={closeMobile}
-          />
+        {/* ── Mobile drawer ── */}
+        <div
+          className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
+            open ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'
+          }`}
+        >
+          <div className="border-t border-white/10 bg-slate-950/98 backdrop-blur-md">
+            <nav className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-1">
 
-          <div
-            ref={menuRef}
-            className={`absolute top-0 right-0 w-[min(320px,85vw)] h-full bg-white shadow-2xl transition-transform duration-300 ease-out ${
-              closing ? 'translate-x-full' : 'translate-x-0'
-            }`}
-            style={{
-              animation: closing ? undefined : 'slideFromRight 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-            }}
-          >
-            <div className="flex flex-col h-full">
-              <div className="pt-20 px-5 flex-1 overflow-y-auto">
-                <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-3 mb-3">
-                  Navigation
-                </p>
-                <nav className="space-y-0.5">
-                  {NAV_ITEMS.map((item, i) => {
-                    const Icon = item.icon;
-                    const isActive = currentPage === item.key;
-                    return (
-                      <button
-                        key={item.key}
-                        onClick={() => handleNav(item.key)}
-                        className={`w-full text-left px-3 py-3 rounded-xl text-[15px] font-medium transition-all duration-200 flex items-center gap-3 group ${
-                          isActive
-                            ? 'text-slate-900 bg-slate-100'
-                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                        }`}
-                        style={{
-                          animation: closing
-                            ? undefined
-                            : `menuItemIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) ${i * 0.05}s both`,
-                        }}
-                      >
-                        <span
-                          className={`flex items-center justify-center w-9 h-9 rounded-lg transition-colors duration-200 ${
-                            isActive
-                              ? 'bg-accent-500 text-white shadow-sm'
-                              : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200 group-hover:text-slate-700'
-                          }`}
-                        >
-                          <Icon className="w-[18px] h-[18px]" />
-                        </span>
-                        <span>{item.label}</span>
-                        {isActive && (
-                          <span className="ml-auto w-1.5 h-1.5 rounded-full bg-accent-500" />
-                        )}
-                      </button>
-                    );
-                  })}
+              {/* Mobile search */}
+              <button
+                onClick={() => { setOpen(false); setTimeout(() => setSearchOpen(true), 200); }}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-white/55 hover:text-white hover:bg-white/6 transition-all duration-200"
+              >
+                <Search className="w-4 h-4 flex-shrink-0 text-white/40" />
+                Search products…
+              </button>
 
-                  <button
-                    onClick={() => {
-                      closeMobile();
-                      setTimeout(() => setShowCalculator(true), 300);
-                    }}
-                    className="w-full text-left px-3 py-3 rounded-xl text-[15px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all duration-200 flex items-center gap-3 group"
-                    style={{
-                      animation: closing
-                        ? undefined
-                        : `menuItemIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) ${NAV_ITEMS.length * 0.05}s both`,
-                    }}
-                  >
-                    <span className="flex items-center justify-center w-9 h-9 rounded-lg bg-slate-100 text-slate-500 group-hover:bg-slate-200 group-hover:text-slate-700 transition-colors duration-200">
-                      <Calculator className="w-[18px] h-[18px]" />
-                    </span>
-                    <span>Calculator</span>
-                  </button>
-                </nav>
+              {/* Nav links */}
+              {NAV_ITEMS.map(({ path, label, icon: Icon }, i) => (
+                <RouterLink
+                  key={path}
+                  to={path}
+                  style={{ transitionDelay: open ? `${i * 40}ms` : '0ms' }}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all duration-200 ${
+                    active(path)
+                      ? 'text-white bg-white/10 border border-white/10'
+                      : 'text-white/55 hover:text-white hover:bg-white/6'
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 flex-shrink-0 ${active(path) ? 'text-cyan-400' : 'text-white/40'}`} />
+                  {label}
+                  {active(path) && <span className="ml-auto w-1.5 h-1.5 bg-cyan-400 rounded-full flex-shrink-0" />}
+                </RouterLink>
+              ))}
+
+              {/* Calculator */}
+              <button
+                onClick={() => { setOpen(false); setTimeout(openCalc, 300); }}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-white/55 hover:text-white hover:bg-white/6 transition-all duration-200 text-left"
+              >
+                <Calculator className="w-4 h-4 text-white/40" />
+                Reconstitution Calculator
+              </button>
+
+              {/* Mobile currency row */}
+              <div className="px-4 py-2">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-white/25 mb-2">Currency</p>
+                <div className="flex flex-wrap gap-2">
+                  {Object.values(CURRENCIES).map(c => (
+                    <button
+                      key={c.code}
+                      onClick={() => setCurrencyCode(c.code)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-all duration-200 ${
+                        c.code === currency.code
+                          ? 'bg-cyan-500/15 border-cyan-500/30 text-cyan-300'
+                          : 'border-white/10 text-white/50 hover:border-white/20 hover:text-white/70'
+                      }`}
+                    >
+                      <span>{c.flag}</span>
+                      <span>{c.code}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              <div
-                className="p-5 border-t border-slate-100"
-                style={{
-                  animation: closing
-                    ? undefined
-                    : `menuItemIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) ${(NAV_ITEMS.length + 1) * 0.05}s both`,
-                }}
-              >
+              {/* Cart CTA */}
+              <div className="mt-2 pt-3 border-t border-white/10">
                 <button
-                  onClick={() => handleNav('checkout')}
-                  className="w-full flex items-center justify-center gap-2.5 px-5 py-3.5 bg-slate-900 text-white text-[15px] font-semibold rounded-xl hover:bg-slate-800 active:scale-[0.98] transition-all duration-200"
+                  onClick={() => { setOpen(false); navigate('/checkout'); }}
+                  className="w-full flex items-center justify-center gap-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 text-cyan-300 font-semibold px-4 py-3.5 rounded-xl transition-all duration-200"
                 >
-                  <ShoppingCart className="w-5 h-5" />
+                  <ShoppingCart className="w-4 h-4" />
                   View Cart
-                  {cartItemCount > 0 && (
-                    <span className="ml-1 bg-accent-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[22px] text-center">
-                      {cartItemCount}
+                  {cartCount > 0 && (
+                    <span className="bg-cyan-500 text-white text-xs font-bold px-2 py-0.5 rounded-full ml-1">
+                      {cartCount}
                     </span>
                   )}
                 </button>
               </div>
-            </div>
+            </nav>
           </div>
         </div>
-      )}
-
-      <style>{`
-        @keyframes slideFromRight {
-          from { transform: translateX(100%); }
-          to { transform: translateX(0); }
-        }
-        @keyframes menuItemIn {
-          from {
-            opacity: 0;
-            transform: translateX(16px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-      `}</style>
+      </header>
     </>
   );
 }

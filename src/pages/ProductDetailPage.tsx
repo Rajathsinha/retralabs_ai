@@ -1,31 +1,187 @@
 import { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import {
+  Progress,
+  Button,
+  ButtonGroup,
+  Card,
+  CardBody,
+  Chip,
+  Accordion,
+  AccordionItem,
+  Divider,
+  Skeleton,
+} from '@heroui/react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { getProductImageUrl, BAC_WATER_IMAGE_URL } from '../utils/imageUrl';
 import { ProductWithVariants, ProductVariant } from '../types';
 import { useCart } from '../context/CartContext';
-import { ChevronRight, Star, Check, Package, Truck, Shield, AlertTriangle, MapPin, Phone, Minus, Plus, ShoppingCart } from 'lucide-react';
+import {
+  ChevronLeft,
+  Star,
+  Check,
+  Package,
+  Truck,
+  Shield,
+  ShieldCheck,
+  AlertTriangle,
+  MapPin,
+  Phone,
+  FlaskConical,
+  FileCheck,
+  BadgeCheck,
+  MessageCircle,
+  Clock,
+  ShoppingCart,
+} from 'lucide-react';
 
-interface ProductDetailPageProps {
-  productId: string;
-  onNavigate: (page: string) => void;
-}
+// Demo products fallback (when Supabase not configured)
+const DEMO_PRODUCTS: ProductWithVariants[] = [
+  {
+    id: '1',
+    name: 'Retatrutide',
+    description: 'Triple agonist peptide targeting GLP-1, GIP, and glucagon receptors for metabolic and obesity research.',
+    category: 'research-peptide',
+    image_url: '/retatrutide.jpg',
+    created_at: new Date().toISOString(),
+    variants: [
+      { id: '1a', product_id: '1', dosage_mg: 20, price_inr: 7000, in_stock: true, vial_configuration: 'Single vial', created_at: new Date().toISOString() },
+      { id: '1b', product_id: '1', dosage_mg: 50, price_inr: 13000, in_stock: true, vial_configuration: '10mg x 5 vials', created_at: new Date().toISOString() },
+      { id: '1c', product_id: '1', dosage_mg: 100, price_inr: 21000, in_stock: true, vial_configuration: '10mg x 10 vials / 20mg x 5 vials', created_at: new Date().toISOString() },
+    ],
+  },
+  {
+    id: '2',
+    name: 'Tirzepatide',
+    description: 'Dual GIP and GLP-1 receptor agonist for metabolic research and analytical applications.',
+    category: 'research-peptide',
+    image_url: '/tirzepatide.jpg',
+    created_at: new Date().toISOString(),
+    variants: [
+      { id: '2a', product_id: '2', dosage_mg: 20, price_inr: 6000, in_stock: true, vial_configuration: 'Single vial', created_at: new Date().toISOString() },
+      { id: '2b', product_id: '2', dosage_mg: 50, price_inr: 11000, in_stock: true, vial_configuration: '10mg x 5 vials', created_at: new Date().toISOString() },
+      { id: '2c', product_id: '2', dosage_mg: 100, price_inr: 18000, in_stock: true, vial_configuration: '10mg x 10 vials / 20mg x 5 vials', created_at: new Date().toISOString() },
+    ],
+  },
+  {
+    id: '3',
+    name: 'GHK-Cu',
+    description: 'Copper peptide complex for skin regeneration, wound healing, and anti-aging research applications.',
+    category: 'research-peptide',
+    image_url: '/ghk-cu.jpg',
+    created_at: new Date().toISOString(),
+    variants: [
+      { id: '3a', product_id: '3', dosage_mg: 50, price_inr: 4000, in_stock: true, created_at: new Date().toISOString() },
+      { id: '3b', product_id: '3', dosage_mg: 100, price_inr: 7000, in_stock: true, created_at: new Date().toISOString() },
+      { id: '3c', product_id: '3', dosage_mg: 150, price_inr: 10000, in_stock: true, created_at: new Date().toISOString() },
+      { id: '3d', product_id: '3', dosage_mg: 200, price_inr: 13000, in_stock: true, created_at: new Date().toISOString() },
+      { id: '3e', product_id: '3', dosage_mg: 250, price_inr: 16500, in_stock: true, created_at: new Date().toISOString() },
+    ],
+  },
+  {
+    id: '4',
+    name: 'IGF-1 LR3',
+    description: 'Long R3 insulin-like growth factor for cellular proliferation and differentiation research.',
+    category: 'research-peptide',
+    image_url: '/igf-1-lr3.jpg',
+    created_at: new Date().toISOString(),
+    variants: [
+      { id: '4a', product_id: '4', dosage_mg: 1, price_inr: 5000, in_stock: true, created_at: new Date().toISOString() },
+      { id: '4b', product_id: '4', dosage_mg: 5, price_inr: 20000, in_stock: true, created_at: new Date().toISOString() },
+      { id: '4c', product_id: '4', dosage_mg: 10, price_inr: 35000, in_stock: true, created_at: new Date().toISOString() },
+    ],
+  },
+  {
+    id: '5',
+    name: 'HGH 191AA',
+    description: 'Human growth hormone (Somatropin) 191 amino acid sequence for laboratory analysis and research.',
+    category: 'research-peptide',
+    image_url: '/hgh-191aa.jpg',
+    created_at: new Date().toISOString(),
+    variants: [
+      { id: '5a', product_id: '5', dosage_mg: 50, price_inr: 7000, in_stock: true, vial_configuration: '10IU x 5 vials', created_at: new Date().toISOString() },
+      { id: '5b', product_id: '5', dosage_mg: 100, price_inr: 11000, in_stock: true, vial_configuration: '10IU x 10 vials', created_at: new Date().toISOString() },
+      { id: '5g', product_id: '5', dosage_mg: 120, price_inr: 13000, in_stock: true, vial_configuration: '24IU x 5 vials', created_at: new Date().toISOString() },
+      { id: '5h', product_id: '5', dosage_mg: 240, price_inr: 18000, in_stock: true, vial_configuration: '24IU x 10 vials', created_at: new Date().toISOString() },
+    ],
+  },
+  {
+    id: '6',
+    name: 'Bacteriostatic Water (Pharma Grade)',
+    description: 'Pharmaceutical grade bacteriostatic water for reconstituting peptides. Sterile, 0.9% benzyl alcohol.',
+    category: 'Medical Supplies',
+    image_url: '/bac-water.png',
+    created_at: new Date().toISOString(),
+    variants: [
+      { id: '6a', product_id: '6', dosage_mg: 10, price_inr: 400, in_stock: true, vial_configuration: '1×10ML', created_at: new Date().toISOString() },
+      { id: '6b', product_id: '6', dosage_mg: 20, price_inr: 600, in_stock: true, vial_configuration: '2×10ML', created_at: new Date().toISOString() },
+      { id: '6c', product_id: '6', dosage_mg: 50, price_inr: 800, in_stock: true, vial_configuration: '5×10ML', created_at: new Date().toISOString() },
+      { id: '6d', product_id: '6', dosage_mg: 100, price_inr: 1500, in_stock: true, vial_configuration: '10×10ML', created_at: new Date().toISOString() },
+    ],
+  },
+];
 
-export default function ProductDetailPage({ productId, onNavigate }: ProductDetailPageProps) {
+const DEMO_BAC_WATER = DEMO_PRODUCTS.find((p) => p.name.includes('Bacteriostatic'))!;
+
+const PURITY_MAP: Record<string, string> = {
+  'Retatrutide': '99.2',
+  'Tirzepatide': '99.4',
+  'GHK-Cu': '99.1',
+  'IGF-1 LR3': '99.3',
+  'HGH 191AA': '99.0',
+};
+
+const FAQ_MAP: Record<string, { q: string; a: string }[]> = {
+  'Retatrutide': [
+    { q: 'What is Retatrutide?', a: 'Retatrutide (LY3437943) is a triple agonist targeting GLP-1, GIP, and glucagon receptors. It is being researched for its potential in metabolic conditions and obesity management in controlled laboratory settings.' },
+    { q: 'What is included with my order?', a: 'Every order includes the peptide in a sterile lyophilised vial along with a Certificate of Analysis (COA) detailing purity, molecular weight, and HPLC testing results.' },
+    { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Standard delivery is 7–14 business days. All peptides are shipped with temperature-controlled packaging to maintain stability.' },
+    { q: 'How do I reconstitute the peptide?', a: 'Use the Reconstitution Calculator (available in the header) to determine the exact volume of Bacteriostatic Water required for your desired concentration. Standard practice is to add BAC water slowly along the vial wall.' },
+  ],
+  'Tirzepatide': [
+    { q: 'What is Tirzepatide?', a: 'Tirzepatide is a dual GIP/GLP-1 receptor agonist. It is supplied for in vitro research and analytical applications only.' },
+    { q: 'What purity can I expect?', a: 'Our Tirzepatide is HPLC-verified at 99.4% purity. The COA with full testing data is included with every order.' },
+    { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Standard delivery is 7–14 business days with temperature-controlled packaging.' },
+    { q: 'Can I get a COA before ordering?', a: "Yes. Contact our support team via WhatsApp or email and we'll send you the batch COA within 24 hours." },
+  ],
+  'default': [
+    { q: 'What purity can I expect?', a: 'All our peptides are HPLC-verified with purity exceeding 99%. A Certificate of Analysis is included with every order.' },
+    { q: 'What is included with my order?', a: 'Every order includes the compound in a sterile vial along with a Certificate of Analysis (COA) detailing purity and testing results.' },
+    { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Standard delivery is 7–14 business days. All peptides are shipped with temperature-controlled packaging.' },
+    { q: 'Can I get a COA before ordering?', a: "Yes. Contact our support team via WhatsApp or email and we'll send you the batch COA within 24 hours." },
+    { q: 'What is your refund policy?', a: 'If your order arrives damaged or the product does not match the COA specifications, we offer a replacement. Contact support within 48 hours of receipt.' },
+  ],
+};
+
+export default function ProductDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+
   const [product, setProduct] = useState<ProductWithVariants | null>(null);
   const [bacWater, setBacWater] = useState<ProductWithVariants | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [quantity, setQuantity] = useState(1);
-  const [imageZoom, setImageZoom] = useState(false);
   const [bundleAdded, setBundleAdded] = useState(false);
   const { addToCart } = useCart();
 
   useEffect(() => {
-    loadProduct();
-  }, [productId]);
+    if (id) loadProduct(id);
+  }, [id]);
 
-  async function loadProduct() {
+  async function loadProduct(productId: string) {
+    setLoading(true);
+
+    // Demo fallback: if Supabase is not configured, use local DEMO_PRODUCTS
     if (!isSupabaseConfigured()) {
+      const demoProduct = DEMO_PRODUCTS.find((p) => p.id === productId);
+      if (demoProduct) {
+        setProduct(demoProduct);
+        if (demoProduct.variants.length > 0) setSelectedVariant(demoProduct.variants[0]);
+        if (!demoProduct.name.toLowerCase().includes('bacteriostatic')) {
+          setBacWater(DEMO_BAC_WATER);
+        }
+      }
       setLoading(false);
       return;
     }
@@ -58,18 +214,23 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
         .single();
 
       if (!bacWaterError && bacWaterData) {
-        const { data: bacWaterVariants, error: bacWaterVariantsError } = await supabase
+        const { data: bacWaterVariants } = await supabase
           .from('product_variants')
           .select('*')
           .eq('product_id', bacWaterData.id)
           .order('dosage_mg');
 
-        if (!bacWaterVariantsError && bacWaterVariants) {
-          setBacWater({ ...bacWaterData, variants: bacWaterVariants });
-        }
+        if (bacWaterVariants) setBacWater({ ...bacWaterData, variants: bacWaterVariants });
       }
     } catch (error) {
       console.error('Error loading product:', error);
+      // Fallback to demo on error too
+      const demoProduct = DEMO_PRODUCTS.find((p) => p.id === productId);
+      if (demoProduct) {
+        setProduct(demoProduct);
+        if (demoProduct.variants.length > 0) setSelectedVariant(demoProduct.variants[0]);
+        setBacWater(DEMO_BAC_WATER);
+      }
     } finally {
       setLoading(false);
     }
@@ -81,39 +242,81 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
       addToCart(product, selectedVariant);
     }
     if (bundleAdded && bacWater) {
-      const bacWaterVariant = bacWater.variants.find(v => v.dosage_mg === 50);
+      const bacWaterVariant = bacWater.variants.find((v) => v.dosage_mg === 50);
       if (bacWaterVariant) addToCart(bacWater, bacWaterVariant);
     }
-    onNavigate('checkout');
+    navigate('/checkout');
   };
 
-  const isFlagship = product?.name === 'Retatrutide' || product?.name === 'Tirzepatide';
-  const isBacWater = product?.name === 'Bacteriostatic Water (Pharma Grade)';
-  const bacWaterPrice = bacWater?.variants.find(v => v.dosage_mg === 50)?.price_inr || 800;
-
+  // ── Loading skeleton ──────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-slate-600 mb-4" />
-          <p className="text-slate-500">Loading product...</p>
+      <div className="min-h-screen bg-slate-50 pb-24 lg:pb-0">
+        {/* Breadcrumb skeleton */}
+        <div className="bg-white border-b border-slate-200 py-3">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <Skeleton className="h-4 w-48 rounded-lg" />
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
+            {/* Image skeleton */}
+            <div className="lg:col-span-2 space-y-4">
+              <Skeleton className="w-full aspect-square rounded-2xl" />
+              <Skeleton className="h-24 w-full rounded-xl" />
+              <div className="grid grid-cols-3 gap-3">
+                <Skeleton className="h-16 rounded-xl" />
+                <Skeleton className="h-16 rounded-xl" />
+                <Skeleton className="h-16 rounded-xl" />
+              </div>
+            </div>
+            {/* Content skeleton */}
+            <div className="lg:col-span-3 space-y-5">
+              <div className="space-y-3">
+                <Skeleton className="h-6 w-32 rounded-full" />
+                <Skeleton className="h-12 w-3/4 rounded-xl" />
+                <Skeleton className="h-5 w-full rounded-lg" />
+                <Skeleton className="h-5 w-5/6 rounded-lg" />
+              </div>
+              <Skeleton className="h-20 w-full rounded-xl" />
+              <Skeleton className="h-48 w-full rounded-2xl" />
+              <Skeleton className="h-40 w-full rounded-2xl" />
+              <Skeleton className="h-64 w-full rounded-2xl" />
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
+  // ── Not found ─────────────────────────────────────────────────────────────
   if (!product) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-slate-500 mb-4">Product not found</p>
-          <button onClick={() => onNavigate('catalogue')} className="text-brand-600 hover:text-brand-700 font-semibold">
+          <FlaskConical className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+          <p className="text-slate-500 mb-6">Product not found</p>
+          <Button
+            color="primary"
+            variant="flat"
+            onPress={() => navigate('/catalogue')}
+            startContent={<ChevronLeft className="w-4 h-4" />}
+          >
             Back to Catalogue
-          </button>
+          </Button>
         </div>
       </div>
     );
   }
+
+  // ── Derived state ─────────────────────────────────────────────────────────
+  const isFlagship = product.name === 'Retatrutide' || product.name === 'Tirzepatide';
+  const isBacWater = product.name?.includes('Bacteriostatic');
+  const bacWaterPrice = bacWater?.variants.find((v) => v.dosage_mg === 50)?.price_inr || 800;
+  const purity = PURITY_MAP[product.name] || '99';
+  const purityNum = parseFloat(purity);
+  const faqs = FAQ_MAP[product.name] || FAQ_MAP['default'];
 
   const basePrice = selectedVariant ? selectedVariant.price_inr * quantity : 0;
   const subtotal = bundleAdded ? basePrice + bacWaterPrice : basePrice;
@@ -121,353 +324,585 @@ export default function ProductDetailPage({ productId, onNavigate }: ProductDeta
   const discountAmount = Math.round((basePrice * discountPercent) / 100);
   const totalPrice = subtotal - discountAmount;
 
+  const whatsappMsg = encodeURIComponent(
+    `Hi! I'd like to order ${product.name}${selectedVariant ? ` — ${selectedVariant.dosage_mg}${isBacWater ? 'ML' : 'mg'} (₹${selectedVariant.price_inr.toLocaleString('en-IN')})` : ''}. Can you help me complete my order?`
+  );
+
   return (
     <div className="min-h-screen bg-slate-50 pb-24 lg:pb-0">
-      <div className="bg-white border-b border-slate-200 py-3">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2 text-sm">
-            <button onClick={() => onNavigate('home')} className="text-slate-500 hover:text-slate-900 transition-colors">Home</button>
-            <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-            <button onClick={() => onNavigate('catalogue')} className="text-slate-500 hover:text-slate-900 transition-colors">Products</button>
-            <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-            <span className="text-slate-900 font-medium">{product.name}</span>
+
+      {/* ── Hero / Breadcrumb ─────────────────────────────────────────────── */}
+      <div className="bg-slate-900 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-2 text-sm text-slate-400 mb-4">
+            <button
+              onClick={() => navigate('/catalogue')}
+              className="flex items-center gap-1 hover:text-white transition-colors font-medium"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Back to Catalogue
+            </button>
+            <span className="text-slate-600">/</span>
+            <span className="text-slate-300 truncate">{product.name}</span>
+          </div>
+
+          {/* Product name + badges */}
+          <div className="flex flex-wrap items-start gap-3">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-3xl lg:text-4xl font-bold text-white tracking-tight mb-3">
+                {product.name}
+              </h1>
+              <div className="flex flex-wrap gap-2">
+                <Chip
+                  size="sm"
+                  variant="flat"
+                  className="bg-emerald-900/60 text-emerald-300 border border-emerald-700"
+                  startContent={<div className="w-1.5 h-1.5 rounded-full bg-emerald-400 ml-1" />}
+                >
+                  In Stock
+                </Chip>
+                {!isBacWater && (
+                  <>
+                    <Chip
+                      size="sm"
+                      variant="flat"
+                      className="bg-blue-900/60 text-blue-300 border border-blue-700"
+                      startContent={<Shield className="w-3 h-3 ml-1" />}
+                    >
+                      COA Verified
+                    </Chip>
+                    <Chip
+                      size="sm"
+                      variant="flat"
+                      className="bg-amber-900/60 text-amber-300 border border-amber-700"
+                      startContent={<FlaskConical className="w-3 h-3 ml-1" />}
+                    >
+                      HPLC Tested
+                    </Chip>
+                    <Chip
+                      size="sm"
+                      variant="flat"
+                      className="bg-slate-700/60 text-slate-300 border border-slate-600"
+                      startContent={<FileCheck className="w-3 h-3 ml-1" />}
+                    >
+                      GMP Source
+                    </Chip>
+                  </>
+                )}
+                {isFlagship && (
+                  <Chip
+                    size="sm"
+                    variant="flat"
+                    className="bg-gradient-to-r from-amber-700/60 to-orange-700/60 text-amber-200 border border-amber-600"
+                    startContent={<Star className="w-3 h-3 fill-current ml-1" />}
+                  >
+                    Flagship
+                  </Chip>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-8">
+      {/* ── Image disclaimer ──────────────────────────────────────────────── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
           <div className="flex items-start gap-3">
             <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
             <p className="text-sm text-amber-800">
-              <strong>Product Images:</strong> Images displayed are AI-generated representations. Actual products are pharmaceutical-grade peptides supplied in sterile vials. All products include Certificates of Analysis.
+              <strong>Product Images:</strong> Images displayed are representative. Actual products are pharmaceutical-grade peptides supplied in sterile lyophilised vials. All orders include Certificates of Analysis.
             </p>
           </div>
         </div>
+      </div>
 
+      {/* ── Main 2-col layout ─────────────────────────────────────────────── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
+
+          {/* ── LEFT: Image + stats ───────────────────────────────────────── */}
           <div className="lg:col-span-2">
-            <div className="sticky top-24">
-              <div className="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm group">
-                <div className="aspect-square relative p-8 cursor-pointer bg-gradient-to-br from-slate-50 to-white" onClick={() => setImageZoom(!imageZoom)}>
+            <div className="sticky top-24 space-y-4">
+
+              {/* Product image */}
+              <div className="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
+                <div className="aspect-square relative p-8 bg-gradient-to-br from-slate-50 to-white">
                   <img
                     src={getProductImageUrl(product.image_url, product.name)}
-                    alt={product.name}
-                    className={`w-full h-full object-contain transition-transform duration-500 ${imageZoom ? 'scale-150' : 'group-hover:scale-105'}`}
+                    alt={`${product.name} research peptide${isBacWater ? '' : ' vial India'}`}
+                    className="w-full h-full object-contain"
                     onError={(e) => {
-                      if (product.name.toLowerCase().includes('bacteriostatic water')) {
-                        (e.target as HTMLImageElement).src = BAC_WATER_IMAGE_URL;
-                      }
+                      const t = e.target as HTMLImageElement;
+                      const n = product.name.toLowerCase();
+                      if (n.includes('retatrutide'))      t.src = '/retatrutide.jpg';
+                      else if (n.includes('tirzepatide')) t.src = '/tirzepatide.jpg';
+                      else if (n.includes('ghk'))         t.src = '/ghk-cu.jpg';
+                      else if (n.includes('igf'))         t.src = '/igf-1-lr3.jpg';
+                      else if (n.includes('hgh'))         t.src = '/hgh-191aa.jpg';
+                      else                                t.src = BAC_WATER_IMAGE_URL;
                     }}
                   />
                   {isFlagship && (
-                    <div className="absolute top-4 left-4 px-3 py-1.5 bg-slate-900 text-white text-xs font-bold rounded-lg flex items-center gap-1.5">
+                    <div className="absolute top-4 left-4 px-3 py-1.5 bg-slate-900 text-white text-xs font-bold rounded-lg flex items-center gap-1.5 z-10">
                       <Star className="w-3.5 h-3.5 fill-current text-amber-400" />
                       FLAGSHIP
                     </div>
                   )}
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg p-2.5 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                        <span className="text-xs font-semibold text-slate-700">In Stock</span>
-                      </div>
+                  <div className="absolute bottom-4 left-4 right-4 z-10">
+                    <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-xl p-3 flex items-center gap-2">
+                      <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                      <span className="text-xs font-semibold text-slate-700">In Stock · Ready to Ship</span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-4 bg-emerald-50 border border-emerald-200 rounded-xl p-4">
-                <div className="flex items-center gap-3">
-                  <Shield className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-                  <div className="flex-1">
-                    <div className="font-bold text-emerald-900">99.45% Purity</div>
-                    <div className="text-sm text-emerald-700">HPLC Verified -- COA Available</div>
-                  </div>
-                  <button onClick={() => onNavigate('support')} className="text-emerald-600 hover:text-emerald-700 text-sm font-semibold whitespace-nowrap">
-                    Request COA
-                  </button>
-                </div>
-              </div>
+              {/* Purity Progress bar */}
+              {!isBacWater && (
+                <Card className="border border-emerald-200 bg-emerald-50 shadow-none">
+                  <CardBody className="p-4 gap-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Shield className="w-5 h-5 text-emerald-600" />
+                        <div>
+                          <p className="font-bold text-emerald-900 text-sm">{purity}% Purity Verified</p>
+                          <p className="text-xs text-emerald-700">HPLC Tested — COA Available</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => navigate('/support')}
+                        className="text-emerald-600 hover:text-emerald-700 text-xs font-semibold whitespace-nowrap"
+                      >
+                        Request COA
+                      </button>
+                    </div>
+                    <Progress
+                      value={purityNum}
+                      color="success"
+                      label="Purity"
+                      showValueLabel
+                      size="lg"
+                      classNames={{
+                        base: 'w-full',
+                        label: 'text-emerald-800 font-semibold text-xs',
+                        value: 'text-emerald-900 font-bold text-xs',
+                        track: 'bg-emerald-200',
+                        indicator: 'bg-gradient-to-r from-emerald-400 to-emerald-600',
+                      }}
+                    />
+                  </CardBody>
+                </Card>
+              )}
 
-              <div className="mt-4 grid grid-cols-3 gap-3">
+              {/* Stats grid */}
+              <div className="grid grid-cols-3 gap-3">
                 {[
-                  { value: '24h', label: 'Fast Ship' },
+                  { value: '48h', label: 'Dispatch' },
                   { value: '2K+', label: 'Orders' },
-                  { value: '99%', label: 'Purity' },
+                  { value: `${purity}%`, label: 'Purity' },
                 ].map((stat) => (
-                  <div key={stat.label} className="bg-white border border-slate-200 rounded-xl p-3 text-center">
-                    <div className="text-lg font-bold text-slate-900">{stat.value}</div>
-                    <div className="text-xs text-slate-500">{stat.label}</div>
-                  </div>
+                  <Card key={stat.label} className="border border-slate-200 shadow-none">
+                    <CardBody className="p-3 text-center gap-0">
+                      <p className="text-lg font-bold text-slate-900">{stat.value}</p>
+                      <p className="text-xs text-slate-500">{stat.label}</p>
+                    </CardBody>
+                  </Card>
                 ))}
               </div>
+
+              {/* WhatsApp support */}
+              <a
+                href={`https://wa.me/918217824384?text=${encodeURIComponent(`Hi! I'd like to know more about ${product.name} before ordering. Can you help?`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition-colors"
+              >
+                <MessageCircle className="w-5 h-5 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="font-bold text-sm">Ask on WhatsApp</p>
+                  <p className="text-xs text-emerald-100">Get answers before you order</p>
+                </div>
+              </a>
             </div>
           </div>
 
-          <div className="lg:col-span-3 space-y-6">
+          {/* ── RIGHT: Product info + ordering ───────────────────────────── */}
+          <div className="lg:col-span-3 space-y-5">
+
+            {/* Description */}
             <div>
               {product.category && (
                 <span className="inline-block mb-3 px-3 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-full uppercase tracking-wider">
                   {product.category}
                 </span>
               )}
-              <h1 className="text-4xl lg:text-5xl font-bold text-slate-900 mb-4 tracking-tight">{product.name}</h1>
               <p className="text-lg text-slate-600 leading-relaxed">{product.description}</p>
             </div>
 
+            {/* Research use warning */}
             <div className="bg-rose-50 border border-rose-200 rounded-xl p-4">
               <div className="flex items-start gap-3">
                 <AlertTriangle className="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5" />
                 <p className="text-sm text-rose-800">
-                  <strong>RESEARCH USE ONLY</strong> -- This product is strictly for laboratory and research purposes. Not for human consumption. By ordering, you confirm you are a qualified researcher.
+                  <strong>RESEARCH USE ONLY</strong> — This product is strictly for laboratory and analytical purposes. Not for human consumption. By ordering, you confirm you are a qualified researcher.
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <span className="px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-lg text-sm font-semibold text-emerald-700 flex items-center gap-1.5">
-                <div className="w-2 h-2 bg-emerald-500 rounded-full" />
-                In Stock
-              </span>
-              <span className="px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg text-sm font-semibold text-blue-700 flex items-center gap-1.5">
-                <Shield className="w-3.5 h-3.5" />
-                COA Verified
-              </span>
-            </div>
+            {/* ── Variant selector ─────────────────────────────────────── */}
+            <Card className="border border-slate-200 shadow-none">
+              <CardBody className="p-6">
+                <div className="flex items-center gap-2 mb-5">
+                  <Package className="w-5 h-5 text-slate-600" />
+                  <h3 className="text-lg font-bold text-slate-900">Choose Your Variant</h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {product.variants.map((variant) => {
+                    const isSelected = selectedVariant?.id === variant.id;
+                    return (
+                      <button
+                        key={variant.id}
+                        type="button"
+                        onClick={() => setSelectedVariant(variant)}
+                        className={[
+                          'relative flex flex-col p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 w-full text-left',
+                          isSelected
+                            ? variant.is_recommended
+                              ? 'border-emerald-500 bg-emerald-50 shadow-md'
+                              : 'border-slate-900 bg-slate-50 shadow-sm'
+                            : variant.is_recommended
+                            ? 'border-emerald-300 bg-emerald-50/50 hover:border-emerald-400'
+                            : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50',
+                        ].join(' ')}
+                      >
+                        {variant.badge_text && (
+                          <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-bold rounded uppercase tracking-wide shadow-lg whitespace-nowrap">
+                            {variant.badge_text}
+                          </div>
+                        )}
+                        {variant.is_recommended && (
+                          <div className="absolute -top-2 -right-2 w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg">
+                            <Star className="w-3 h-3 text-white fill-current" />
+                          </div>
+                        )}
+                        <p className={`font-bold text-xl mb-0.5 ${isSelected ? (variant.is_recommended ? 'text-emerald-900' : 'text-slate-900') : 'text-slate-700'}`}>
+                          ₹{variant.price_inr.toLocaleString('en-IN')}
+                        </p>
+                        <p className="text-sm text-slate-500 font-medium">
+                          {isBacWater ? `${variant.dosage_mg}ML` : `${variant.dosage_mg}mg`}
+                        </p>
+                        {variant.vial_configuration && (
+                          <p className="text-xs text-slate-400 mt-1">{variant.vial_configuration}</p>
+                        )}
+                        {isSelected && (
+                          <div className="mt-2 flex items-center gap-1">
+                            <Check className={`w-4 h-4 ${variant.is_recommended ? 'text-emerald-600' : 'text-slate-900'}`} />
+                            <span className={`text-xs font-semibold ${variant.is_recommended ? 'text-emerald-700' : 'text-slate-700'}`}>Selected</span>
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </CardBody>
+            </Card>
 
-            <div className="bg-white border border-slate-200 rounded-2xl p-6">
-              <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                <Package className="w-5 h-5 text-slate-600" />
-                Choose Your Variant
-              </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {product.variants.map((variant) => (
-                  <button
-                    key={variant.id}
-                    onClick={() => setSelectedVariant(variant)}
-                    className={`relative p-4 rounded-xl border-2 transition-all duration-200 text-center ${
-                      selectedVariant?.id === variant.id
-                        ? variant.is_recommended
-                          ? 'border-emerald-500 bg-emerald-50 shadow-md'
-                          : 'border-slate-900 bg-slate-50 shadow-sm'
-                        : variant.is_recommended
-                        ? 'border-emerald-300 bg-emerald-50/50 hover:border-emerald-400'
-                        : 'border-slate-200 bg-white hover:border-slate-300'
-                    }`}
+            {/* ── Quantity selector ─────────────────────────────────────── */}
+            <Card className="border border-slate-200 shadow-none">
+              <CardBody className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-bold text-slate-900">Quantity</h3>
+                  <span className="text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full">Per Kit</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <ButtonGroup>
+                    <Button
+                      isIconOnly
+                      size="lg"
+                      variant="bordered"
+                      onPress={() => setQuantity(Math.max(1, quantity - 1))}
+                      isDisabled={quantity <= 1}
+                      className="border-slate-200 text-slate-700 hover:bg-slate-50"
+                      aria-label="Decrease quantity"
+                    >
+                      <span className="text-lg font-bold leading-none">−</span>
+                    </Button>
+                    <div className="flex items-center justify-center w-16 h-10 border-y border-slate-200 bg-white font-bold text-lg text-slate-900 select-none">
+                      {quantity}
+                    </div>
+                    <Button
+                      isIconOnly
+                      size="lg"
+                      variant="bordered"
+                      onPress={() => setQuantity(quantity + 1)}
+                      className="border-slate-200 text-slate-700 hover:bg-slate-50"
+                      aria-label="Increase quantity"
+                    >
+                      <span className="text-lg font-bold leading-none">+</span>
+                    </Button>
+                  </ButtonGroup>
+                </div>
+
+                {quantity > 1 && !isBacWater && (
+                  <div className="mt-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2.5">
+                    <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                    <span className="text-sm font-medium text-emerald-800">
+                      {discountPercent}% volume discount applied — saving ₹{discountAmount.toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                )}
+                {quantity === 1 && !isBacWater && (
+                  <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2.5">
+                    <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                    <span className="text-sm text-amber-800">
+                      Add 1 more to get <strong>20% OFF</strong> · Add 2 more for <strong>25% OFF</strong>
+                    </span>
+                  </div>
+                )}
+              </CardBody>
+            </Card>
+
+            {/* ── Bundle / Frequently bought together ──────────────────── */}
+            {!isBacWater && bacWater && (
+              <Card className="border border-slate-200 shadow-none">
+                <CardBody className="p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <BadgeCheck className="w-5 h-5 text-blue-600" />
+                    <h3 className="text-lg font-bold text-slate-900">Frequently Bought Together</h3>
+                  </div>
+                  <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200 mb-4">
+                    <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center border border-slate-200 flex-shrink-0">
+                      <Package className="w-7 h-7 text-slate-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-slate-900">Bacteriostatic Water</p>
+                      <p className="text-sm text-slate-500">50ML — Pharma Grade · Required for reconstitution</p>
+                    </div>
+                    <p className="font-bold text-slate-900 flex-shrink-0">₹{bacWaterPrice.toLocaleString('en-IN')}</p>
+                  </div>
+                  <Button
+                    fullWidth
+                    color={bundleAdded ? 'success' : 'default'}
+                    variant={bundleAdded ? 'solid' : 'bordered'}
+                    isDisabled={!selectedVariant}
+                    onPress={() => setBundleAdded(!bundleAdded)}
+                    startContent={bundleAdded ? <Check className="w-4 h-4" /> : null}
+                    className={bundleAdded ? 'text-white font-semibold' : 'border-slate-200 text-slate-700 font-semibold hover:bg-slate-50'}
                   >
-                    {variant.badge_text && (
-                      <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-bold rounded uppercase tracking-wide shadow-lg whitespace-nowrap">
-                        {variant.badge_text}
+                    {bundleAdded ? 'Bundle Added' : 'Add Bacteriostatic Water to Bundle'}
+                  </Button>
+                </CardBody>
+              </Card>
+            )}
+
+            {/* ── Order summary ─────────────────────────────────────────── */}
+            <Card className="border border-slate-200 shadow-none">
+              <CardBody className="p-6">
+                <h3 className="text-lg font-bold text-slate-900 mb-5">Order Summary</h3>
+
+                <div className="space-y-3 mb-4">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-600">
+                      {product.name} ({selectedVariant?.dosage_mg}{isBacWater ? 'ML' : 'mg'}) × {quantity}
+                    </span>
+                    <span className="font-medium text-slate-900">₹{basePrice.toLocaleString('en-IN')}</span>
+                  </div>
+                  {bundleAdded && (
+                    <>
+                      <Divider />
+                      <div className="flex justify-between text-sm">
+                        <span className="text-slate-600">Bacteriostatic Water (50ML)</span>
+                        <span className="font-medium text-slate-900">₹{bacWaterPrice.toLocaleString('en-IN')}</span>
                       </div>
-                    )}
-                    {variant.is_recommended && (
-                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg">
-                        <Star className="w-3 h-3 text-white fill-current" />
+                    </>
+                  )}
+                  {discountPercent > 0 && (
+                    <>
+                      <Divider />
+                      <div className="flex justify-between text-sm text-emerald-600">
+                        <span className="font-medium">Volume Discount ({discountPercent}%)</span>
+                        <span className="font-semibold">−₹{discountAmount.toLocaleString('en-IN')}</span>
                       </div>
+                    </>
+                  )}
+                </div>
+
+                <Divider className="my-4" />
+
+                <div className="flex items-baseline justify-between mb-5">
+                  <span className="text-slate-700 font-medium">Total</span>
+                  <div className="text-right">
+                    {discountPercent > 0 && (
+                      <span className="text-sm text-slate-400 line-through mr-2">₹{subtotal.toLocaleString('en-IN')}</span>
                     )}
-                    <div className={`font-bold text-lg mb-0.5 ${
-                      selectedVariant?.id === variant.id
-                        ? variant.is_recommended ? 'text-emerald-900' : 'text-slate-900'
-                        : 'text-slate-700'
-                    }`}>
-                      ₹{variant.price_inr.toLocaleString('en-IN')}
+                    <span className="text-3xl font-bold text-slate-900">₹{totalPrice.toLocaleString('en-IN')}</span>
+                  </div>
+                </div>
+
+                {discountPercent > 0 && (
+                  <div className="mb-5 p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2">
+                    <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                    <span className="text-sm font-medium text-emerald-800">
+                      You save ₹{discountAmount.toLocaleString('en-IN')} with {discountPercent}% volume discount
+                    </span>
+                  </div>
+                )}
+
+                {/* Shipping cards */}
+                <div className="space-y-3 mb-6">
+                  <Card className="border border-blue-200 bg-blue-50 shadow-none">
+                    <CardBody className="p-3 flex-row items-start gap-3">
+                      <MapPin className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-semibold text-blue-900">Free Shipping Across India</p>
+                        <p className="text-xs text-blue-700 mt-0.5">7–14 business days · Temperature-controlled packaging</p>
+                      </div>
+                    </CardBody>
+                  </Card>
+                  <Card className="border border-slate-200 bg-slate-50 shadow-none">
+                    <CardBody className="p-3 flex-row items-center gap-3">
+                      <Clock className="w-5 h-5 text-slate-500 flex-shrink-0" />
+                      <p className="text-sm text-slate-600">
+                        <strong>Avg dispatch:</strong> 48 hours after order confirmation
+                      </p>
+                    </CardBody>
+                  </Card>
+                  <Card className="border border-slate-200 bg-slate-50 shadow-none">
+                    <CardBody className="p-3 flex-row items-center gap-3">
+                      <Phone className="w-5 h-5 text-slate-500 flex-shrink-0" />
+                      <p className="text-sm text-slate-600">
+                        <strong>International:</strong> Contact support for availability and shipping rates
+                      </p>
+                    </CardBody>
+                  </Card>
+                  <div className="flex gap-4 px-1">
+                    <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                      <Shield className="w-3.5 h-3.5 text-emerald-500" />
+                      Temperature Controlled
                     </div>
-                    <div className="text-sm text-slate-500 font-medium">
-                      {isBacWater ? `${variant.dosage_mg}ML` : `${variant.dosage_mg}mg`}
+                    <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                      <Truck className="w-3.5 h-3.5 text-emerald-500" />
+                      Express Processing
                     </div>
-                    {variant.vial_configuration && (
-                      <div className="text-xs text-slate-400 mt-1">{variant.vial_configuration}</div>
-                    )}
-                    {selectedVariant?.id === variant.id && (
-                      <div className="mt-2 flex justify-center">
-                        <Check className={`w-4 h-4 ${variant.is_recommended ? 'text-emerald-600' : 'text-slate-900'}`} />
-                      </div>
-                    )}
-                  </button>
+                  </div>
+                </div>
+
+                {/* WhatsApp CTA */}
+                <a
+                  href={`https://wa.me/918217824384?text=${whatsappMsg}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block w-full mb-3"
+                >
+                  <Button
+                    size="lg"
+                    color="success"
+                    fullWidth
+                    startContent={<MessageCircle className="w-5 h-5" />}
+                    className="font-bold text-white bg-emerald-500 hover:bg-emerald-600"
+                  >
+                    Order via WhatsApp
+                  </Button>
+                </a>
+
+                {/* Checkout CTA */}
+                <Button
+                  size="lg"
+                  color="primary"
+                  fullWidth
+                  isDisabled={!selectedVariant}
+                  onPress={handleAddToCart}
+                  startContent={<ShoppingCart className="w-5 h-5" />}
+                  className="font-bold text-lg bg-slate-900 hover:bg-slate-800 text-white shadow-lg"
+                >
+                  Order Now
+                </Button>
+              </CardBody>
+            </Card>
+
+            {/* ── FAQ section ──────────────────────────────────────────── */}
+            <Card className="border border-slate-200 shadow-none">
+              <CardBody className="p-6">
+                <h3 className="text-lg font-bold text-slate-900 mb-5">Frequently Asked Questions</h3>
+                <Accordion
+                  variant="splitted"
+                  selectionMode="multiple"
+                  className="px-0 gap-3"
+                  itemClasses={{
+                    base: 'border border-slate-200 rounded-xl shadow-none bg-white',
+                    title: 'font-semibold text-slate-900 text-sm',
+                    content: 'text-slate-600 text-sm leading-relaxed pb-4',
+                    trigger: 'px-5 py-4 hover:bg-slate-50 rounded-xl',
+                    indicator: 'text-slate-400',
+                  }}
+                >
+                  {faqs.map((faq) => (
+                    <AccordionItem
+                      key={faq.q}
+                      aria-label={faq.q}
+                      title={faq.q}
+                    >
+                      {faq.a}
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </CardBody>
+            </Card>
+
+            {/* ── Why RetraLabs ─────────────────────────────────────────── */}
+            <div className="bg-slate-900 rounded-2xl p-6">
+              <h3 className="text-white font-bold mb-4">Why Buy from RetraLabs?</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {[
+                  { icon: ShieldCheck, label: 'COA with every order', color: 'text-emerald-400' },
+                  { icon: FlaskConical, label: '99%+ HPLC verified purity', color: 'text-blue-400' },
+                  { icon: Truck, label: 'Pan-India free shipping', color: 'text-amber-400' },
+                  { icon: MessageCircle, label: 'WhatsApp support always on', color: 'text-green-400' },
+                ].map((item) => (
+                  <div key={item.label} className="flex items-center gap-3 text-sm text-slate-300">
+                    <item.icon className={`w-4 h-4 ${item.color} flex-shrink-0`} />
+                    {item.label}
+                  </div>
                 ))}
               </div>
             </div>
 
-            <div className="bg-white border border-slate-200 rounded-2xl p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-slate-900">Quantity</h3>
-                <span className="text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full">Per Kit</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  disabled={quantity <= 1}
-                  className="w-11 h-11 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 flex items-center justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  <Minus className="w-4 h-4 text-slate-700" />
-                </button>
-                <input
-                  type="number"
-                  value={quantity}
-                  onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="w-20 h-11 text-center border border-slate-200 rounded-xl font-bold text-lg focus:outline-none focus:border-slate-400"
-                />
-                <button
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="w-11 h-11 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 flex items-center justify-center transition-all"
-                >
-                  <Plus className="w-4 h-4 text-slate-700" />
-                </button>
-              </div>
+          </div>
+        </div>
+      </div>
 
-              {quantity > 1 && !isBacWater && (
-                <div className="mt-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2.5">
-                  <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span className="text-sm font-medium text-emerald-800">
-                    {discountPercent}% volume discount applied -- saving ₹{discountAmount.toLocaleString('en-IN')}
-                  </span>
-                </div>
-              )}
-
-              {quantity === 1 && !isBacWater && (
-                <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2.5">
-                  <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
-                  <span className="text-sm text-amber-800">Add 1 more item to get <strong>20% OFF</strong></span>
-                </div>
-              )}
-            </div>
-
-            {!isBacWater && bacWater && (
-              <div className="bg-white border border-slate-200 rounded-2xl p-6">
-                <h3 className="text-lg font-bold text-slate-900 mb-4">Frequently Bought Together</h3>
-                <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200 mb-4">
-                  <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center border border-slate-200">
-                    <Package className="w-7 h-7 text-slate-400" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-semibold text-slate-900">Bacteriostatic Water</div>
-                    <div className="text-sm text-slate-500">50ML - Pharma Grade</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-bold text-slate-900">₹{bacWaterPrice.toLocaleString('en-IN')}</div>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setBundleAdded(!bundleAdded)}
-                  disabled={!selectedVariant}
-                  className={`w-full py-3 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
-                    bundleAdded
-                      ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
-                  }`}
-                >
-                  {bundleAdded ? <><Check className="w-4 h-4" /> Bundle Added</> : 'Add to Bundle'}
-                </button>
-              </div>
-            )}
-
-            <div className="bg-white border border-slate-200 rounded-2xl p-6">
-              <h3 className="text-lg font-bold text-slate-900 mb-5">Order Summary</h3>
-
-              <div className="space-y-3 mb-5">
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-600">{product.name} ({selectedVariant?.dosage_mg}{isBacWater ? 'ML' : 'mg'}) x {quantity}</span>
-                  <span className="font-medium text-slate-900">₹{basePrice.toLocaleString('en-IN')}</span>
-                </div>
-                {bundleAdded && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-slate-600">Bacteriostatic Water (50ML)</span>
-                    <span className="font-medium text-slate-900">₹{bacWaterPrice.toLocaleString('en-IN')}</span>
-                  </div>
-                )}
+      {/* ── Mobile sticky bottom bar ──────────────────────────────────────── */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40">
+        <Card className="rounded-none rounded-t-2xl border-t border-slate-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+          <CardBody className="px-4 py-3 flex-row items-center gap-4">
+            <div className="flex-1">
+              <p className="text-xs text-slate-500 mb-0.5">Total</p>
+              <div className="flex items-baseline gap-2">
                 {discountPercent > 0 && (
-                  <div className="flex justify-between text-sm text-emerald-600">
-                    <span className="font-medium">Volume Discount ({discountPercent}%)</span>
-                    <span className="font-semibold">-₹{discountAmount.toLocaleString('en-IN')}</span>
-                  </div>
+                  <span className="text-xs text-slate-400 line-through">₹{subtotal.toLocaleString('en-IN')}</span>
                 )}
+                <span className="text-xl font-bold text-slate-900">₹{totalPrice.toLocaleString('en-IN')}</span>
               </div>
-
-              <div className="pt-4 border-t border-slate-200 flex items-baseline justify-between mb-6">
-                <span className="text-slate-700 font-medium">Total</span>
-                <div className="text-right">
-                  {discountPercent > 0 && (
-                    <span className="text-sm text-slate-400 line-through mr-2">₹{subtotal.toLocaleString('en-IN')}</span>
-                  )}
-                  <span className="text-3xl font-bold text-slate-900">₹{totalPrice.toLocaleString('en-IN')}</span>
-                </div>
-              </div>
-
               {discountPercent > 0 && (
-                <div className="mb-5 p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2">
-                  <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span className="text-sm font-medium text-emerald-800">
-                    You save ₹{discountAmount.toLocaleString('en-IN')} with {discountPercent}% volume discount
-                  </span>
-                </div>
+                <span className="text-xs text-emerald-600 font-semibold">{discountPercent}% OFF applied</span>
               )}
-
-              <div className="space-y-3 mb-6">
-                <div className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-xl">
-                  <MapPin className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                  <div>
-                    <span className="text-sm font-semibold text-blue-900">Free Shipping to India</span>
-                    <p className="text-xs text-blue-700">5-7 business days -- contact support for details</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl">
-                  <Phone className="w-5 h-5 text-slate-500 flex-shrink-0" />
-                  <span className="text-sm text-slate-600">
-                    <strong>International:</strong> Contact support for availability
-                  </span>
-                </div>
-
-                <div className="flex gap-4 px-1">
-                  <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                    <Shield className="w-3.5 h-3.5 text-emerald-500" />
-                    Temperature Controlled
-                  </div>
-                  <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                    <Truck className="w-3.5 h-3.5 text-emerald-500" />
-                    Express Processing
-                  </div>
-                </div>
-              </div>
-
-              <button
-                onClick={handleAddToCart}
-                disabled={!selectedVariant}
-                className="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl transition-all disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center gap-2.5 text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0"
-              >
-                <ShoppingCart className="w-5 h-5" />
-                Order Now
-              </button>
             </div>
-          </div>
-        </div>
+            <Button
+              size="lg"
+              color="primary"
+              isDisabled={!selectedVariant}
+              onPress={handleAddToCart}
+              startContent={<ShoppingCart className="w-5 h-5" />}
+              className="flex-1 font-bold bg-slate-900 text-white"
+            >
+              Order Now
+            </Button>
+          </CardBody>
+        </Card>
       </div>
 
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-4 py-3 z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
-        <div className="flex items-center gap-4">
-          <div className="flex-1">
-            <div className="text-xs text-slate-500 mb-0.5">Total</div>
-            <div className="flex items-baseline gap-2">
-              {discountPercent > 0 && (
-                <span className="text-xs text-slate-400 line-through">₹{subtotal.toLocaleString('en-IN')}</span>
-              )}
-              <span className="text-xl font-bold text-slate-900">₹{totalPrice.toLocaleString('en-IN')}</span>
-            </div>
-            {discountPercent > 0 && (
-              <span className="text-xs text-emerald-600 font-semibold">{discountPercent}% OFF applied</span>
-            )}
-          </div>
-          <button
-            onClick={handleAddToCart}
-            disabled={!selectedVariant}
-            className="flex-1 py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl transition-all disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            <ShoppingCart className="w-5 h-5" />
-            Order Now
-          </button>
-        </div>
-      </div>
     </div>
   );
 }

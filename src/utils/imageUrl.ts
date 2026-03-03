@@ -5,14 +5,39 @@ import bacWaterImage from '../assets/bac-water.png';
 export const BAC_WATER_IMAGE_URL = bacWaterImage;
 
 /**
+ * Maps product name keywords → local public-folder image paths.
+ * Used as primary resolution when Supabase image_url is missing/broken.
+ */
+const NAME_TO_LOCAL_IMAGE: Array<[string, string]> = [
+  ['bacteriostatic', bacWaterImage],
+  ['bac-water',      bacWaterImage],
+  ['retatrutide',    '/retatrutide.jpg'],
+  ['tirzepatide',    '/tirzepatide.jpg'],
+  ['ghk-cu',         '/ghk-cu.jpg'],
+  ['ghk cu',         '/ghk-cu.jpg'],
+  ['igf-1',          '/igf-1-lr3.jpg'],
+  ['igf1',           '/igf-1-lr3.jpg'],
+  ['hgh',            '/hgh-191aa.jpg'],
+];
+
+/**
  * Resolves product image URL for display.
- * Bacteriostatic Water: use bundled asset so it always loads.
+ *
+ * Priority order:
+ * 1. Name-based mapping → always resolves to a known-good local image
+ * 2. Provided imageUrl  → pass-through if name match not found
+ * 3. Empty string       → component will show its bg-color placeholder
  */
 export function getProductImageUrl(imageUrl: string, productName?: string): string {
-  if (productName && productName.toLowerCase().includes('bacteriostatic water')) {
-    return bacWaterImage;
+  const normalizedName = (productName ?? '').toLowerCase();
+
+  for (const [keyword, localPath] of NAME_TO_LOCAL_IMAGE) {
+    if (normalizedName.includes(keyword)) {
+      return localPath;
+    }
   }
-  if (!imageUrl) return imageUrl;
+
+  // Name not matched — try URL-based heuristics for bac-water
   if (
     imageUrl === '/bac-water.jpg' ||
     imageUrl === 'bac-water.jpg' ||
@@ -21,5 +46,6 @@ export function getProductImageUrl(imageUrl: string, productName?: string): stri
   ) {
     return bacWaterImage;
   }
-  return imageUrl;
+
+  return imageUrl ?? '';
 }
