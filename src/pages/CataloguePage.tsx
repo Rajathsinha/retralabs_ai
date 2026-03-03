@@ -439,6 +439,16 @@ export default function CataloguePage() {
     );
   };
 
+  const filteredProducts = products.filter((p) => {
+    if (filter === 'all') return true;
+    if (filter === 'peptide') return p.category === 'research-peptide';
+    if (filter === 'supplies') return p.category !== 'research-peptide';
+    return true;
+  });
+
+  const peptideCount = products.filter((p) => p.category === 'research-peptide').length;
+  const suppliesCount = products.filter((p) => p.category !== 'research-peptide').length;
+
   return (
     <div className="min-h-screen bg-slate-50">
 
