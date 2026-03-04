@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Search, Package, Truck, CheckCircle, Clock, XCircle,
@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { getProductImageUrl, BAC_WATER_IMAGE_URL } from '../utils/imageUrl';
+import { useAuth } from '../context/AuthContext';
 
 /* ── Carrier config ─────────────────────────────────────────── */
 const CARRIERS = [
@@ -90,6 +91,7 @@ function getStatusMeta(status: string): { label: string; color: string; bg: stri
 /* ════════════════════════════════════════════════════════════ */
 export default function OrderTrackingPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   /* Tab state */
   const [tab, setTab] = useState<'carrier' | 'order'>('carrier');
@@ -105,6 +107,11 @@ export default function OrderTrackingPage() {
   const [orderDetails, setOrderDetails] = useState<OrderTrackingDetails | null>(null);
   const [loading,      setLoading]      = useState(false);
   const [orderError,   setOrderError]   = useState('');
+
+  /* ── Auto-fill email from signed-in user ── */
+  useEffect(() => {
+    if (user?.email) setEmail(user.email);
+  }, [user?.email]);
 
   /* ── Carrier: open tracking ── */
   const handleCarrierTrack = () => {
@@ -362,7 +369,14 @@ export default function OrderTrackingPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Email Address</label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-sm font-semibold text-slate-700">Email Address</label>
+                    {user?.email && (
+                      <span className="text-xs text-emerald-600 font-semibold bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                        ✓ Auto-filled
+                      </span>
+                    )}
+                  </div>
                   <input
                     type="email"
                     required

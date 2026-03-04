@@ -4,10 +4,11 @@ import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   ShoppingCart, Calculator, Menu, X,
   Home, FlaskConical, Star, Users, HelpCircle,
-  Search, ChevronDown, Check,
+  Search, ChevronDown, Check, LogOut, UserCircle2,
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useCurrency, CURRENCIES } from '../context/CurrencyContext';
+import { useAuth } from '../context/AuthContext';
 import Logo from './Logo';
 import ReconstitutionCalculator from './ReconstitutionCalculator';
 import SearchModal from './SearchModal';
@@ -21,16 +22,25 @@ const NAV_ITEMS = [
 ];
 
 export default function Header() {
-  const { cart }                    = useCart();
+  const { cart }                      = useCart();
   const { currency, setCurrencyCode } = useCurrency();
-  const cartCount                   = cart.reduce((n, i) => n + i.quantity, 0);
-  const location                    = useLocation();
-  const navigate                    = useNavigate();
-  const [open,       setOpen]       = useState(false);
-  const [scrolled,   setScrolled]   = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
+  const { user, signOut }             = useAuth();
+  const cartCount                     = cart.reduce((n, i) => n + i.quantity, 0);
+  const location                      = useLocation();
+  const navigate                      = useNavigate();
+  const [open,         setOpen]         = useState(false);
+  const [scrolled,     setScrolled]     = useState(false);
+  const [searchOpen,   setSearchOpen]   = useState(false);
   const [currencyOpen, setCurrencyOpen] = useState(false);
+  const [avatarOpen,   setAvatarOpen]   = useState(false);
   const currencyRef = useRef<HTMLDivElement>(null);
+  const avatarRef   = useRef<HTMLDivElement>(null);
+
+  /* User initials for avatar */
+  const initials = user
+    ? (user.user_metadata?.name || user.email || 'U')
+        .split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase()
+    : '';
 
   const { isOpen: calcOpen, onOpen: openCalc, onClose: closeCalc } = useDisclosure();
 
@@ -66,6 +76,17 @@ export default function Header() {
     if (currencyOpen) document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [currencyOpen]);
+
+  /* ── Close avatar dropdown on outside click ── */
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (avatarRef.current && !avatarRef.current.contains(e.target as Node)) {
+        setAvatarOpen(false);
+      }
+    };
+    if (avatarOpen) document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [avatarOpen]);
 
   const active = (path: string) =>
     path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
@@ -198,6 +219,46 @@ export default function Header() {
                 )}
               </div>
 
+              {/* Sign In / Avatar — desktop only */}
+              {user ? (
+                <div className="relative hidden md:block" ref={avatarRef}>
+                  <button
+                    onClick={() => setAvatarOpen(o => !o)}
+                    className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-cyan-600 flex items-center justify-center text-white text-xs font-extrabold hover:opacity-90 transition-opacity"
+                    aria-label="Account menu"
+                  >
+                    {initials}
+                  </button>
+                  {avatarOpen && (
+                    <div className="absolute right-0 top-full mt-2 w-44 bg-slate-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
+                      <div className="px-3 py-2.5 border-b border-white/8">
+                        <p className="text-xs font-bold text-white/80 truncate">{user.user_metadata?.name || 'Account'}</p>
+                        <p className="text-[10px] text-white/40 truncate">{user.email}</p>
+                      </div>
+                      <button
+                        onClick={() => { setAvatarOpen(false); navigate('/account'); }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/6 transition-colors text-left"
+                      >
+                        <UserCircle2 className="w-4 h-4" /> My Account
+                      </button>
+                      <button
+                        onClick={async () => { setAvatarOpen(false); await signOut(); navigate('/'); }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors text-left"
+                      >
+                        <LogOut className="w-4 h-4" /> Sign Out
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <button
+                  onClick={() => navigate('/signin')}
+                  className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-white/60 hover:text-white border border-white/10 hover:border-white/25 hover:bg-white/5 transition-all duration-200"
+                >
+                  Sign In
+                </button>
+              )}
+
               {/* Cart */}
               <button
                 onClick={() => navigate('/checkout')}
@@ -292,7 +353,7 @@ export default function Header() {
               </div>
 
               {/* Cart CTA */}
-              <div className="mt-2 pt-3 border-t border-white/10">
+              <div className="mt-2 pt-3 border-t border-white/10 flex flex-col gap-2">
                 <button
                   onClick={() => { setOpen(false); navigate('/checkout'); }}
                   className="w-full flex items-center justify-center gap-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 text-cyan-300 font-semibold px-4 py-3.5 rounded-xl transition-all duration-200"
@@ -305,6 +366,32 @@ export default function Header() {
                     </span>
                   )}
                 </button>
+
+                {/* Auth row */}
+                {user ? (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => { setOpen(false); navigate('/account'); }}
+                      className="flex-1 flex items-center justify-center gap-2 border border-white/10 text-white/60 hover:text-white hover:bg-white/6 font-semibold px-4 py-3 rounded-xl transition-all duration-200 text-sm"
+                    >
+                      <UserCircle2 className="w-4 h-4" />
+                      My Account
+                    </button>
+                    <button
+                      onClick={async () => { setOpen(false); await signOut(); navigate('/'); }}
+                      className="flex items-center gap-1.5 border border-red-500/20 text-red-400 hover:bg-red-500/10 px-4 py-3 rounded-xl transition-all duration-200 text-sm font-semibold"
+                    >
+                      <LogOut className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => { setOpen(false); navigate('/signin'); }}
+                    className="w-full flex items-center justify-center gap-2 border border-white/10 text-white/60 hover:text-white hover:bg-white/6 font-semibold px-4 py-3 rounded-xl transition-all duration-200 text-sm"
+                  >
+                    Sign In / Register
+                  </button>
+                )}
               </div>
             </nav>
           </div>

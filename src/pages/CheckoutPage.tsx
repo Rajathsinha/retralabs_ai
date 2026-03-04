@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Button,
@@ -11,10 +11,12 @@ import {
 import { getProductImageUrl, BAC_WATER_IMAGE_URL } from '../utils/imageUrl';
 import { Minus, Plus, Trash2, Check, MessageCircle, Tag, ShoppingBag, ArrowRight } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { OrderFormData } from '../types';
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const {
     cart,
     removeFromCart,
@@ -33,6 +35,19 @@ export default function CheckoutPage() {
     shipping_address: '',
     disclaimer_accepted: false,
   });
+
+  /* ── Pre-fill from user profile if signed in ── */
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        customer_name:    user.user_metadata?.name    || prev.customer_name,
+        customer_email:   user.email                  || prev.customer_email,
+        customer_phone:   user.user_metadata?.phone   || prev.customer_phone,
+        shipping_address: user.user_metadata?.address || prev.shipping_address,
+      }));
+    }
+  }, [user]);
   const [orderReady, setOrderReady] = useState(false);   // step 2: review screen
   const [whatsappUrl, setWhatsappUrl] = useState('');
   const [orderSent, setOrderSent] = useState(false);     // step 3: done
