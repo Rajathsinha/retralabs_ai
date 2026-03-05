@@ -1,112 +1,190 @@
-import { Mail, MessageSquare, Clock, AlertTriangle } from 'lucide-react';
-import { Card, CardBody, Accordion, AccordionItem, Link } from '@heroui/react';
-import ScrollReveal from '../components/ScrollReveal';
-
-const FAQ_ITEMS = [
-  {
-    q: 'Do you ship internationally?',
-    a: 'Yes, we ship to most countries. Shipping times and availability may vary based on location and local regulations.',
-  },
-  {
-    q: 'How are products stored and shipped?',
-    a: 'All products are stored under controlled conditions and shipped with appropriate cooling measures to maintain stability during transit.',
-  },
-  {
-    q: 'Can I get certificates of analysis?',
-    a: 'Yes, certificates of analysis are available upon request for all products. Please contact us with your order details.',
-  },
-];
+import { useState } from 'react';
+import {
+  Button,
+  Card,
+  CardBody,
+  Chip,
+  Divider,
+  Input,
+  Textarea,
+} from '@heroui/react';
+import { Mail, MessageSquare, Clock, AlertTriangle, Send } from 'lucide-react';
 
 export default function ContactPage() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [subject, setSubject] = useState('');
+  const [message, setMessage] = useState('');
+  const [isSending, setIsSending] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSending(true);
+
+    const body = `Name: ${name}\nEmail: ${email}\n\n${message}`;
+    const mailtoUrl = `mailto:support@retralabs.in?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.open(mailtoUrl, '_blank');
+
+    setTimeout(() => {
+      setIsSending(false);
+      setName('');
+      setEmail('');
+      setSubject('');
+      setMessage('');
+    }, 1000);
+  };
+
+  const contactMethods = [
+    {
+      icon: MessageSquare,
+      title: 'WhatsApp',
+      desc: 'Quick questions & real-time support',
+      chip: { label: '1hr SLA · 9AM–6PM', color: 'success' as const },
+      href: 'https://wa.me/918217824384?text=Hello%2C%20I%20came%20across%20your%20website%20RetraLabs',
+      linkText: '+91 8217824384',
+      iconClass: 'text-emerald-600',
+      iconBg: 'bg-emerald-100',
+    },
+    {
+      icon: Mail,
+      title: 'Email Support',
+      desc: 'Send us a detailed inquiry',
+      chip: { label: 'Responds in 24hrs', color: 'primary' as const },
+      href: 'mailto:support@retralabs.in',
+      linkText: 'support@retralabs.in',
+      iconClass: 'text-blue-600',
+      iconBg: 'bg-blue-100',
+    },
+    {
+      icon: Clock,
+      title: 'Business Hours',
+      desc: 'Monday to Saturday',
+      chip: { label: '9:00 AM – 6:00 PM IST', color: 'warning' as const },
+      href: '',
+      linkText: '',
+      iconClass: 'text-amber-600',
+      iconBg: 'bg-amber-100',
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <ScrollReveal>
-          <h1 className="section-heading mb-4">Contact Us</h1>
-          <p className="text-lg text-slate-500 mb-12 max-w-2xl">
-            We're here to assist with your research needs. Our team typically responds within 24 hours.
+      {/* Hero section */}
+      <div className="bg-white border-b border-slate-200">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+          <h1 className="text-4xl font-bold text-slate-900 mb-3">Say Something. We're Listening.</h1>
+          <p className="text-lg text-slate-500 max-w-xl">
+            Questions, concerns, or just want to tell us the reta is working? We read everything. Usually within 24 hours.
           </p>
-        </ScrollReveal>
+        </div>
+      </div>
 
-        <div className="grid md:grid-cols-3 gap-5 mb-12">
-          {[
-            {
-              icon: Mail,
-              title: 'Email Support',
-              desc: 'Send us a detailed inquiry',
-              link: 'mailto:support@retralabs.in',
-              linkText: 'support@retralabs.in',
-              color: 'bg-blue-50 border-blue-100',
-              iconBg: 'bg-blue-100',
-              iconColor: 'text-blue-600',
-            },
-            {
-              icon: MessageSquare,
-              title: 'WhatsApp',
-              desc: 'Quick questions & real-time support',
-              link: 'https://wa.me/918217824384?text=Hello%2C%20I%20came%20across%20your%20website%20RetraLabs',
-              linkText: '+91 8217824384',
-              color: 'bg-emerald-50 border-emerald-100',
-              iconBg: 'bg-emerald-100',
-              iconColor: 'text-emerald-600',
-            },
-            {
-              icon: Clock,
-              title: 'Response Time',
-              desc: 'We respond within 24 hours on business days',
-              link: '',
-              linkText: '',
-              color: 'bg-amber-50 border-amber-100',
-              iconBg: 'bg-amber-100',
-              iconColor: 'text-amber-600',
-            },
-          ].map((item, i) => (
-            <ScrollReveal key={item.title} delay={i * 100}>
-              <Card shadow="none" classNames={{ base: `border ${item.color}` }} className="card-hover">
-                <CardBody className="p-6">
-                  <div className={`w-12 h-12 ${item.iconBg} rounded-xl flex items-center justify-center mb-4`}>
-                    <item.icon className={`w-5 h-5 ${item.iconColor}`} />
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Contact method cards */}
+        <div className="grid md:grid-cols-3 gap-4 mb-12">
+          {contactMethods.map((method) => (
+            <Card key={method.title} shadow="none" className="border border-slate-200 hover:border-slate-300 transition-colors">
+              <CardBody className="p-5">
+                <div className={`w-11 h-11 ${method.iconBg} rounded-xl flex items-center justify-center mb-4`}>
+                  <method.icon className={`w-5 h-5 ${method.iconClass}`} />
+                </div>
+                <h3 className="font-bold text-slate-900 mb-1">{method.title}</h3>
+                <p className="text-sm text-slate-500 mb-3">{method.desc}</p>
+                <Chip size="sm" color={method.chip.color} variant="flat" className="mb-3">
+                  {method.chip.label}
+                </Chip>
+                {method.href && (
+                  <div className="mt-1">
+                    <a
+                      href={method.href}
+                      target={method.href.startsWith('http') ? '_blank' : undefined}
+                      rel={method.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                      className="text-sm font-semibold text-brand-600 hover:text-brand-700 transition-colors"
+                    >
+                      {method.linkText}
+                    </a>
                   </div>
-                  <h3 className="font-bold text-slate-900 mb-1">{item.title}</h3>
-                  <p className="text-sm text-slate-500 mb-3">{item.desc}</p>
-                  {item.link && (
-                    <Link href={item.link} color="primary" className="text-sm font-semibold">
-                      {item.linkText}
-                    </Link>
-                  )}
-                </CardBody>
-              </Card>
-            </ScrollReveal>
+                )}
+              </CardBody>
+            </Card>
           ))}
         </div>
 
-        <ScrollReveal>
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold text-slate-900 mb-6">Frequently Asked Questions</h2>
-            <Accordion variant="bordered">
-              {FAQ_ITEMS.map((item, index) => (
-                <AccordionItem key={index} title={item.q} classNames={{ title: 'font-semibold text-slate-900' }}>
-                  <p className="text-slate-600 leading-relaxed pb-2">{item.a}</p>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </div>
-        </ScrollReveal>
+        <Divider className="mb-12" />
 
-        <ScrollReveal>
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 flex items-start gap-4">
-            <div className="p-2 bg-amber-100 rounded-xl flex-shrink-0">
-              <AlertTriangle className="w-5 h-5 text-amber-600" />
-            </div>
-            <div>
-              <h3 className="font-bold text-amber-900 mb-1">Important Notice</h3>
-              <p className="text-sm text-amber-800 leading-relaxed">
-                All products are strictly for research use only. We do not provide medical advice or support
-                any use outside of laboratory research environments.
-              </p>
-            </div>
+        {/* Contact form */}
+        <div className="grid md:grid-cols-2 gap-12 items-start">
+          <div>
+            <h2 className="text-2xl font-bold text-slate-900 mb-2">Send Us a Message.</h2>
+            <p className="text-slate-500 mb-6 text-sm leading-relaxed">
+              Fill in the form and we'll get back to you ASAP. For anything urgent, just WhatsApp us — it's faster and we're actually on it.
+            </p>
+
+            {/* Important notice */}
+            <Card shadow="none" className="border border-amber-200 bg-amber-50">
+              <CardBody className="flex flex-row items-start gap-3 p-4">
+                <div className="p-1.5 bg-amber-100 rounded-lg flex-shrink-0 mt-0.5">
+                  <AlertTriangle className="w-4 h-4 text-amber-600" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-amber-900 mb-1">Important Notice</h3>
+                  <p className="text-xs text-amber-800 leading-relaxed">
+                    All products are strictly for research use only. We do not provide medical
+                    advice or support any use outside of laboratory research environments.
+                  </p>
+                </div>
+              </CardBody>
+            </Card>
           </div>
-        </ScrollReveal>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <Input
+              label="Your Name"
+              placeholder="Full name"
+              variant="bordered"
+              isRequired
+              value={name}
+              onValueChange={setName}
+            />
+            <Input
+              label="Email Address"
+              placeholder="you@email.com"
+              type="email"
+              variant="bordered"
+              isRequired
+              value={email}
+              onValueChange={setEmail}
+            />
+            <Input
+              label="Subject"
+              placeholder="How can we help?"
+              variant="bordered"
+              isRequired
+              value={subject}
+              onValueChange={setSubject}
+            />
+            <Textarea
+              label="Message"
+              placeholder="Describe your inquiry in detail..."
+              variant="bordered"
+              minRows={5}
+              isRequired
+              value={message}
+              onValueChange={setMessage}
+            />
+            <Button
+              type="submit"
+              color="primary"
+              size="lg"
+              fullWidth
+              isLoading={isSending}
+              startContent={!isSending && <Send className="w-4 h-4" />}
+              className="font-semibold"
+            >
+              {isSending ? 'Opening email client...' : 'Send Message'}
+            </Button>
+          </form>
+        </div>
       </div>
     </div>
   );
