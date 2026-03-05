@@ -534,9 +534,9 @@ export default function ProductDetailPage() {
             {/* Description */}
             <div>
               {product.category && (
-                <span className="inline-block mb-3 px-3 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-full uppercase tracking-wider">
+                <Chip variant="flat" color="default" size="sm" className="mb-3 uppercase tracking-wider text-xs font-bold">
                   {product.category}
-                </span>
+                </Chip>
               )}
               <p className="text-lg text-slate-600 leading-relaxed">{product.description}</p>
             </div>

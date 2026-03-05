@@ -292,7 +292,11 @@ export default function Header() {
                     {cartCount}
                   </span>
                 )}
-              </button>
+              </Button>
+            </Tooltip>
+          </NavbarItem>
+          <NavbarMenuToggle className="md:hidden" />
+        </NavbarContent>
 
               {/* Hamburger — mobile only */}
               <button

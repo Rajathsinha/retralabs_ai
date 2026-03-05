@@ -10,6 +10,7 @@ import {
   Divider,
 } from '@heroui/react';
 import { supabase } from '../lib/supabase';
+import { Button, Card, CardBody, Spinner } from '@heroui/react';
 
 interface OrderDetails {
   id: string;
