@@ -15,6 +15,7 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { getProductImageUrl, BAC_WATER_IMAGE_URL } from '../utils/imageUrl';
 import { ProductWithVariants } from '../types';
 import { useCurrency } from '../context/CurrencyContext';
+import { useSEO } from '../hooks/useSEO';
 import { ShieldCheck, FlaskConical, FileCheck, Microscope, Sparkles, ArrowRight } from 'lucide-react';
 
 const DEMO_PRODUCTS: ProductWithVariants[] = [
@@ -149,6 +150,14 @@ export default function CataloguePage() {
   const [products, setProducts] = useState<ProductWithVariants[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterType>('all');
+
+  useSEO({
+    title: 'Buy Research Peptides India | Retatrutide, Tirzepatide, GHK-Cu | RetraLabs',
+    description: 'Buy research-grade Retatrutide, Tirzepatide, GHK-Cu, HGH 191AA & IGF-1 LR3 in India. 99%+ HPLC purity, COA verified. Retatrutide from ₹4,000. India-wide shipping.',
+    keywords: 'buy retatrutide india, retatrutide catalogue india, buy tirzepatide india, GHK-Cu india, research peptides india, reta india, peptide catalogue india, buy peptides online india',
+    canonical: 'https://retralabs.in/catalogue',
+    ogImage: 'https://retralabs.in/retatrutide.jpg',
+  });
 
   useEffect(() => {
     loadProducts();
