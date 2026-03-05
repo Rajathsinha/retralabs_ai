@@ -17,6 +17,7 @@ import { getProductImageUrl, BAC_WATER_IMAGE_URL } from '../utils/imageUrl';
 import { ProductWithVariants, ProductVariant } from '../types';
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
+import { useSEO } from '../hooks/useSEO';
 import {
   ChevronLeft,
   Star,
@@ -167,6 +168,54 @@ export default function ProductDetailPage() {
   const [bundleAdded, setBundleAdded] = useState(false);
   const { addToCart } = useCart();
   const { format } = useCurrency();
+
+  // ── Per-product SEO ──────────────────────────────────────────────────────
+  const purity = product ? (PURITY_MAP[product.name] ?? '99+') : '99+';
+  const lowestPrice = product ? Math.min(...product.variants.map(v => v.price_inr)) : 0;
+  const seoTitle = product
+    ? `Buy ${product.name} India | ${purity}% Purity | ₹${lowestPrice.toLocaleString('en-IN')} | RetraLabs`
+    : 'Research Peptides India | RetraLabs';
+  const seoDesc = product
+    ? `Buy ${product.name} in India for laboratory research. ${purity}% HPLC-verified purity, Certificate of Analysis included. From ₹${lowestPrice.toLocaleString('en-IN')}. ${product.description} India-wide shipping, temperature-controlled packaging.`
+    : 'Research-grade peptides for laboratory use in India. HPLC verified, COA included.';
+  const seoKeywords = product
+    ? `buy ${product.name.toLowerCase()} india, ${product.name.toLowerCase()} india, ${product.name.toLowerCase()} price india, ${product.name.toLowerCase()} buy online india, ${product.name.toLowerCase()} for sale india, research peptides india`
+    : 'research peptides india';
+  const seoImage = product ? `https://retralabs.in${product.image_url}` : 'https://retralabs.in/retatrutide.jpg';
+  const seoCanonical = product ? `https://retralabs.in/product/${product.id}` : undefined;
+
+  const productSchema = product ? {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: `${product.name} (Research Grade) India`,
+    description: `${product.description} HPLC-verified ${purity}% purity. For laboratory research use only.`,
+    image: seoImage,
+    brand: { '@type': 'Brand', name: 'RetraLabs' },
+    url: seoCanonical,
+    offers: product.variants.map(v => ({
+      '@type': 'Offer',
+      price: v.price_inr,
+      priceCurrency: 'INR',
+      availability: v.in_stock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      url: seoCanonical,
+      seller: { '@type': 'Organization', name: 'RetraLabs' },
+    })),
+    additionalProperty: [
+      { '@type': 'PropertyValue', name: 'HPLC Purity', value: `${purity}%` },
+      { '@type': 'PropertyValue', name: 'COA Included', value: 'Yes' },
+      { '@type': 'PropertyValue', name: 'Country of Availability', value: 'India' },
+    ],
+  } : null;
+
+  useSEO({
+    title: seoTitle,
+    description: seoDesc,
+    keywords: seoKeywords,
+    canonical: seoCanonical,
+    ogImage: seoImage,
+    schema: productSchema ? [productSchema] : undefined,
+  });
+  // ────────────────────────────────────────────────────────────────────────
 
   useEffect(() => {
     if (id) loadProduct(id);
