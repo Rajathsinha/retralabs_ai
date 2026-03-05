@@ -146,15 +146,8 @@ export default function HomePage() {
                 />
               ))}
             </div>
-            <p className="text-lg md:text-xl text-slate-400 mb-4 leading-relaxed max-w-2xl mx-auto" style={{ animationDelay: '100ms' }}>
-              Fake vials. Useless compounds. Thousands wasted. We couldn't find a single legitimate peptide supplier in India — so we went directly to GMP manufacturers, got HPLC testing done, and made it accessible to everyone.
-            </p>
-            <p className="text-slate-500 text-sm italic mb-10" style={{ animationDelay: '150ms' }}>
-              That's the whole story. Everything else is just good products at honest prices.
-            </p>
-
             {/* CTAs */}
-            <div className="flex flex-col sm:flex-row gap-3 justify-center mb-16" style={{ animationDelay: '200ms' }}>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center mb-16 mt-8" style={{ animationDelay: '200ms' }}>
               <button
                 type="button"
                 onClick={() => navigate('/catalogue')}
