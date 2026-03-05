@@ -15,6 +15,7 @@ export const CURRENCIES: Record<string, Currency> = {
   GBP: { code: 'GBP', symbol: '£',  name: 'British Pound',      rate: 0.0095,  flag: '🇬🇧' },
   AUD: { code: 'AUD', symbol: 'A$', name: 'Australian Dollar',  rate: 0.019,   flag: '🇦🇺' },
   SGD: { code: 'SGD', symbol: 'S$', name: 'Singapore Dollar',   rate: 0.016,   flag: '🇸🇬' },
+  KRW: { code: 'KRW', symbol: '₩',  name: 'Korean Won',         rate: 16.2,    flag: '🇰🇷' },
 };
 
 function detectCurrencyCode(): string {
@@ -24,11 +25,12 @@ function detectCurrencyCode(): string {
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     if (tz === 'Asia/Kolkata' || tz === 'Asia/Calcutta') return 'INR';
-    if (tz === 'Europe/London')   return 'GBP';
-    if (tz.startsWith('Europe/')) return 'EUR';
+    if (tz === 'Europe/London')    return 'GBP';
+    if (tz.startsWith('Europe/'))  return 'EUR';
     if (tz.startsWith('America/')) return 'USD';
     if (tz.startsWith('Australia/')) return 'AUD';
-    if (tz === 'Asia/Singapore')  return 'SGD';
+    if (tz === 'Asia/Singapore')   return 'SGD';
+    if (tz === 'Asia/Seoul')       return 'KRW';
   } catch { /* ignore */ }
 
   return 'INR';
@@ -57,7 +59,10 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     if (currency.code === 'INR') {
       return `₹${Math.round(val).toLocaleString('en-IN')}`;
     }
-    return `${currency.symbol}${Math.round(val).toLocaleString('en-US')}`;
+    if (currency.code === 'KRW') {
+      return `₩${Math.round(val).toLocaleString('ko-KR')}`;
+    }
+    return `${currency.symbol}${val.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
   };
 
   return (

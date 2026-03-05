@@ -14,6 +14,7 @@ import {
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { getProductImageUrl, BAC_WATER_IMAGE_URL } from '../utils/imageUrl';
 import { ProductWithVariants } from '../types';
+import { useCurrency } from '../context/CurrencyContext';
 import { ShieldCheck, FlaskConical, FileCheck, Microscope, Sparkles, ArrowRight } from 'lucide-react';
 
 const DEMO_PRODUCTS: ProductWithVariants[] = [
@@ -143,6 +144,7 @@ function SkeletonCard() {
 
 export default function CataloguePage() {
   const navigate = useNavigate();
+  const { format } = useCurrency();
   const [products, setProducts] = useState<ProductWithVariants[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterType>('all');
@@ -396,7 +398,7 @@ export default function CataloguePage() {
                         <div className="flex items-baseline gap-1">
                           <span className="text-xs text-slate-400 font-medium">From</span>
                           <span className="text-xl font-bold text-slate-900">
-                            ₹{startingPrice.toLocaleString('en-IN')}
+                            {format(startingPrice)}
                           </span>
                         </div>
                       )}

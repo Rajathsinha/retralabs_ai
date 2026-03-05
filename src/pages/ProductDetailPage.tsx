@@ -16,6 +16,7 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { getProductImageUrl, BAC_WATER_IMAGE_URL } from '../utils/imageUrl';
 import { ProductWithVariants, ProductVariant } from '../types';
 import { useCart } from '../context/CartContext';
+import { useCurrency } from '../context/CurrencyContext';
 import {
   ChevronLeft,
   Star,
@@ -164,6 +165,7 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [bundleAdded, setBundleAdded] = useState(false);
   const { addToCart } = useCart();
+  const { format } = useCurrency();
 
   useEffect(() => {
     if (id) loadProduct(id);
@@ -325,7 +327,7 @@ export default function ProductDetailPage() {
   const totalPrice = subtotal - discountAmount;
 
   const whatsappMsg = encodeURIComponent(
-    `Hi! I'd like to order ${product.name}${selectedVariant ? ` — ${selectedVariant.dosage_mg}${isBacWater ? 'ML' : 'mg'} (₹${selectedVariant.price_inr.toLocaleString('en-IN')})` : ''}. Can you help me complete my order?`
+    `Hi! I'd like to order ${product.name}${selectedVariant ? ` — ${selectedVariant.dosage_mg}${isBacWater ? 'ML' : 'mg'} (${format(selectedVariant.price_inr)})` : ''}. Can you help me complete my order?`
   );
 
   return (
@@ -588,7 +590,7 @@ export default function ProductDetailPage() {
                           </div>
                         )}
                         <p className={`font-bold text-xl mb-0.5 ${isSelected ? (variant.is_recommended ? 'text-emerald-900' : 'text-slate-900') : 'text-slate-700'}`}>
-                          ₹{variant.price_inr.toLocaleString('en-IN')}
+                          {format(variant.price_inr)}
                         </p>
                         <p className="text-sm text-slate-500 font-medium">
                           {isBacWater ? `${variant.dosage_mg}ML` : `${variant.dosage_mg}mg`}
@@ -649,7 +651,7 @@ export default function ProductDetailPage() {
                   <div className="mt-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2.5">
                     <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
                     <span className="text-sm font-medium text-emerald-800">
-                      {discountPercent}% volume discount applied — saving ₹{discountAmount.toLocaleString('en-IN')}
+                      {discountPercent}% volume discount applied — saving {format(discountAmount)}
                     </span>
                   </div>
                 )}
@@ -680,7 +682,7 @@ export default function ProductDetailPage() {
                       <p className="font-semibold text-slate-900">Bacteriostatic Water</p>
                       <p className="text-sm text-slate-500">50ML — Pharma Grade · Required for reconstitution</p>
                     </div>
-                    <p className="font-bold text-slate-900 flex-shrink-0">₹{bacWaterPrice.toLocaleString('en-IN')}</p>
+                    <p className="font-bold text-slate-900 flex-shrink-0">{format(bacWaterPrice)}</p>
                   </div>
                   <Button
                     fullWidth
@@ -707,14 +709,14 @@ export default function ProductDetailPage() {
                     <span className="text-slate-600">
                       {product.name} ({selectedVariant?.dosage_mg}{isBacWater ? 'ML' : 'mg'}) × {quantity}
                     </span>
-                    <span className="font-medium text-slate-900">₹{basePrice.toLocaleString('en-IN')}</span>
+                    <span className="font-medium text-slate-900">{format(basePrice)}</span>
                   </div>
                   {bundleAdded && (
                     <>
                       <Divider />
                       <div className="flex justify-between text-sm">
                         <span className="text-slate-600">Bacteriostatic Water (50ML)</span>
-                        <span className="font-medium text-slate-900">₹{bacWaterPrice.toLocaleString('en-IN')}</span>
+                        <span className="font-medium text-slate-900">{format(bacWaterPrice)}</span>
                       </div>
                     </>
                   )}
@@ -723,7 +725,7 @@ export default function ProductDetailPage() {
                       <Divider />
                       <div className="flex justify-between text-sm text-emerald-600">
                         <span className="font-medium">Volume Discount ({discountPercent}%)</span>
-                        <span className="font-semibold">−₹{discountAmount.toLocaleString('en-IN')}</span>
+                        <span className="font-semibold">−{format(discountAmount)}</span>
                       </div>
                     </>
                   )}
@@ -735,9 +737,9 @@ export default function ProductDetailPage() {
                   <span className="text-slate-700 font-medium">Total</span>
                   <div className="text-right">
                     {discountPercent > 0 && (
-                      <span className="text-sm text-slate-400 line-through mr-2">₹{subtotal.toLocaleString('en-IN')}</span>
+                      <span className="text-sm text-slate-400 line-through mr-2">{format(subtotal)}</span>
                     )}
-                    <span className="text-3xl font-bold text-slate-900">₹{totalPrice.toLocaleString('en-IN')}</span>
+                    <span className="text-3xl font-bold text-slate-900">{format(totalPrice)}</span>
                   </div>
                 </div>
 
@@ -745,7 +747,7 @@ export default function ProductDetailPage() {
                   <div className="mb-5 p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2">
                     <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
                     <span className="text-sm font-medium text-emerald-800">
-                      You save ₹{discountAmount.toLocaleString('en-IN')} with {discountPercent}% volume discount
+                      You save {format(discountAmount)} with {discountPercent}% volume discount
                     </span>
                   </div>
                 )}
@@ -881,9 +883,9 @@ export default function ProductDetailPage() {
               <p className="text-xs text-slate-500 mb-0.5">Total</p>
               <div className="flex items-baseline gap-2">
                 {discountPercent > 0 && (
-                  <span className="text-xs text-slate-400 line-through">₹{subtotal.toLocaleString('en-IN')}</span>
+                  <span className="text-xs text-slate-400 line-through">{format(subtotal)}</span>
                 )}
-                <span className="text-xl font-bold text-slate-900">₹{totalPrice.toLocaleString('en-IN')}</span>
+                <span className="text-xl font-bold text-slate-900">{format(totalPrice)}</span>
               </div>
               {discountPercent > 0 && (
                 <span className="text-xs text-emerald-600 font-semibold">{discountPercent}% OFF applied</span>
