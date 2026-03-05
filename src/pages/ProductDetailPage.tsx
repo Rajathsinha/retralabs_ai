@@ -238,7 +238,22 @@ export default function ProductDetailPage() {
     }
   }
 
+  const [cartAdded, setCartAdded] = useState(false);
+
   const handleAddToCart = () => {
+    if (!product || !selectedVariant) return;
+    for (let i = 0; i < quantity; i++) {
+      addToCart(product, selectedVariant);
+    }
+    if (bundleAdded && bacWater) {
+      const bacWaterVariant = bacWater.variants.find((v) => v.dosage_mg === 50);
+      if (bacWaterVariant) addToCart(bacWater, bacWaterVariant);
+    }
+    setCartAdded(true);
+    setTimeout(() => setCartAdded(false), 2000);
+  };
+
+  const handleOrderNow = () => {
     if (!product || !selectedVariant) return;
     for (let i = 0; i < quantity; i++) {
       addToCart(product, selectedVariant);
@@ -815,11 +830,27 @@ export default function ProductDetailPage() {
                   color="primary"
                   fullWidth
                   isDisabled={!selectedVariant}
-                  onPress={handleAddToCart}
+                  onPress={handleOrderNow}
                   startContent={<ShoppingCart className="w-5 h-5" />}
                   className="font-bold text-lg bg-slate-900 hover:bg-slate-800 text-white shadow-lg"
                 >
                   Order Now
+                </Button>
+
+                {/* Add to Cart */}
+                <Button
+                  size="lg"
+                  fullWidth
+                  isDisabled={!selectedVariant}
+                  onPress={handleAddToCart}
+                  startContent={cartAdded ? <Check className="w-5 h-5" /> : <ShoppingCart className="w-5 h-5" />}
+                  className={`font-bold text-lg border-2 transition-all ${
+                    cartAdded
+                      ? 'bg-emerald-50 border-emerald-400 text-emerald-700'
+                      : 'bg-white border-slate-200 hover:border-slate-400 text-slate-800 hover:bg-slate-50'
+                  }`}
+                >
+                  {cartAdded ? 'Added to Cart!' : 'Add to Cart'}
                 </Button>
               </CardBody>
             </Card>
@@ -891,12 +922,26 @@ export default function ProductDetailPage() {
                 <span className="text-xs text-emerald-600 font-semibold">{discountPercent}% OFF applied</span>
               )}
             </div>
+            {/* Add to Cart — icon only on mobile sticky bar */}
+            <Button
+              size="lg"
+              isIconOnly
+              isDisabled={!selectedVariant}
+              onPress={handleAddToCart}
+              className={`border-2 transition-all ${
+                cartAdded
+                  ? 'bg-emerald-50 border-emerald-400 text-emerald-700'
+                  : 'bg-white border-slate-200 text-slate-700 hover:border-slate-400 hover:bg-slate-50'
+              }`}
+              aria-label="Add to cart"
+            >
+              {cartAdded ? <Check className="w-5 h-5" /> : <ShoppingCart className="w-5 h-5" />}
+            </Button>
             <Button
               size="lg"
               color="primary"
               isDisabled={!selectedVariant}
-              onPress={handleAddToCart}
-              startContent={<ShoppingCart className="w-5 h-5" />}
+              onPress={handleOrderNow}
               className="flex-1 font-bold bg-slate-900 text-white"
             >
               Order Now
