@@ -876,8 +876,8 @@ export default function ProductDetailPage() {
       </div>
 
       {/* ── Mobile sticky bottom bar ──────────────────────────────────────── */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40">
-        <Card className="rounded-none rounded-t-2xl border-t border-slate-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 shadow-[0_-4px_20px_rgba(0,0,0,0.10)] rounded-t-2xl">
+        <Card className="rounded-none rounded-t-2xl bg-white shadow-none border-none">
           <CardBody className="px-4 py-3 flex-row items-center gap-4">
             <div className="flex-1">
               <p className="text-xs text-slate-500 mb-0.5">Total</p>
