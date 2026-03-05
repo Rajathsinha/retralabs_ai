@@ -806,52 +806,45 @@ export default function ProductDetailPage() {
                   </div>
                 </div>
 
-                {/* WhatsApp CTA */}
+                {/* ── Primary CTA row ── */}
+                <div className="flex gap-3">
+                  {/* Order Now — primary */}
+                  <Button
+                    size="lg"
+                    color="primary"
+                    isDisabled={!selectedVariant}
+                    onPress={handleOrderNow}
+                    className="flex-1 font-bold bg-slate-900 hover:bg-slate-800 text-white"
+                  >
+                    Order Now
+                  </Button>
+
+                  {/* Add to Cart — secondary icon+label */}
+                  <Button
+                    size="lg"
+                    isDisabled={!selectedVariant}
+                    onPress={handleAddToCart}
+                    className={`px-4 font-semibold border-2 transition-all ${
+                      cartAdded
+                        ? 'bg-emerald-50 border-emerald-400 text-emerald-700'
+                        : 'bg-white border-slate-200 hover:border-slate-400 text-slate-700 hover:bg-slate-50'
+                    }`}
+                    startContent={cartAdded ? <Check className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
+                  >
+                    {cartAdded ? 'Added!' : 'Cart'}
+                  </Button>
+                </div>
+
+                {/* WhatsApp — subtle link */}
                 <a
                   href={`https://wa.me/918217824384?text=${whatsappMsg}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block w-full mb-3"
+                  className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 transition-colors text-emerald-700 font-semibold text-sm"
                 >
-                  <Button
-                    size="lg"
-                    color="success"
-                    fullWidth
-                    startContent={<MessageCircle className="w-5 h-5" />}
-                    className="font-bold text-white bg-emerald-500 hover:bg-emerald-600"
-                  >
-                    Order via WhatsApp
-                  </Button>
+                  <MessageCircle className="w-4 h-4" />
+                  Enquire via WhatsApp
                 </a>
-
-                {/* Checkout CTA */}
-                <Button
-                  size="lg"
-                  color="primary"
-                  fullWidth
-                  isDisabled={!selectedVariant}
-                  onPress={handleOrderNow}
-                  startContent={<ShoppingCart className="w-5 h-5" />}
-                  className="font-bold text-lg bg-slate-900 hover:bg-slate-800 text-white shadow-lg"
-                >
-                  Order Now
-                </Button>
-
-                {/* Add to Cart */}
-                <Button
-                  size="lg"
-                  fullWidth
-                  isDisabled={!selectedVariant}
-                  onPress={handleAddToCart}
-                  startContent={cartAdded ? <Check className="w-5 h-5" /> : <ShoppingCart className="w-5 h-5" />}
-                  className={`font-bold text-lg border-2 transition-all ${
-                    cartAdded
-                      ? 'bg-emerald-50 border-emerald-400 text-emerald-700'
-                      : 'bg-white border-slate-200 hover:border-slate-400 text-slate-800 hover:bg-slate-50'
-                  }`}
-                >
-                  {cartAdded ? 'Added to Cart!' : 'Add to Cart'}
-                </Button>
               </CardBody>
             </Card>
 
