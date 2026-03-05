@@ -9,14 +9,14 @@ import {
   Divider,
 } from '@heroui/react';
 import { getProductImageUrl, BAC_WATER_IMAGE_URL } from '../utils/imageUrl';
-import { Minus, Plus, Trash2, Check, MessageCircle, Tag, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Minus, Plus, Trash2, Check, MessageCircle, Tag, ShoppingBag, ArrowRight, LogIn, UserPlus } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { OrderFormData } from '../types';
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const {
     cart,
     removeFromCart,
@@ -92,19 +92,49 @@ export default function CheckoutPage() {
     setTimeout(() => navigate('/'), 4000);
   };
 
-  /* ── Step 3: order sent ── */
+  /* ── Step 3: enquiry sent → prompt sign-in if guest ── */
   if (orderSent) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
-        <div className="text-center max-w-md mx-auto">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-12">
+        <div className="text-center max-w-sm mx-auto">
+          {/* Success tick */}
           <div className="w-20 h-20 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
             <Check className="w-10 h-10 text-emerald-600" />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">You're done!</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Enquiry sent!</h2>
           <p className="text-slate-500 mb-1 leading-relaxed">
-            Your order details are on WhatsApp. Our team will reply with a UPI QR within the hour.
+            Your order details are on WhatsApp. Our team will reply with a UPI payment link within the hour.
           </p>
-          <p className="text-sm text-slate-400 mt-4">Heading back home in a sec...</p>
+
+          {/* Guest: nudge to create account for tracking */}
+          {!authLoading && !user && (
+            <div className="mt-8 bg-white rounded-2xl border border-slate-200 p-5 text-left">
+              <p className="text-sm font-bold text-slate-900 mb-1">Track this order easily</p>
+              <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+                Create a free account to view order history and get faster checkout next time — no re-entering details.
+              </p>
+              <div className="space-y-2">
+                <button
+                  onClick={() => navigate('/register')}
+                  className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-700 text-white font-bold py-3 rounded-xl text-sm transition-colors"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  Create Account
+                </button>
+                <button
+                  onClick={() => navigate('/signin')}
+                  className="w-full flex items-center justify-center gap-2 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-700 font-semibold py-3 rounded-xl text-sm transition-all"
+                >
+                  <LogIn className="w-4 h-4" />
+                  Sign In
+                </button>
+              </div>
+            </div>
+          )}
+
+          <p className="text-sm text-slate-400 mt-6">
+            {user ? 'Heading back home in a sec\u2026' : "Or we'll take you home in a moment."}
+          </p>
         </div>
       </div>
     );

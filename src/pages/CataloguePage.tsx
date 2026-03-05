@@ -14,6 +14,7 @@ import {
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { getProductImageUrl, BAC_WATER_IMAGE_URL } from '../utils/imageUrl';
 import { ProductWithVariants } from '../types';
+import { useCurrency } from '../context/CurrencyContext';
 import { ShieldCheck, FlaskConical, FileCheck, Microscope, Sparkles, ArrowRight } from 'lucide-react';
 
 const DEMO_PRODUCTS: ProductWithVariants[] = [
@@ -25,6 +26,7 @@ const DEMO_PRODUCTS: ProductWithVariants[] = [
     image_url: '/retatrutide.jpg',
     created_at: new Date().toISOString(),
     variants: [
+      { id: '1s', product_id: '1', dosage_mg: 10, price_inr: 4000, in_stock: true, vial_configuration: 'Starter vial', created_at: new Date().toISOString() },
       { id: '1a', product_id: '1', dosage_mg: 20, price_inr: 7000, in_stock: true, vial_configuration: 'Single vial', created_at: new Date().toISOString() },
       { id: '1b', product_id: '1', dosage_mg: 50, price_inr: 13000, in_stock: true, vial_configuration: '10mg x 5 vials', created_at: new Date().toISOString() },
       { id: '1c', product_id: '1', dosage_mg: 100, price_inr: 21000, in_stock: true, vial_configuration: '10mg x 10 vials / 20mg x 5 vials', created_at: new Date().toISOString() },
@@ -143,6 +145,7 @@ function SkeletonCard() {
 
 export default function CataloguePage() {
   const navigate = useNavigate();
+  const { format } = useCurrency();
   const [products, setProducts] = useState<ProductWithVariants[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterType>('all');
@@ -396,7 +399,7 @@ export default function CataloguePage() {
                         <div className="flex items-baseline gap-1">
                           <span className="text-xs text-slate-400 font-medium">From</span>
                           <span className="text-xl font-bold text-slate-900">
-                            ₹{startingPrice.toLocaleString('en-IN')}
+                            {format(startingPrice)}
                           </span>
                         </div>
                       )}

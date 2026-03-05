@@ -16,6 +16,7 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { getProductImageUrl, BAC_WATER_IMAGE_URL } from '../utils/imageUrl';
 import { ProductWithVariants, ProductVariant } from '../types';
 import { useCart } from '../context/CartContext';
+import { useCurrency } from '../context/CurrencyContext';
 import {
   ChevronLeft,
   Star,
@@ -45,6 +46,7 @@ const DEMO_PRODUCTS: ProductWithVariants[] = [
     image_url: '/retatrutide.jpg',
     created_at: new Date().toISOString(),
     variants: [
+      { id: '1s', product_id: '1', dosage_mg: 10, price_inr: 4000, in_stock: true, vial_configuration: 'Starter vial', created_at: new Date().toISOString() },
       { id: '1a', product_id: '1', dosage_mg: 20, price_inr: 7000, in_stock: true, vial_configuration: 'Single vial', created_at: new Date().toISOString() },
       { id: '1b', product_id: '1', dosage_mg: 50, price_inr: 13000, in_stock: true, vial_configuration: '10mg x 5 vials', created_at: new Date().toISOString() },
       { id: '1c', product_id: '1', dosage_mg: 100, price_inr: 21000, in_stock: true, vial_configuration: '10mg x 10 vials / 20mg x 5 vials', created_at: new Date().toISOString() },
@@ -164,6 +166,7 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [bundleAdded, setBundleAdded] = useState(false);
   const { addToCart } = useCart();
+  const { format } = useCurrency();
 
   useEffect(() => {
     if (id) loadProduct(id);
@@ -236,7 +239,22 @@ export default function ProductDetailPage() {
     }
   }
 
+  const [cartAdded, setCartAdded] = useState(false);
+
   const handleAddToCart = () => {
+    if (!product || !selectedVariant) return;
+    for (let i = 0; i < quantity; i++) {
+      addToCart(product, selectedVariant);
+    }
+    if (bundleAdded && bacWater) {
+      const bacWaterVariant = bacWater.variants.find((v) => v.dosage_mg === 50);
+      if (bacWaterVariant) addToCart(bacWater, bacWaterVariant);
+    }
+    setCartAdded(true);
+    setTimeout(() => setCartAdded(false), 2000);
+  };
+
+  const handleOrderNow = () => {
     if (!product || !selectedVariant) return;
     for (let i = 0; i < quantity; i++) {
       addToCart(product, selectedVariant);
@@ -325,7 +343,7 @@ export default function ProductDetailPage() {
   const totalPrice = subtotal - discountAmount;
 
   const whatsappMsg = encodeURIComponent(
-    `Hi! I'd like to order ${product.name}${selectedVariant ? ` — ${selectedVariant.dosage_mg}${isBacWater ? 'ML' : 'mg'} (₹${selectedVariant.price_inr.toLocaleString('en-IN')})` : ''}. Can you help me complete my order?`
+    `Hi! I'd like to order ${product.name}${selectedVariant ? ` — ${selectedVariant.dosage_mg}${isBacWater ? 'ML' : 'mg'} (${format(selectedVariant.price_inr)})` : ''}. Can you help me complete my order?`
   );
 
   return (
@@ -588,7 +606,7 @@ export default function ProductDetailPage() {
                           </div>
                         )}
                         <p className={`font-bold text-xl mb-0.5 ${isSelected ? (variant.is_recommended ? 'text-emerald-900' : 'text-slate-900') : 'text-slate-700'}`}>
-                          ₹{variant.price_inr.toLocaleString('en-IN')}
+                          {format(variant.price_inr)}
                         </p>
                         <p className="text-sm text-slate-500 font-medium">
                           {isBacWater ? `${variant.dosage_mg}ML` : `${variant.dosage_mg}mg`}
@@ -649,7 +667,7 @@ export default function ProductDetailPage() {
                   <div className="mt-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2.5">
                     <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
                     <span className="text-sm font-medium text-emerald-800">
-                      {discountPercent}% volume discount applied — saving ₹{discountAmount.toLocaleString('en-IN')}
+                      {discountPercent}% volume discount applied — saving {format(discountAmount)}
                     </span>
                   </div>
                 )}
@@ -680,7 +698,7 @@ export default function ProductDetailPage() {
                       <p className="font-semibold text-slate-900">Bacteriostatic Water</p>
                       <p className="text-sm text-slate-500">50ML — Pharma Grade · Required for reconstitution</p>
                     </div>
-                    <p className="font-bold text-slate-900 flex-shrink-0">₹{bacWaterPrice.toLocaleString('en-IN')}</p>
+                    <p className="font-bold text-slate-900 flex-shrink-0">{format(bacWaterPrice)}</p>
                   </div>
                   <Button
                     fullWidth
@@ -707,14 +725,14 @@ export default function ProductDetailPage() {
                     <span className="text-slate-600">
                       {product.name} ({selectedVariant?.dosage_mg}{isBacWater ? 'ML' : 'mg'}) × {quantity}
                     </span>
-                    <span className="font-medium text-slate-900">₹{basePrice.toLocaleString('en-IN')}</span>
+                    <span className="font-medium text-slate-900">{format(basePrice)}</span>
                   </div>
                   {bundleAdded && (
                     <>
                       <Divider />
                       <div className="flex justify-between text-sm">
                         <span className="text-slate-600">Bacteriostatic Water (50ML)</span>
-                        <span className="font-medium text-slate-900">₹{bacWaterPrice.toLocaleString('en-IN')}</span>
+                        <span className="font-medium text-slate-900">{format(bacWaterPrice)}</span>
                       </div>
                     </>
                   )}
@@ -723,7 +741,7 @@ export default function ProductDetailPage() {
                       <Divider />
                       <div className="flex justify-between text-sm text-emerald-600">
                         <span className="font-medium">Volume Discount ({discountPercent}%)</span>
-                        <span className="font-semibold">−₹{discountAmount.toLocaleString('en-IN')}</span>
+                        <span className="font-semibold">−{format(discountAmount)}</span>
                       </div>
                     </>
                   )}
@@ -735,9 +753,9 @@ export default function ProductDetailPage() {
                   <span className="text-slate-700 font-medium">Total</span>
                   <div className="text-right">
                     {discountPercent > 0 && (
-                      <span className="text-sm text-slate-400 line-through mr-2">₹{subtotal.toLocaleString('en-IN')}</span>
+                      <span className="text-sm text-slate-400 line-through mr-2">{format(subtotal)}</span>
                     )}
-                    <span className="text-3xl font-bold text-slate-900">₹{totalPrice.toLocaleString('en-IN')}</span>
+                    <span className="text-3xl font-bold text-slate-900">{format(totalPrice)}</span>
                   </div>
                 </div>
 
@@ -745,7 +763,7 @@ export default function ProductDetailPage() {
                   <div className="mb-5 p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2">
                     <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
                     <span className="text-sm font-medium text-emerald-800">
-                      You save ₹{discountAmount.toLocaleString('en-IN')} with {discountPercent}% volume discount
+                      You save {format(discountAmount)} with {discountPercent}% volume discount
                     </span>
                   </div>
                 )}
@@ -789,36 +807,41 @@ export default function ProductDetailPage() {
                   </div>
                 </div>
 
-                {/* WhatsApp CTA */}
-                <a
-                  href={`https://wa.me/918217824384?text=${whatsappMsg}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full mb-3"
+                {/* ── CTAs ── */}
+                {/* Order Now */}
+                <button
+                  disabled={!selectedVariant}
+                  onClick={handleOrderNow}
+                  className="w-full flex items-center justify-center gap-2.5 bg-slate-900 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-base py-4 rounded-xl transition-colors"
                 >
-                  <Button
-                    size="lg"
-                    color="success"
-                    fullWidth
-                    startContent={<MessageCircle className="w-5 h-5" />}
-                    className="font-bold text-white bg-emerald-500 hover:bg-emerald-600"
-                  >
-                    Order via WhatsApp
-                  </Button>
-                </a>
-
-                {/* Checkout CTA */}
-                <Button
-                  size="lg"
-                  color="primary"
-                  fullWidth
-                  isDisabled={!selectedVariant}
-                  onPress={handleAddToCart}
-                  startContent={<ShoppingCart className="w-5 h-5" />}
-                  className="font-bold text-lg bg-slate-900 hover:bg-slate-800 text-white shadow-lg"
-                >
+                  <ShoppingCart className="w-5 h-5" />
                   Order Now
-                </Button>
+                </button>
+
+                {/* Add to Cart + WhatsApp side by side */}
+                <div className="flex gap-3">
+                  <button
+                    disabled={!selectedVariant}
+                    onClick={handleAddToCart}
+                    className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl border-2 font-semibold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                      cartAdded
+                        ? 'bg-emerald-50 border-emerald-400 text-emerald-700'
+                        : 'bg-white border-slate-200 hover:border-slate-900 text-slate-800'
+                    }`}
+                  >
+                    {cartAdded ? <Check className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
+                    {cartAdded ? 'Added!' : 'Add to Cart'}
+                  </button>
+                  <a
+                    href={`https://wa.me/918217824384?text=${whatsappMsg}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl border-2 border-emerald-200 bg-emerald-50 hover:bg-emerald-100 hover:border-emerald-400 text-emerald-700 font-semibold text-sm transition-all"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    WhatsApp
+                  </a>
+                </div>
               </CardBody>
             </Card>
 
@@ -874,31 +897,42 @@ export default function ProductDetailPage() {
       </div>
 
       {/* ── Mobile sticky bottom bar ──────────────────────────────────────── */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40">
-        <Card className="rounded-none rounded-t-2xl border-t border-slate-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 shadow-[0_-4px_20px_rgba(0,0,0,0.10)] rounded-t-2xl">
+        <Card className="rounded-none rounded-t-2xl bg-white shadow-none border-none">
           <CardBody className="px-4 py-3 flex-row items-center gap-4">
             <div className="flex-1">
               <p className="text-xs text-slate-500 mb-0.5">Total</p>
               <div className="flex items-baseline gap-2">
                 {discountPercent > 0 && (
-                  <span className="text-xs text-slate-400 line-through">₹{subtotal.toLocaleString('en-IN')}</span>
+                  <span className="text-xs text-slate-400 line-through">{format(subtotal)}</span>
                 )}
-                <span className="text-xl font-bold text-slate-900">₹{totalPrice.toLocaleString('en-IN')}</span>
+                <span className="text-xl font-bold text-slate-900">{format(totalPrice)}</span>
               </div>
               {discountPercent > 0 && (
                 <span className="text-xs text-emerald-600 font-semibold">{discountPercent}% OFF applied</span>
               )}
             </div>
-            <Button
-              size="lg"
-              color="primary"
-              isDisabled={!selectedVariant}
-              onPress={handleAddToCart}
-              startContent={<ShoppingCart className="w-5 h-5" />}
-              className="flex-1 font-bold bg-slate-900 text-white"
+            {/* Add to Cart — icon only */}
+            <button
+              disabled={!selectedVariant}
+              onClick={handleAddToCart}
+              aria-label="Add to cart"
+              className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center flex-shrink-0 transition-all disabled:opacity-40 ${
+                cartAdded
+                  ? 'bg-emerald-50 border-emerald-400 text-emerald-700'
+                  : 'bg-white border-slate-200 text-slate-700 hover:border-slate-900'
+              }`}
+            >
+              {cartAdded ? <Check className="w-5 h-5" /> : <ShoppingCart className="w-5 h-5" />}
+            </button>
+            {/* Order Now */}
+            <button
+              disabled={!selectedVariant}
+              onClick={handleOrderNow}
+              className="flex-1 flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-700 disabled:opacity-40 text-white font-bold py-3 rounded-xl transition-colors"
             >
               Order Now
-            </Button>
+            </button>
           </CardBody>
         </Card>
       </div>
