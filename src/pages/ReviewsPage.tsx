@@ -22,8 +22,8 @@ const communityReviews = [
     product: 'Retatrutide',
   },
   {
-    username: 'u/Rajathsinha6',
-    initial: 'R',
+    username: 'u/Verified_Researcher_IN',
+    initial: 'V',
     gradient: 'from-rose-500 to-pink-500',
     time: '1 day ago',
     title: "Retralabs is totally vibin — pure Retatrutide without burning a hole in your pocket",
