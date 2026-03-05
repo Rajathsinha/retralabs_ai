@@ -1,10 +1,15 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Check, Copy, Package, Clock } from 'lucide-react';
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  Button,
+  Chip,
+  Divider,
+} from '@heroui/react';
 import { supabase } from '../lib/supabase';
-
-interface PaymentSuccessPageProps {
-  onNavigate: (page: string) => void;
-}
 
 interface OrderDetails {
   id: string;
@@ -26,7 +31,8 @@ interface OrderDetails {
   }>;
 }
 
-export default function PaymentSuccessPage({ onNavigate }: PaymentSuccessPageProps) {
+export default function PaymentSuccessPage() {
+  const navigate = useNavigate();
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
@@ -95,7 +101,7 @@ export default function PaymentSuccessPage({ onNavigate }: PaymentSuccessPagePro
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-700 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto" />
           <p className="mt-4 text-gray-600">Loading order details...</p>
         </div>
       </div>
@@ -105,18 +111,21 @@ export default function PaymentSuccessPage({ onNavigate }: PaymentSuccessPagePro
   if (!orderDetails) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto px-4">
-          <h1 className="text-2xl font-light text-gray-900 mb-4">Order Not Found</h1>
-          <p className="text-gray-600 mb-6">
-            We couldn't find your order. Please check your email for order confirmation.
-          </p>
-          <button
-            onClick={() => onNavigate('home')}
-            className="px-6 py-3 bg-blue-700 text-white font-medium hover:bg-blue-800 transition-colors"
-          >
-            Return to Home
-          </button>
-        </div>
+        <Card className="max-w-md w-full mx-4" shadow="sm">
+          <CardBody className="text-center gap-4 py-10 px-8">
+            <h1 className="text-2xl font-light text-gray-900">Order Not Found</h1>
+            <p className="text-gray-600">
+              We couldn't find your order. Please check your email for order confirmation.
+            </p>
+            <Button
+              color="primary"
+              onPress={() => navigate('/')}
+              className="mt-2"
+            >
+              Return to Home
+            </Button>
+          </CardBody>
+        </Card>
       </div>
     );
   }
@@ -124,53 +133,68 @@ export default function PaymentSuccessPage({ onNavigate }: PaymentSuccessPagePro
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-3xl mx-auto px-4">
-        <div className="bg-white shadow-sm border border-gray-200 overflow-hidden">
-          <div className="bg-green-50 border-b border-green-100 p-8 text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Check className="w-8 h-8 text-green-600" />
+        <Card shadow="sm" className="border border-gray-200 overflow-hidden">
+          {/* Success Header */}
+          <div className="bg-success-50 border-b border-success-100 p-8 text-center">
+            <div className="w-16 h-16 bg-success-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Check className="w-8 h-8 text-success-600" />
             </div>
-            <h1 className="text-3xl font-light text-gray-900 mb-2">Payment Successful!</h1>
+            <h1 className="text-3xl font-light text-gray-900 mb-2">Order Confirmed!</h1>
             <p className="text-gray-600">
               Thank you for your order, {orderDetails.customer_name}
             </p>
+            <Chip color="success" variant="flat" className="mt-3">
+              Payment Successful
+            </Chip>
           </div>
 
-          <div className="p-8">
-            <div className="mb-8">
+          <CardBody className="p-8 gap-8">
+            {/* Order ID */}
+            <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="text-sm font-medium text-gray-700">Your Order ID</label>
-                <button
-                  onClick={copyOrderId}
-                  className="flex items-center gap-1 text-sm text-blue-700 hover:text-blue-800"
+                <span className="text-sm font-medium text-gray-700">Your Order ID</span>
+                <Button
+                  size="sm"
+                  variant="light"
+                  color="primary"
+                  startContent={<Copy className="w-4 h-4" />}
+                  onPress={copyOrderId}
                 >
-                  <Copy className="w-4 h-4" />
                   {copied ? 'Copied!' : 'Copy'}
-                </button>
+                </Button>
               </div>
-              <div className="flex items-center gap-3 p-4 bg-gray-50 border border-gray-200 font-mono text-sm">
-                <Package className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                <span className="text-gray-900 break-all">{orderDetails.id}</span>
-              </div>
+              <Card className="bg-gray-50 border border-gray-200">
+                <CardBody className="flex-row items-center gap-3 py-3">
+                  <Package className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                  <span className="text-gray-900 font-mono text-sm break-all">{orderDetails.id}</span>
+                </CardBody>
+              </Card>
               <p className="mt-2 text-sm text-gray-500">
                 Save this Order ID to track your shipment
               </p>
             </div>
 
-            <div className="mb-8 p-4 bg-blue-50 border border-blue-100">
-              <div className="flex items-start gap-3">
-                <Clock className="w-5 h-5 text-blue-700 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-medium text-blue-900 mb-1">What's Next?</p>
-                  <ul className="text-sm text-blue-800 space-y-1">
-                    <li>• We're preparing your order for shipment</li>
-                    <li>• You'll receive tracking information via email within 24-48 hours</li>
-                    <li>• Use your Order ID to check status anytime</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
+            <Divider />
 
-            <div className="border-t border-gray-200 pt-6 mb-6">
+            {/* What's Next */}
+            <Card className="bg-primary-50 border border-primary-100">
+              <CardBody className="gap-3">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-primary flex-shrink-0" />
+                  <span className="font-medium text-primary-900">What's Next?</span>
+                </div>
+                <ul className="text-sm text-primary-800 space-y-1 ml-7">
+                  <li>• We're preparing your order for shipment</li>
+                  <li>• You'll receive tracking information via email within 24-48 hours</li>
+                  <li>• Use your Order ID to check status anytime</li>
+                </ul>
+              </CardBody>
+            </Card>
+
+            <Divider />
+
+            {/* Order Summary */}
+            <div>
               <h2 className="text-lg font-medium text-gray-900 mb-4">Order Summary</h2>
               <div className="space-y-3">
                 {orderDetails.order_items.map((item, index) => (
@@ -186,7 +210,8 @@ export default function PaymentSuccessPage({ onNavigate }: PaymentSuccessPagePro
                   </div>
                 ))}
               </div>
-              <div className="mt-4 pt-4 border-t border-gray-200 flex justify-between">
+              <Divider className="my-4" />
+              <div className="flex justify-between">
                 <span className="font-medium text-gray-900">Total Amount</span>
                 <span className="text-xl font-medium text-gray-900">
                   ₹{orderDetails.total_amount.toLocaleString('en-IN')}
@@ -194,26 +219,31 @@ export default function PaymentSuccessPage({ onNavigate }: PaymentSuccessPagePro
               </div>
             </div>
 
+            <Divider />
+
+            {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-3">
-              <button
-                onClick={() => onNavigate('track-order')}
-                className="flex-1 px-6 py-3 bg-blue-700 text-white font-medium hover:bg-blue-800 transition-colors text-center"
+              <Button
+                color="primary"
+                fullWidth
+                onPress={() => navigate('/track-order')}
               >
                 Track Your Order
-              </button>
-              <button
-                onClick={() => onNavigate('home')}
-                className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors text-center"
+              </Button>
+              <Button
+                variant="bordered"
+                fullWidth
+                onPress={() => navigate('/catalogue')}
               >
                 Continue Shopping
-              </button>
+              </Button>
             </div>
-          </div>
-        </div>
+          </CardBody>
+        </Card>
 
-        <div className="mt-6 text-center text-sm text-gray-500">
-          <p>Order confirmation has been sent to {orderDetails.customer_email}</p>
-        </div>
+        <p className="mt-6 text-center text-sm text-gray-500">
+          Order confirmation has been sent to {orderDetails.customer_email}
+        </p>
       </div>
     </div>
   );
