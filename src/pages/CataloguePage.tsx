@@ -26,6 +26,7 @@ const DEMO_PRODUCTS: ProductWithVariants[] = [
     image_url: '/retatrutide.jpg',
     created_at: new Date().toISOString(),
     variants: [
+      { id: '1s', product_id: '1', dosage_mg: 10, price_inr: 4000, in_stock: true, vial_configuration: 'Starter vial', created_at: new Date().toISOString() },
       { id: '1a', product_id: '1', dosage_mg: 20, price_inr: 7000, in_stock: true, vial_configuration: 'Single vial', created_at: new Date().toISOString() },
       { id: '1b', product_id: '1', dosage_mg: 50, price_inr: 13000, in_stock: true, vial_configuration: '10mg x 5 vials', created_at: new Date().toISOString() },
       { id: '1c', product_id: '1', dosage_mg: 100, price_inr: 21000, in_stock: true, vial_configuration: '10mg x 10 vials / 20mg x 5 vials', created_at: new Date().toISOString() },

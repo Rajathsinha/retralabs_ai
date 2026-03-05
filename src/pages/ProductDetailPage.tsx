@@ -46,6 +46,7 @@ const DEMO_PRODUCTS: ProductWithVariants[] = [
     image_url: '/retatrutide.jpg',
     created_at: new Date().toISOString(),
     variants: [
+      { id: '1s', product_id: '1', dosage_mg: 10, price_inr: 4000, in_stock: true, vial_configuration: 'Starter vial', created_at: new Date().toISOString() },
       { id: '1a', product_id: '1', dosage_mg: 20, price_inr: 7000, in_stock: true, vial_configuration: 'Single vial', created_at: new Date().toISOString() },
       { id: '1b', product_id: '1', dosage_mg: 50, price_inr: 13000, in_stock: true, vial_configuration: '10mg x 5 vials', created_at: new Date().toISOString() },
       { id: '1c', product_id: '1', dosage_mg: 100, price_inr: 21000, in_stock: true, vial_configuration: '10mg x 10 vials / 20mg x 5 vials', created_at: new Date().toISOString() },
@@ -806,45 +807,41 @@ export default function ProductDetailPage() {
                   </div>
                 </div>
 
-                {/* ── Primary CTA row ── */}
-                <div className="flex gap-3">
-                  {/* Order Now — primary */}
-                  <Button
-                    size="lg"
-                    color="primary"
-                    isDisabled={!selectedVariant}
-                    onPress={handleOrderNow}
-                    className="flex-1 font-bold bg-slate-900 hover:bg-slate-800 text-white"
-                  >
-                    Order Now
-                  </Button>
+                {/* ── CTAs ── */}
+                {/* Order Now */}
+                <button
+                  disabled={!selectedVariant}
+                  onClick={handleOrderNow}
+                  className="w-full flex items-center justify-center gap-2.5 bg-slate-900 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-base py-4 rounded-xl transition-colors"
+                >
+                  <ShoppingCart className="w-5 h-5" />
+                  Order Now
+                </button>
 
-                  {/* Add to Cart — secondary icon+label */}
-                  <Button
-                    size="lg"
-                    isDisabled={!selectedVariant}
-                    onPress={handleAddToCart}
-                    className={`px-4 font-semibold border-2 transition-all ${
+                {/* Add to Cart + WhatsApp side by side */}
+                <div className="flex gap-3">
+                  <button
+                    disabled={!selectedVariant}
+                    onClick={handleAddToCart}
+                    className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl border-2 font-semibold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
                       cartAdded
                         ? 'bg-emerald-50 border-emerald-400 text-emerald-700'
-                        : 'bg-white border-slate-200 hover:border-slate-400 text-slate-700 hover:bg-slate-50'
+                        : 'bg-white border-slate-200 hover:border-slate-900 text-slate-800'
                     }`}
-                    startContent={cartAdded ? <Check className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
                   >
-                    {cartAdded ? 'Added!' : 'Cart'}
-                  </Button>
+                    {cartAdded ? <Check className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
+                    {cartAdded ? 'Added!' : 'Add to Cart'}
+                  </button>
+                  <a
+                    href={`https://wa.me/918217824384?text=${whatsappMsg}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl border-2 border-emerald-200 bg-emerald-50 hover:bg-emerald-100 hover:border-emerald-400 text-emerald-700 font-semibold text-sm transition-all"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    WhatsApp
+                  </a>
                 </div>
-
-                {/* WhatsApp — subtle link */}
-                <a
-                  href={`https://wa.me/918217824384?text=${whatsappMsg}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 transition-colors text-emerald-700 font-semibold text-sm"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  Enquire via WhatsApp
-                </a>
               </CardBody>
             </Card>
 
@@ -915,30 +912,27 @@ export default function ProductDetailPage() {
                 <span className="text-xs text-emerald-600 font-semibold">{discountPercent}% OFF applied</span>
               )}
             </div>
-            {/* Add to Cart — icon only on mobile sticky bar */}
-            <Button
-              size="lg"
-              isIconOnly
-              isDisabled={!selectedVariant}
-              onPress={handleAddToCart}
-              className={`border-2 transition-all ${
+            {/* Add to Cart — icon only */}
+            <button
+              disabled={!selectedVariant}
+              onClick={handleAddToCart}
+              aria-label="Add to cart"
+              className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center flex-shrink-0 transition-all disabled:opacity-40 ${
                 cartAdded
                   ? 'bg-emerald-50 border-emerald-400 text-emerald-700'
-                  : 'bg-white border-slate-200 text-slate-700 hover:border-slate-400 hover:bg-slate-50'
+                  : 'bg-white border-slate-200 text-slate-700 hover:border-slate-900'
               }`}
-              aria-label="Add to cart"
             >
               {cartAdded ? <Check className="w-5 h-5" /> : <ShoppingCart className="w-5 h-5" />}
-            </Button>
-            <Button
-              size="lg"
-              color="primary"
-              isDisabled={!selectedVariant}
-              onPress={handleOrderNow}
-              className="flex-1 font-bold bg-slate-900 text-white"
+            </button>
+            {/* Order Now */}
+            <button
+              disabled={!selectedVariant}
+              onClick={handleOrderNow}
+              className="flex-1 flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-700 disabled:opacity-40 text-white font-bold py-3 rounded-xl transition-colors"
             >
               Order Now
-            </Button>
+            </button>
           </CardBody>
         </Card>
       </div>
