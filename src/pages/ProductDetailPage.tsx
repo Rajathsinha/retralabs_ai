@@ -170,13 +170,13 @@ export default function ProductDetailPage() {
   const { format } = useCurrency();
 
   // ── Per-product SEO ──────────────────────────────────────────────────────
-  const purity = product ? (PURITY_MAP[product.name] ?? '99+') : '99+';
+  const seoPurity = product ? (PURITY_MAP[product.name] ?? '99+') : '99+';
   const lowestPrice = product ? Math.min(...product.variants.map(v => v.price_inr)) : 0;
   const seoTitle = product
-    ? `Buy ${product.name} India | ${purity}% Purity | ₹${lowestPrice.toLocaleString('en-IN')} | RetraLabs`
+    ? `Buy ${product.name} India | ${seoPurity}% Purity | ₹${lowestPrice.toLocaleString('en-IN')} | RetraLabs`
     : 'Research Peptides India | RetraLabs';
   const seoDesc = product
-    ? `Buy ${product.name} in India for laboratory research. ${purity}% HPLC-verified purity, Certificate of Analysis included. From ₹${lowestPrice.toLocaleString('en-IN')}. ${product.description} India-wide shipping, temperature-controlled packaging.`
+    ? `Buy ${product.name} in India for laboratory research. ${seoPurity}% HPLC-verified purity, Certificate of Analysis included. From ₹${lowestPrice.toLocaleString('en-IN')}. ${product.description} India-wide shipping, temperature-controlled packaging.`
     : 'Research-grade peptides for laboratory use in India. HPLC verified, COA included.';
   const seoKeywords = product
     ? `buy ${product.name.toLowerCase()} india, ${product.name.toLowerCase()} india, ${product.name.toLowerCase()} price india, ${product.name.toLowerCase()} buy online india, ${product.name.toLowerCase()} for sale india, research peptides india`
@@ -188,7 +188,7 @@ export default function ProductDetailPage() {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: `${product.name} (Research Grade) India`,
-    description: `${product.description} HPLC-verified ${purity}% purity. For laboratory research use only.`,
+    description: `${product.description} HPLC-verified ${seoPurity}% purity. For laboratory research use only.`,
     image: seoImage,
     brand: { '@type': 'Brand', name: 'RetraLabs' },
     url: seoCanonical,
@@ -201,7 +201,7 @@ export default function ProductDetailPage() {
       seller: { '@type': 'Organization', name: 'RetraLabs' },
     })),
     additionalProperty: [
-      { '@type': 'PropertyValue', name: 'HPLC Purity', value: `${purity}%` },
+      { '@type': 'PropertyValue', name: 'HPLC Purity', value: `${seoPurity}%` },
       { '@type': 'PropertyValue', name: 'COA Included', value: 'Yes' },
       { '@type': 'PropertyValue', name: 'Country of Availability', value: 'India' },
     ],
