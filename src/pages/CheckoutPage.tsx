@@ -9,14 +9,14 @@ import {
   Divider,
 } from '@heroui/react';
 import { getProductImageUrl, BAC_WATER_IMAGE_URL } from '../utils/imageUrl';
-import { Minus, Plus, Trash2, Check, MessageCircle, Tag, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Minus, Plus, Trash2, Check, MessageCircle, Tag, ShoppingBag, ArrowRight, LogIn, UserPlus, Lock } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { OrderFormData } from '../types';
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const {
     cart,
     removeFromCart,
@@ -91,6 +91,59 @@ export default function CheckoutPage() {
     setOrderSent(true);
     setTimeout(() => navigate('/'), 4000);
   };
+
+  /* ── Auth gate: must be signed in to checkout ── */
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-slate-300 border-t-slate-800 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-4 py-12">
+        <div className="w-full max-w-sm mx-auto text-center">
+          {/* Lock icon */}
+          <div className="w-20 h-20 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-slate-200">
+            <Lock className="w-9 h-9 text-slate-500" />
+          </div>
+
+          <h2 className="text-2xl font-extrabold text-slate-900 mb-2">Sign in to checkout</h2>
+          <p className="text-slate-500 text-sm leading-relaxed mb-8">
+            A RetraLabs account lets us keep your order history, saved address, and makes every future checkout instant.
+          </p>
+
+          {/* CTA buttons */}
+          <div className="space-y-3">
+            <button
+              onClick={() => navigate('/signin?returnTo=/checkout')}
+              className="w-full flex items-center justify-center gap-2.5 bg-slate-900 hover:bg-slate-700 text-white font-bold py-3.5 rounded-xl transition-colors"
+            >
+              <LogIn className="w-4 h-4" />
+              Sign In
+            </button>
+            <button
+              onClick={() => navigate('/register?returnTo=/checkout')}
+              className="w-full flex items-center justify-center gap-2.5 bg-white hover:bg-slate-50 border-2 border-slate-200 hover:border-slate-300 text-slate-800 font-semibold py-3.5 rounded-xl transition-all"
+            >
+              <UserPlus className="w-4 h-4" />
+              Create an Account
+            </button>
+          </div>
+
+          {/* Back link */}
+          <button
+            onClick={() => navigate(-1)}
+            className="mt-6 text-sm text-slate-400 hover:text-slate-700 transition-colors underline underline-offset-2"
+          >
+            ← Go back
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   /* ── Step 3: order sent ── */
   if (orderSent) {

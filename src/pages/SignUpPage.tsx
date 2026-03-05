@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useNavigate, useSearchParams } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, User, ArrowRight, CheckCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Logo from '../components/Logo';
 
 export default function SignUpPage() {
-  const navigate = useNavigate();
+  const navigate         = useNavigate();
+  const [searchParams]   = useSearchParams();
+  const returnTo         = searchParams.get('returnTo') || '/account';
   const { signUp } = useAuth();
 
   const [name,         setName]         = useState('');
@@ -246,7 +248,10 @@ export default function SignUpPage() {
           {/* Sign in link */}
           <p className="text-center text-sm text-slate-500 mt-6">
             Already have an account?{' '}
-            <RouterLink to="/signin" className="text-slate-900 font-bold hover:underline underline-offset-2 transition-colors">
+            <RouterLink
+              to={returnTo !== '/account' ? `/signin?returnTo=${encodeURIComponent(returnTo)}` : '/signin'}
+              className="text-slate-900 font-bold hover:underline underline-offset-2 transition-colors"
+            >
               Sign in →
             </RouterLink>
           </p>

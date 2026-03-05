@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useNavigate, useSearchParams } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Zap } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Logo from '../components/Logo';
@@ -19,7 +19,9 @@ function GoogleIcon() {
 }
 
 export default function SignInPage() {
-  const navigate   = useNavigate();
+  const navigate         = useNavigate();
+  const [searchParams]   = useSearchParams();
+  const returnTo         = searchParams.get('returnTo') || '/account';
   const { signInWithPassword, signInWithGoogle, signInWithMagicLink } = useAuth();
 
   const [tab,           setTab]           = useState<Tab>('password');
@@ -41,7 +43,7 @@ export default function SignInPage() {
     if (err) {
       setError(err.message.includes('Invalid') ? 'Incorrect email or password.' : err.message);
     } else {
-      navigate('/account');
+      navigate(returnTo);
     }
   };
 
@@ -265,7 +267,10 @@ export default function SignInPage() {
           {/* Register link */}
           <p className="text-center text-sm text-slate-500 mt-6">
             Don't have an account?{' '}
-            <RouterLink to="/register" className="text-slate-900 font-bold hover:underline underline-offset-2 transition-colors">
+            <RouterLink
+              to={returnTo !== '/account' ? `/register?returnTo=${encodeURIComponent(returnTo)}` : '/register'}
+              className="text-slate-900 font-bold hover:underline underline-offset-2 transition-colors"
+            >
               Create one →
             </RouterLink>
           </p>
