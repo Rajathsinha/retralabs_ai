@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Modal, ModalContent, useDisclosure } from '@heroui/react';
+import { useDisclosure } from '@heroui/react';
 import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   ShoppingCart, Calculator, Menu, X,
@@ -99,22 +99,7 @@ export default function Header() {
       <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
 
       {/* ── Calculator Modal ── */}
-      <Modal
-        isOpen={calcOpen}
-        onClose={closeCalc}
-        size="2xl"
-        scrollBehavior="inside"
-        classNames={{
-          base:     'bg-transparent shadow-none',
-          backdrop: 'bg-slate-950/80 backdrop-blur-sm',
-          wrapper:  'items-center',
-        }}
-        hideCloseButton
-      >
-        <ModalContent>
-          {() => <ReconstitutionCalculator isOpen={calcOpen} onClose={closeCalc} />}
-        </ModalContent>
-      </Modal>
+      <ReconstitutionCalculator isOpen={calcOpen} onClose={closeCalc} />
 
       {/* ── Header shell ── */}
       <header
