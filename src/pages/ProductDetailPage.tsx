@@ -35,6 +35,7 @@ import {
   MessageCircle,
   Clock,
   ShoppingCart,
+  GraduationCap,
 } from 'lucide-react';
 
 // Demo products fallback (when Supabase not configured)
@@ -855,6 +856,18 @@ export default function ProductDetailPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* ── Student discount notice ── */}
+                <a
+                  href={`https://wa.me/918217824384?text=${encodeURIComponent('Hi, I\'m a student and would like to enquire about the student discount.')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 w-full bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 hover:border-indigo-300 transition-colors rounded-xl px-4 py-2.5 group"
+                >
+                  <GraduationCap className="w-4 h-4 text-indigo-500 flex-shrink-0" />
+                  <span className="text-xs font-semibold text-indigo-700">Student discount available</span>
+                  <span className="ml-auto text-[10px] text-indigo-400 group-hover:text-indigo-600 font-medium transition-colors">Ask on WhatsApp →</span>
+                </a>
 
                 {/* ── CTAs ── */}
                 {/* Order Now */}
