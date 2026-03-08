@@ -39,6 +39,9 @@ export default function CheckoutPage() {
     customer_phone: '',
     shipping_address: '',
     disclaimer_accepted: false,
+    age_confirmed: false,
+    no_dosing_accepted: false,
+    referral_source: '',
   });
 
   /* ── Pre-fill from user profile if signed in ── */
@@ -93,12 +96,16 @@ export default function CheckoutPage() {
       ? `\n*Coupon (${couponCode}):* -₹${couponAmt.toLocaleString('en-IN')}`
       : '';
 
+    const referralLine = formData.referral_source
+      ? `\nFound us via: ${formData.referral_source}`
+      : '';
+
     const message =
       `*New Order — RetraLabs.in*\n\n` +
       `*Customer*\n` +
       `Name: ${formData.customer_name}\n` +
       `Email: ${formData.customer_email}\n` +
-      `Phone: ${formData.customer_phone}\n\n` +
+      `Phone: ${formData.customer_phone}${referralLine}\n\n` +
       `*Shipping Address*\n${formData.shipping_address}\n\n` +
       `*Items*\n${lines.join('\n')}` +
       `${discountText}` +
@@ -605,25 +612,82 @@ export default function CheckoutPage() {
                   />
                 </div>
 
-                {/* Disclaimer checkbox */}
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
-                  <label className="flex items-start gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formData.disclaimer_accepted}
-                      onChange={(e) => setFormData({ ...formData, disclaimer_accepted: e.target.checked })}
-                      className="mt-0.5 w-4 h-4 rounded border-slate-300 accent-slate-900 cursor-pointer flex-shrink-0"
-                    />
-                    <span className="text-sm text-slate-600 leading-relaxed">
-                      I confirm that these products are being purchased for research purposes only,
-                      in accordance with applicable regulations and institutional guidelines.
-                    </span>
+                {/* ── How did you find us? ── */}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                    How did you find us? <span className="text-slate-400 font-normal">(optional)</span>
                   </label>
+                  <div className="flex flex-wrap gap-2">
+                    {['YouTube', 'Instagram', 'Reddit', 'Friends & Family', 'Google', 'Twitter / X', 'TikTok', 'Other', 'Prefer not to say'].map((src) => (
+                      <button
+                        key={src}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, referral_source: formData.referral_source === src ? '' : src })}
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border-2 transition-all ${
+                          formData.referral_source === src
+                            ? 'bg-slate-900 border-slate-900 text-white'
+                            : 'bg-white border-slate-200 text-slate-600 hover:border-slate-400'
+                        }`}
+                      >
+                        {src}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* ── Compliance checkboxes ── */}
+                <div className="space-y-3">
+                  {/* Research use */}
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formData.disclaimer_accepted}
+                        onChange={(e) => setFormData({ ...formData, disclaimer_accepted: e.target.checked })}
+                        className="mt-0.5 w-4 h-4 rounded border-slate-300 accent-slate-900 cursor-pointer flex-shrink-0"
+                      />
+                      <span className="text-sm text-slate-600 leading-relaxed">
+                        I confirm these products are being purchased for <strong>research purposes only</strong>,
+                        in accordance with applicable regulations and institutional guidelines.
+                      </span>
+                    </label>
+                  </div>
+
+                  {/* 18+ age */}
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formData.age_confirmed}
+                        onChange={(e) => setFormData({ ...formData, age_confirmed: e.target.checked })}
+                        className="mt-0.5 w-4 h-4 rounded border-slate-300 accent-slate-900 cursor-pointer flex-shrink-0"
+                      />
+                      <span className="text-sm text-slate-600 leading-relaxed">
+                        I confirm I am <strong>18 years of age or older</strong>.
+                      </span>
+                    </label>
+                  </div>
+
+                  {/* No dosing guidance */}
+                  <div className="p-4 bg-rose-50 rounded-xl border border-rose-200">
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formData.no_dosing_accepted}
+                        onChange={(e) => setFormData({ ...formData, no_dosing_accepted: e.target.checked })}
+                        className="mt-0.5 w-4 h-4 rounded border-rose-300 accent-rose-700 cursor-pointer flex-shrink-0"
+                      />
+                      <span className="text-sm text-rose-800 leading-relaxed">
+                        I understand that <strong>RetraLabs does not provide dosing guidance, medical advice, or usage instructions</strong> of any kind.
+                        I will <strong>not</strong> request dosing information, and I take full responsibility for my research activities.
+                      </span>
+                    </label>
+                  </div>
                 </div>
 
                 <button
                   type="submit"
-                  disabled={!formData.disclaimer_accepted}
+                  disabled={!formData.disclaimer_accepted || !formData.age_confirmed || !formData.no_dosing_accepted}
                   className="w-full flex items-center justify-center gap-2.5 bg-slate-900 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-base py-4 rounded-xl transition-colors"
                 >
                   <MessageCircle className="w-5 h-5" />

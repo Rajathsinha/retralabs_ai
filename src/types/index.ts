@@ -35,4 +35,7 @@ export interface OrderFormData {
   customer_phone: string;
   shipping_address: string;
   disclaimer_accepted: boolean;
+  age_confirmed: boolean;
+  no_dosing_accepted: boolean;
+  referral_source: string;
 }
