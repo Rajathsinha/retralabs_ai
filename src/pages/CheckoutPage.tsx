@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Button,
@@ -13,6 +13,7 @@ import { Minus, Plus, Trash2, Check, MessageCircle, Tag, ShoppingBag, ArrowRight
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { OrderFormData } from '../types';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
@@ -54,7 +55,9 @@ export default function CheckoutPage() {
   }, [user]);
   const [orderReady, setOrderReady] = useState(false);   // step 2: review screen
   const [whatsappUrl, setWhatsappUrl] = useState('');
-  const [orderSent, setOrderSent] = useState(false);     // step 3: done
+  const [orderSent,   setOrderSent]   = useState(false); // step 3: done
+  const [savedOrderId, setSavedOrderId] = useState<string | null>(null); // Supabase order ID
+  const orderSaving = useRef(false); // prevent double-save
 
   // coupon input state
   const [couponInput,  setCouponInput]  = useState('');
@@ -107,12 +110,63 @@ export default function CheckoutPage() {
     setOrderReady(true);
   };
 
-  /** Step 2 → 3: user explicitly taps "Send on WhatsApp" */
-  const handleSendOnWhatsApp = () => {
+  /** Step 2 → 3: save order to Supabase, then open WhatsApp */
+  const handleSendOnWhatsApp = async () => {
+    if (orderSaving.current) return;
+    orderSaving.current = true;
+
+    let finalUrl = whatsappUrl;
+    let shortId: string | null = null;
+
+    // ── Save to Supabase if configured ──────────────────────────────────────
+    if (isSupabaseConfigured()) {
+      try {
+        // 1. Insert order row
+        const { data: order, error: orderErr } = await supabase
+          .from('orders')
+          .insert({
+            customer_name:    formData.customer_name,
+            customer_email:   formData.customer_email,
+            customer_phone:   formData.customer_phone,
+            shipping_address: formData.shipping_address,
+            total_amount:     getTotal(),
+            status:           'pending',
+            order_status:     'pending',
+            payment_status:   'pending',
+          })
+          .select('id')
+          .single();
+
+        if (!orderErr && order?.id) {
+          shortId = (order.id as string).slice(0, 8).toUpperCase();
+          setSavedOrderId(shortId);
+
+          // 2. Insert order_items rows
+          await supabase.from('order_items').insert(
+            cart.map(item => ({
+              order_id:   order.id,
+              product_id: item.product.id,
+              variant_id: item.variant.id,
+              quantity:   item.quantity,
+              unit_price: item.variant.price_inr,
+            }))
+          );
+
+          // 3. Prepend Order ID to WhatsApp message
+          const rawMsg = decodeURIComponent(whatsappUrl.split('?text=')[1] || '');
+          const updatedMsg = `*Order ID: #${shortId}*\n\n` + rawMsg;
+          finalUrl = `https://wa.me/918217824384?text=${encodeURIComponent(updatedMsg)}`;
+        }
+      } catch (_) {
+        // Supabase save failed — still proceed with WhatsApp order
+      }
+    }
+
     clearCart();
-    window.open(whatsappUrl, '_blank');
+    window.open(finalUrl, '_blank');
     setOrderSent(true);
-    setTimeout(() => navigate('/'), 4000);
+    setTimeout(() => navigate('/'), 6000);
+    orderSaving.current = false;
   };
 
   /* ── Step 3: enquiry sent → prompt sign-in if guest ── */
@@ -128,6 +182,15 @@ export default function CheckoutPage() {
           <p className="text-slate-500 mb-1 leading-relaxed">
             Your order details are on WhatsApp. Our team will reply with a UPI payment link within the hour.
           </p>
+
+          {/* Order ID badge */}
+          {savedOrderId && (
+            <div className="mt-4 mb-2 bg-slate-900 rounded-2xl px-5 py-4 text-center">
+              <p className="text-xs text-slate-400 uppercase tracking-widest mb-1">Your Order ID</p>
+              <p className="text-2xl font-black text-white tracking-widest">#{savedOrderId}</p>
+              <p className="text-xs text-slate-400 mt-1">Save this to track your order</p>
+            </div>
+          )}
 
           {/* Guest: nudge to create account for tracking */}
           {!authLoading && !user && (
