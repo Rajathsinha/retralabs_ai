@@ -35,6 +35,7 @@ import {
   MessageCircle,
   Clock,
   ShoppingCart,
+  GraduationCap,
 } from 'lucide-react';
 
 // Demo products fallback (when Supabase not configured)
@@ -138,19 +139,19 @@ const FAQ_MAP: Record<string, { q: string; a: string }[]> = {
   'Retatrutide': [
     { q: 'What is Retatrutide?', a: 'Retatrutide (LY3437943) is a triple agonist targeting GLP-1, GIP, and glucagon receptors. It is being researched for its potential in metabolic conditions and obesity management in controlled laboratory settings.' },
     { q: 'What is included with my order?', a: 'Every order includes the peptide in a sterile lyophilised vial along with a Certificate of Analysis (COA) detailing purity, molecular weight, and HPLC testing results.' },
-    { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Standard delivery is 7–14 business days. All peptides are shipped with temperature-controlled packaging to maintain stability.' },
+    { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Standard delivery is 3–4 business days (standard, free) or 1 day (fast, +₹800). All peptides are shipped with temperature-controlled packaging to maintain stability.' },
     { q: 'How do I reconstitute the peptide?', a: 'Use the Reconstitution Calculator (available in the header) to determine the exact volume of Bacteriostatic Water required for your desired concentration. Standard practice is to add BAC water slowly along the vial wall.' },
   ],
   'Tirzepatide': [
     { q: 'What is Tirzepatide?', a: 'Tirzepatide is a dual GIP/GLP-1 receptor agonist. It is supplied for in vitro research and analytical applications only.' },
     { q: 'What purity can I expect?', a: 'Our Tirzepatide is HPLC-verified at 99.4% purity. The COA with full testing data is included with every order.' },
-    { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Standard delivery is 7–14 business days with temperature-controlled packaging.' },
+    { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Standard delivery is 3–4 business days (standard, free) or 1 day (fast, +₹800) with temperature-controlled packaging.' },
     { q: 'Can I get a COA before ordering?', a: "Yes. Contact our support team via WhatsApp or email and we'll send you the batch COA within 24 hours." },
   ],
   'default': [
     { q: 'What purity can I expect?', a: 'All our peptides are HPLC-verified with purity exceeding 99%. A Certificate of Analysis is included with every order.' },
     { q: 'What is included with my order?', a: 'Every order includes the compound in a sterile vial along with a Certificate of Analysis (COA) detailing purity and testing results.' },
-    { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Standard delivery is 7–14 business days. All peptides are shipped with temperature-controlled packaging.' },
+    { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Standard delivery is 3–4 business days (standard, free) or 1 day (fast, +₹800). All peptides are shipped with temperature-controlled packaging.' },
     { q: 'Can I get a COA before ordering?', a: "Yes. Contact our support team via WhatsApp or email and we'll send you the batch COA within 24 hours." },
     { q: 'What is your refund policy?', a: 'If your order arrives damaged or the product does not match the COA specifications, we offer a replacement. Contact support within 48 hours of receipt.' },
   ],
@@ -824,7 +825,7 @@ export default function ProductDetailPage() {
                       <MapPin className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                       <div>
                         <p className="text-sm font-semibold text-blue-900">Free Shipping Across India</p>
-                        <p className="text-xs text-blue-700 mt-0.5">7–14 business days · Temperature-controlled packaging</p>
+                        <p className="text-xs text-blue-700 mt-0.5">Standard 3–4 days (free) · Fast 1-day (+₹800) · Temperature-controlled packaging</p>
                       </div>
                     </CardBody>
                   </Card>
@@ -855,6 +856,18 @@ export default function ProductDetailPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* ── Student discount notice ── */}
+                <a
+                  href={`https://wa.me/918217824384?text=${encodeURIComponent('Hi, I\'m a student and would like to enquire about the student discount.')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 w-full bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 hover:border-indigo-300 transition-colors rounded-xl px-4 py-2.5 group"
+                >
+                  <GraduationCap className="w-4 h-4 text-indigo-500 flex-shrink-0" />
+                  <span className="text-xs font-semibold text-indigo-700">Student discount available</span>
+                  <span className="ml-auto text-[10px] text-indigo-400 group-hover:text-indigo-600 font-medium transition-colors">Ask on WhatsApp →</span>
+                </a>
 
                 {/* ── CTAs ── */}
                 {/* Order Now */}

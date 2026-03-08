@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Button,
@@ -9,14 +9,19 @@ import {
   Divider,
 } from '@heroui/react';
 import { getProductImageUrl, BAC_WATER_IMAGE_URL } from '../utils/imageUrl';
-import { Minus, Plus, Trash2, Check, MessageCircle, Tag, ShoppingBag, ArrowRight, LogIn, UserPlus } from 'lucide-react';
+import { Minus, Plus, Trash2, Check, MessageCircle, Tag, ShoppingBag, ArrowRight, LogIn, UserPlus, X, GraduationCap, Zap, Clock } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { useCurrency } from '../context/CurrencyContext';
 import { OrderFormData } from '../types';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
+
+const FAST_DELIVERY_CHARGE = 800;
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const { format, currency } = useCurrency();
   const {
     cart,
     removeFromCart,
@@ -26,6 +31,10 @@ export default function CheckoutPage() {
     getSubtotal,
     getDiscount,
     getDiscountAmount,
+    couponCode,
+    applyCoupon,
+    removeCoupon,
+    getCouponAmount,
   } = useCart();
 
   const [formData, setFormData] = useState<OrderFormData>({
@@ -34,7 +43,14 @@ export default function CheckoutPage() {
     customer_phone: '',
     shipping_address: '',
     disclaimer_accepted: false,
+    age_confirmed: false,
+    no_dosing_accepted: false,
+    referral_source: '',
+    delivery_option: 'normal',
   });
+
+  const deliveryCharge = formData.delivery_option === 'fast' ? FAST_DELIVERY_CHARGE : 0;
+  const grandTotal = getTotal() + deliveryCharge;
 
   /* ── Pre-fill from user profile if signed in ── */
   useEffect(() => {
@@ -50,7 +66,22 @@ export default function CheckoutPage() {
   }, [user]);
   const [orderReady, setOrderReady] = useState(false);   // step 2: review screen
   const [whatsappUrl, setWhatsappUrl] = useState('');
-  const [orderSent, setOrderSent] = useState(false);     // step 3: done
+  const [orderSent,   setOrderSent]   = useState(false); // step 3: done
+  const [savedOrderId, setSavedOrderId] = useState<string | null>(null); // Supabase order ID
+  const orderSaving = useRef(false); // prevent double-save
+
+  // coupon input state
+  const [couponInput,  setCouponInput]  = useState('');
+  const [couponStatus, setCouponStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [couponMsg,    setCouponMsg]    = useState('');
+
+  const handleApplyCoupon = () => {
+    if (!couponInput.trim()) return;
+    const result = applyCoupon(couponInput);
+    setCouponStatus(result.success ? 'success' : 'error');
+    setCouponMsg(result.message);
+    if (result.success) setCouponInput('');
+  };
 
   /** Step 1 → 2: validate form and build WhatsApp URL, but don't open yet */
   const handleSubmit = (e: React.FormEvent) => {
@@ -65,31 +96,98 @@ export default function CheckoutPage() {
     const discount = getDiscount();
     const discountText =
       discount > 0
-        ? `\n*Subtotal:* ₹${getSubtotal().toLocaleString('en-IN')}\n*Discount (${discount}%):* -₹${getDiscountAmount().toLocaleString('en-IN')}`
+        ? `\n*Subtotal:* ₹${getSubtotal().toLocaleString('en-IN')}\n*Volume Discount (${discount}%):* -₹${getDiscountAmount().toLocaleString('en-IN')}`
         : '';
+
+    const couponAmt = getCouponAmount();
+    const couponText = couponCode && couponAmt > 0
+      ? `\n*Coupon (${couponCode}):* -₹${couponAmt.toLocaleString('en-IN')}`
+      : '';
+
+    const referralLine = formData.referral_source
+      ? `\nFound us via: ${formData.referral_source}`
+      : '';
+
+    const deliveryLine = formData.delivery_option === 'fast'
+      ? `\n*Delivery: Fast (1 day) — +₹${FAST_DELIVERY_CHARGE.toLocaleString('en-IN')}*`
+      : `\n*Delivery: Standard (3–4 days) — Free*`;
 
     const message =
       `*New Order — RetraLabs.in*\n\n` +
       `*Customer*\n` +
       `Name: ${formData.customer_name}\n` +
       `Email: ${formData.customer_email}\n` +
-      `Phone: ${formData.customer_phone}\n\n` +
+      `Phone: ${formData.customer_phone}${referralLine}\n\n` +
       `*Shipping Address*\n${formData.shipping_address}\n\n` +
       `*Items*\n${lines.join('\n')}` +
-      `${discountText}\n\n` +
-      `*Total: ₹${getTotal().toLocaleString('en-IN')}*\n\n` +
-      `Payment via UPI preferred.`;
+      `${discountText}` +
+      `${couponText}` +
+      `${deliveryLine}\n\n` +
+      `*Total: ₹${grandTotal.toLocaleString('en-IN')}*` +
+      (currency.code !== 'INR' ? ` (~${format(grandTotal)})` : '') +
+      `\n\nPayment via UPI preferred (INR).`;
 
     setWhatsappUrl(`https://wa.me/918217824384?text=${encodeURIComponent(message)}`);
     setOrderReady(true);
   };
 
-  /** Step 2 → 3: user explicitly taps "Send on WhatsApp" */
-  const handleSendOnWhatsApp = () => {
+  /** Step 2 → 3: save order to Supabase, then open WhatsApp */
+  const handleSendOnWhatsApp = async () => {
+    if (orderSaving.current) return;
+    orderSaving.current = true;
+
+    let finalUrl = whatsappUrl;
+    let shortId: string | null = null;
+
+    // ── Save to Supabase if configured ──────────────────────────────────────
+    if (isSupabaseConfigured()) {
+      try {
+        // 1. Insert order row
+        const { data: order, error: orderErr } = await supabase
+          .from('orders')
+          .insert({
+            customer_name:    formData.customer_name,
+            customer_email:   formData.customer_email,
+            customer_phone:   formData.customer_phone,
+            shipping_address: formData.shipping_address,
+            total_amount:     grandTotal,
+            status:           'pending',
+            order_status:     'pending',
+            payment_status:   'pending',
+          })
+          .select('id')
+          .single();
+
+        if (!orderErr && order?.id) {
+          shortId = (order.id as string).slice(0, 8).toUpperCase();
+          setSavedOrderId(shortId);
+
+          // 2. Insert order_items rows
+          await supabase.from('order_items').insert(
+            cart.map(item => ({
+              order_id:   order.id,
+              product_id: item.product.id,
+              variant_id: item.variant.id,
+              quantity:   item.quantity,
+              unit_price: item.variant.price_inr,
+            }))
+          );
+
+          // 3. Prepend Order ID to WhatsApp message
+          const rawMsg = decodeURIComponent(whatsappUrl.split('?text=')[1] || '');
+          const updatedMsg = `*Order ID: #${shortId}*\n\n` + rawMsg;
+          finalUrl = `https://wa.me/918217824384?text=${encodeURIComponent(updatedMsg)}`;
+        }
+      } catch (_) {
+        // Supabase save failed — still proceed with WhatsApp order
+      }
+    }
+
     clearCart();
-    window.open(whatsappUrl, '_blank');
+    window.open(finalUrl, '_blank');
     setOrderSent(true);
-    setTimeout(() => navigate('/'), 4000);
+    setTimeout(() => navigate('/'), 6000);
+    orderSaving.current = false;
   };
 
   /* ── Step 3: enquiry sent → prompt sign-in if guest ── */
@@ -105,6 +203,15 @@ export default function CheckoutPage() {
           <p className="text-slate-500 mb-1 leading-relaxed">
             Your order details are on WhatsApp. Our team will reply with a UPI payment link within the hour.
           </p>
+
+          {/* Order ID badge */}
+          {savedOrderId && (
+            <div className="mt-4 mb-2 bg-slate-900 rounded-2xl px-5 py-4 text-center">
+              <p className="text-xs text-slate-400 uppercase tracking-widest mb-1">Your Order ID</p>
+              <p className="text-2xl font-black text-white tracking-widest">#{savedOrderId}</p>
+              <p className="text-xs text-slate-400 mt-1">Save this to track your order</p>
+            </div>
+          )}
 
           {/* Guest: nudge to create account for tracking */}
           {!authLoading && !user && (
@@ -166,14 +273,39 @@ export default function CheckoutPage() {
                     <p className="text-xs text-slate-400">{item.variant.dosage_mg}mg · qty {item.quantity}</p>
                   </div>
                   <p className="text-sm font-bold text-slate-900">
-                    ₹{(item.variant.price_inr * item.quantity).toLocaleString('en-IN')}
+                    {format(item.variant.price_inr * item.quantity)}
                   </p>
                 </div>
               ))}
             </div>
+            {(getDiscount() > 0 || getCouponAmount() > 0 || deliveryCharge > 0) && (
+              <div className="border-t border-slate-100 pt-3 space-y-1.5">
+                {getDiscount() > 0 && (
+                  <div className="flex justify-between text-sm text-emerald-600">
+                    <span>Volume Discount ({getDiscount()}%)</span>
+                    <span>&minus;{format(getDiscountAmount())}</span>
+                  </div>
+                )}
+                {couponCode && getCouponAmount() > 0 && (
+                  <div className="flex justify-between text-sm text-emerald-600">
+                    <span>Coupon ({couponCode.toUpperCase()})</span>
+                    <span>&minus;{format(getCouponAmount())}</span>
+                  </div>
+                )}
+                {deliveryCharge > 0 && (
+                  <div className="flex justify-between text-sm text-amber-600">
+                    <span className="flex items-center gap-1">
+                      <Zap className="w-3.5 h-3.5" />
+                      Fast Delivery (1 day)
+                    </span>
+                    <span>+{format(deliveryCharge)}</span>
+                  </div>
+                )}
+              </div>
+            )}
             <div className="border-t border-slate-100 pt-3 flex justify-between items-center">
               <span className="font-semibold text-slate-700">Total</span>
-              <span className="text-xl font-black text-slate-900">₹{getTotal().toLocaleString('en-IN')}</span>
+              <span className="text-xl font-black text-slate-900">{format(grandTotal)}</span>
             </div>
           </div>
 
@@ -306,7 +438,7 @@ export default function CheckoutPage() {
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-slate-900 truncate">{item.product.name}</p>
                         <p className="text-sm text-slate-500">
-                          {item.variant.dosage_mg}mg &mdash; ₹{item.variant.price_inr.toLocaleString('en-IN')}
+                          {item.variant.dosage_mg}mg &mdash; {format(item.variant.price_inr)}
                         </p>
                       </div>
                       {/* Quantity controls */}
@@ -357,32 +489,94 @@ export default function CheckoutPage() {
                 <CardBody className="px-5 pb-5 pt-3 space-y-3">
                   <div className="flex justify-between items-center text-slate-600">
                     <span>Subtotal</span>
-                    <span className="font-medium">₹{getSubtotal().toLocaleString('en-IN')}</span>
+                    <span className="font-medium">{format(getSubtotal())}</span>
                   </div>
 
                   {getDiscount() > 0 && (
                     <div className="flex justify-between items-center text-emerald-600">
-                      <span className="font-medium">Discount ({getDiscount()}%)</span>
+                      <span className="font-medium">Volume Discount ({getDiscount()}%)</span>
                       <span className="font-semibold">
-                        &minus;₹{getDiscountAmount().toLocaleString('en-IN')}
+                        &minus;{format(getDiscountAmount())}
                       </span>
                     </div>
                   )}
+
+                  {/* ── Coupon row ── */}
+                  {couponCode ? (
+                    <>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex items-center gap-1.5 bg-indigo-100 text-indigo-700 text-xs font-bold px-2.5 py-1 rounded-full">
+                            <GraduationCap className="w-3 h-3" />
+                            {couponCode.toUpperCase()}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => { removeCoupon(); setCouponStatus('idle'); setCouponMsg(''); }}
+                            className="text-slate-400 hover:text-slate-600 transition-colors"
+                            aria-label="Remove coupon"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                        <span className="font-semibold text-emerald-600">
+                          &minus;{format(getCouponAmount())}
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <div>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="Coupon code"
+                          value={couponInput}
+                          onChange={(e) => { setCouponInput(e.target.value); setCouponStatus('idle'); }}
+                          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleApplyCoupon(); } }}
+                          className="flex-1 px-3 py-2 rounded-lg border-2 border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-500 transition-colors bg-white"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleApplyCoupon}
+                          disabled={!couponInput.trim()}
+                          className="px-4 py-2 bg-slate-900 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-bold rounded-lg transition-colors"
+                        >
+                          Apply
+                        </button>
+                      </div>
+                      {couponStatus === 'error' && (
+                        <p className="mt-1.5 text-xs text-red-500 font-medium">{couponMsg}</p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* ── Delivery charge row ── */}
+                  <div className="flex justify-between items-center">
+                    <span className={`flex items-center gap-1.5 text-sm font-medium ${formData.delivery_option === 'fast' ? 'text-amber-600' : 'text-slate-500'}`}>
+                      {formData.delivery_option === 'fast'
+                        ? <><Zap className="w-3.5 h-3.5" />Fast Delivery (1 day)</>
+                        : <><Clock className="w-3.5 h-3.5" />Standard Delivery (3–4 days)</>
+                      }
+                    </span>
+                    <span className={`font-semibold text-sm ${formData.delivery_option === 'fast' ? 'text-amber-600' : 'text-emerald-600'}`}>
+                      {formData.delivery_option === 'fast' ? `+${format(FAST_DELIVERY_CHARGE)}` : 'FREE'}
+                    </span>
+                  </div>
 
                   <Divider />
 
                   <div className="flex justify-between items-center">
                     <span className="text-lg font-semibold text-slate-900">Total</span>
                     <span className="text-2xl font-bold text-slate-900">
-                      ₹{getTotal().toLocaleString('en-IN')}
+                      {format(grandTotal)}
                     </span>
                   </div>
 
-                  {getDiscount() > 0 && (
+                  {(getDiscount() > 0 || getCouponAmount() > 0) && (
                     <div className="flex items-center gap-2 pt-1">
                       <Check className="w-4 h-4 text-emerald-500" />
                       <span className="text-sm text-emerald-600 font-medium">
-                        You saved ₹{getDiscountAmount().toLocaleString('en-IN')}
+                        You saved {format(getDiscountAmount() + getCouponAmount())} in total
                       </span>
                     </div>
                   )}
@@ -454,25 +648,144 @@ export default function CheckoutPage() {
                   />
                 </div>
 
-                {/* Disclaimer checkbox */}
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
-                  <label className="flex items-start gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formData.disclaimer_accepted}
-                      onChange={(e) => setFormData({ ...formData, disclaimer_accepted: e.target.checked })}
-                      className="mt-0.5 w-4 h-4 rounded border-slate-300 accent-slate-900 cursor-pointer flex-shrink-0"
-                    />
-                    <span className="text-sm text-slate-600 leading-relaxed">
-                      I confirm that these products are being purchased for research purposes only,
-                      in accordance with applicable regulations and institutional guidelines.
-                    </span>
+                {/* ── Delivery Option ── */}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Delivery Speed <span className="text-red-500">*</span>
                   </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* Normal delivery */}
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, delivery_option: 'normal' })}
+                      className={`relative flex flex-col items-start gap-1.5 p-4 rounded-xl border-2 text-left transition-all ${
+                        formData.delivery_option === 'normal'
+                          ? 'border-slate-900 bg-slate-900 text-white shadow-lg'
+                          : 'border-slate-200 bg-white text-slate-700 hover:border-slate-400'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Clock className={`w-4 h-4 ${formData.delivery_option === 'normal' ? 'text-white' : 'text-slate-500'}`} />
+                        <span className="text-sm font-bold">Standard</span>
+                      </div>
+                      <p className={`text-xs ${formData.delivery_option === 'normal' ? 'text-slate-300' : 'text-slate-500'}`}>
+                        3–4 business days
+                      </p>
+                      <span className={`text-base font-black ${formData.delivery_option === 'normal' ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                        FREE
+                      </span>
+                      {formData.delivery_option === 'normal' && (
+                        <div className="absolute top-2.5 right-2.5 w-5 h-5 bg-white rounded-full flex items-center justify-center">
+                          <Check className="w-3 h-3 text-slate-900" />
+                        </div>
+                      )}
+                    </button>
+
+                    {/* Fast delivery */}
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, delivery_option: 'fast' })}
+                      className={`relative flex flex-col items-start gap-1.5 p-4 rounded-xl border-2 text-left transition-all ${
+                        formData.delivery_option === 'fast'
+                          ? 'border-amber-500 bg-amber-500 text-white shadow-lg shadow-amber-500/30'
+                          : 'border-slate-200 bg-white text-slate-700 hover:border-amber-400'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Zap className={`w-4 h-4 ${formData.delivery_option === 'fast' ? 'text-white' : 'text-amber-500'}`} />
+                        <span className="text-sm font-bold">Fast</span>
+                      </div>
+                      <p className={`text-xs ${formData.delivery_option === 'fast' ? 'text-amber-100' : 'text-slate-500'}`}>
+                        1 business day
+                      </p>
+                      <span className={`text-base font-black ${formData.delivery_option === 'fast' ? 'text-white' : 'text-amber-600'}`}>
+                        +{format(FAST_DELIVERY_CHARGE)}
+                      </span>
+                      {formData.delivery_option === 'fast' && (
+                        <div className="absolute top-2.5 right-2.5 w-5 h-5 bg-white rounded-full flex items-center justify-center">
+                          <Check className="w-3 h-3 text-amber-500" />
+                        </div>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* ── How did you find us? ── */}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                    How did you find us? <span className="text-slate-400 font-normal">(optional)</span>
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {['YouTube', 'Instagram', 'Reddit', 'Friends & Family', 'Google', 'Twitter / X', 'TikTok', 'Other', 'Prefer not to say'].map((src) => (
+                      <button
+                        key={src}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, referral_source: formData.referral_source === src ? '' : src })}
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border-2 transition-all ${
+                          formData.referral_source === src
+                            ? 'bg-slate-900 border-slate-900 text-white'
+                            : 'bg-white border-slate-200 text-slate-600 hover:border-slate-400'
+                        }`}
+                      >
+                        {src}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* ── Compliance checkboxes ── */}
+                <div className="space-y-3">
+                  {/* Research use */}
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formData.disclaimer_accepted}
+                        onChange={(e) => setFormData({ ...formData, disclaimer_accepted: e.target.checked })}
+                        className="mt-0.5 w-4 h-4 rounded border-slate-300 accent-slate-900 cursor-pointer flex-shrink-0"
+                      />
+                      <span className="text-sm text-slate-600 leading-relaxed">
+                        I confirm these products are being purchased for <strong>research purposes only</strong>,
+                        in accordance with applicable regulations and institutional guidelines.
+                      </span>
+                    </label>
+                  </div>
+
+                  {/* 18+ age */}
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formData.age_confirmed}
+                        onChange={(e) => setFormData({ ...formData, age_confirmed: e.target.checked })}
+                        className="mt-0.5 w-4 h-4 rounded border-slate-300 accent-slate-900 cursor-pointer flex-shrink-0"
+                      />
+                      <span className="text-sm text-slate-600 leading-relaxed">
+                        I confirm I am <strong>18 years of age or older</strong>.
+                      </span>
+                    </label>
+                  </div>
+
+                  {/* No dosing guidance */}
+                  <div className="p-4 bg-rose-50 rounded-xl border border-rose-200">
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formData.no_dosing_accepted}
+                        onChange={(e) => setFormData({ ...formData, no_dosing_accepted: e.target.checked })}
+                        className="mt-0.5 w-4 h-4 rounded border-rose-300 accent-rose-700 cursor-pointer flex-shrink-0"
+                      />
+                      <span className="text-sm text-rose-800 leading-relaxed">
+                        I understand that <strong>RetraLabs does not provide dosing guidance, medical advice, or usage instructions</strong> of any kind.
+                        I will <strong>not</strong> request dosing information, and I take full responsibility for my research activities.
+                      </span>
+                    </label>
+                  </div>
                 </div>
 
                 <button
                   type="submit"
-                  disabled={!formData.disclaimer_accepted}
+                  disabled={!formData.disclaimer_accepted || !formData.age_confirmed || !formData.no_dosing_accepted}
                   className="w-full flex items-center justify-center gap-2.5 bg-slate-900 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-base py-4 rounded-xl transition-colors"
                 >
                   <MessageCircle className="w-5 h-5" />

@@ -1,5 +1,6 @@
 import { Check } from 'lucide-react';
 import { ProductWithVariants, ProductVariant } from '../types';
+import { useCurrency } from '../context/CurrencyContext';
 import {
   Modal,
   ModalContent,
@@ -21,6 +22,7 @@ interface ProductModalProps {
 }
 
 export default function ProductModal({ product, isOpen, onClose, onAddToCart, addedVariantId }: ProductModalProps) {
+  const { format } = useCurrency();
   const isFlagship = product.name === 'Retatrutide' || product.name === 'Tirzepatide';
   const isBacWater = product.name === 'Bacteriostatic Water (Pharma Grade)';
 
@@ -81,7 +83,7 @@ export default function ProductModal({ product, isOpen, onClose, onAddToCart, ad
                       </p>
                     )}
                     <p className="text-2xl font-bold text-gray-900">
-                      ₹{variant.price_inr.toLocaleString('en-IN')}
+                      {format(variant.price_inr)}
                     </p>
                   </div>
 

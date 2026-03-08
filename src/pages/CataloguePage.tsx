@@ -16,7 +16,7 @@ import { getProductImageUrl, BAC_WATER_IMAGE_URL } from '../utils/imageUrl';
 import { ProductWithVariants } from '../types';
 import { useCurrency } from '../context/CurrencyContext';
 import { useSEO } from '../hooks/useSEO';
-import { ShieldCheck, FlaskConical, FileCheck, Microscope, Sparkles, ArrowRight } from 'lucide-react';
+import { ShieldCheck, FlaskConical, FileCheck, Microscope, Sparkles, ArrowRight, GraduationCap } from 'lucide-react';
 
 const DEMO_PRODUCTS: ProductWithVariants[] = [
   {
@@ -414,6 +414,10 @@ export default function CataloguePage() {
                       )}
                       <span className="text-xs text-slate-400">
                         {product.variants.length} variant{product.variants.length !== 1 ? 's' : ''} available
+                      </span>
+                      <span className="inline-flex items-center gap-1 mt-1 text-[10px] font-semibold text-indigo-500">
+                        <GraduationCap className="w-3 h-3" />
+                        Student discount available
                       </span>
                     </div>
                     <button
