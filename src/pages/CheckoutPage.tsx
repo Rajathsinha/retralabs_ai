@@ -12,6 +12,7 @@ import { getProductImageUrl, BAC_WATER_IMAGE_URL } from '../utils/imageUrl';
 import { Minus, Plus, Trash2, Check, MessageCircle, Tag, ShoppingBag, ArrowRight, LogIn, UserPlus, X, GraduationCap, Zap, Clock } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { useCurrency } from '../context/CurrencyContext';
 import { OrderFormData } from '../types';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
@@ -20,6 +21,7 @@ const FAST_DELIVERY_CHARGE = 800;
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const { format, currency } = useCurrency();
   const {
     cart,
     removeFromCart,
@@ -121,8 +123,9 @@ export default function CheckoutPage() {
       `${discountText}` +
       `${couponText}` +
       `${deliveryLine}\n\n` +
-      `*Total: ₹${grandTotal.toLocaleString('en-IN')}*\n\n` +
-      `Payment via UPI preferred.`;
+      `*Total: ₹${grandTotal.toLocaleString('en-IN')}*` +
+      (currency.code !== 'INR' ? ` (~${format(grandTotal)})` : '') +
+      `\n\nPayment via UPI preferred (INR).`;
 
     setWhatsappUrl(`https://wa.me/918217824384?text=${encodeURIComponent(message)}`);
     setOrderReady(true);
@@ -270,7 +273,7 @@ export default function CheckoutPage() {
                     <p className="text-xs text-slate-400">{item.variant.dosage_mg}mg · qty {item.quantity}</p>
                   </div>
                   <p className="text-sm font-bold text-slate-900">
-                    ₹{(item.variant.price_inr * item.quantity).toLocaleString('en-IN')}
+                    {format(item.variant.price_inr * item.quantity)}
                   </p>
                 </div>
               ))}
@@ -280,13 +283,13 @@ export default function CheckoutPage() {
                 {getDiscount() > 0 && (
                   <div className="flex justify-between text-sm text-emerald-600">
                     <span>Volume Discount ({getDiscount()}%)</span>
-                    <span>&minus;₹{getDiscountAmount().toLocaleString('en-IN')}</span>
+                    <span>&minus;{format(getDiscountAmount())}</span>
                   </div>
                 )}
                 {couponCode && getCouponAmount() > 0 && (
                   <div className="flex justify-between text-sm text-emerald-600">
                     <span>Coupon ({couponCode.toUpperCase()})</span>
-                    <span>&minus;₹{getCouponAmount().toLocaleString('en-IN')}</span>
+                    <span>&minus;{format(getCouponAmount())}</span>
                   </div>
                 )}
                 {deliveryCharge > 0 && (
@@ -295,14 +298,14 @@ export default function CheckoutPage() {
                       <Zap className="w-3.5 h-3.5" />
                       Fast Delivery (1 day)
                     </span>
-                    <span>+₹{deliveryCharge.toLocaleString('en-IN')}</span>
+                    <span>+{format(deliveryCharge)}</span>
                   </div>
                 )}
               </div>
             )}
             <div className="border-t border-slate-100 pt-3 flex justify-between items-center">
               <span className="font-semibold text-slate-700">Total</span>
-              <span className="text-xl font-black text-slate-900">₹{grandTotal.toLocaleString('en-IN')}</span>
+              <span className="text-xl font-black text-slate-900">{format(grandTotal)}</span>
             </div>
           </div>
 
@@ -435,7 +438,7 @@ export default function CheckoutPage() {
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-slate-900 truncate">{item.product.name}</p>
                         <p className="text-sm text-slate-500">
-                          {item.variant.dosage_mg}mg &mdash; ₹{item.variant.price_inr.toLocaleString('en-IN')}
+                          {item.variant.dosage_mg}mg &mdash; {format(item.variant.price_inr)}
                         </p>
                       </div>
                       {/* Quantity controls */}
@@ -486,14 +489,14 @@ export default function CheckoutPage() {
                 <CardBody className="px-5 pb-5 pt-3 space-y-3">
                   <div className="flex justify-between items-center text-slate-600">
                     <span>Subtotal</span>
-                    <span className="font-medium">₹{getSubtotal().toLocaleString('en-IN')}</span>
+                    <span className="font-medium">{format(getSubtotal())}</span>
                   </div>
 
                   {getDiscount() > 0 && (
                     <div className="flex justify-between items-center text-emerald-600">
                       <span className="font-medium">Volume Discount ({getDiscount()}%)</span>
                       <span className="font-semibold">
-                        &minus;₹{getDiscountAmount().toLocaleString('en-IN')}
+                        &minus;{format(getDiscountAmount())}
                       </span>
                     </div>
                   )}
@@ -517,7 +520,7 @@ export default function CheckoutPage() {
                           </button>
                         </div>
                         <span className="font-semibold text-emerald-600">
-                          &minus;₹{getCouponAmount().toLocaleString('en-IN')}
+                          &minus;{format(getCouponAmount())}
                         </span>
                       </div>
                     </>
@@ -556,7 +559,7 @@ export default function CheckoutPage() {
                       }
                     </span>
                     <span className={`font-semibold text-sm ${formData.delivery_option === 'fast' ? 'text-amber-600' : 'text-emerald-600'}`}>
-                      {formData.delivery_option === 'fast' ? `+₹${FAST_DELIVERY_CHARGE.toLocaleString('en-IN')}` : 'FREE'}
+                      {formData.delivery_option === 'fast' ? `+${format(FAST_DELIVERY_CHARGE)}` : 'FREE'}
                     </span>
                   </div>
 
@@ -565,7 +568,7 @@ export default function CheckoutPage() {
                   <div className="flex justify-between items-center">
                     <span className="text-lg font-semibold text-slate-900">Total</span>
                     <span className="text-2xl font-bold text-slate-900">
-                      ₹{grandTotal.toLocaleString('en-IN')}
+                      {format(grandTotal)}
                     </span>
                   </div>
 
@@ -573,7 +576,7 @@ export default function CheckoutPage() {
                     <div className="flex items-center gap-2 pt-1">
                       <Check className="w-4 h-4 text-emerald-500" />
                       <span className="text-sm text-emerald-600 font-medium">
-                        You saved ₹{(getDiscountAmount() + getCouponAmount()).toLocaleString('en-IN')} in total
+                        You saved {format(getDiscountAmount() + getCouponAmount())} in total
                       </span>
                     </div>
                   )}
@@ -696,7 +699,7 @@ export default function CheckoutPage() {
                         1 business day
                       </p>
                       <span className={`text-base font-black ${formData.delivery_option === 'fast' ? 'text-white' : 'text-amber-600'}`}>
-                        +₹{FAST_DELIVERY_CHARGE.toLocaleString('en-IN')}
+                        +{format(FAST_DELIVERY_CHARGE)}
                       </span>
                       {formData.delivery_option === 'fast' && (
                         <div className="absolute top-2.5 right-2.5 w-5 h-5 bg-white rounded-full flex items-center justify-center">
