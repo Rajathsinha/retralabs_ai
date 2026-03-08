@@ -1,6 +1,18 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { CartItem, Product, ProductVariant } from '../types';
 
+// ── Coupon types ──────────────────────────────────────────────────────────────
+type CouponDiscount =
+  | { type: 'flat';    value: number }
+  | { type: 'percent'; value: number };
+
+const COUPONS: Record<string, CouponDiscount> = {
+  'new1k':       { type: 'flat',    value: 1000 },
+  'bulk2000':    { type: 'flat',    value: 2000 },
+  'welfare1000': { type: 'flat',    value: 1000 },
+  'rajath':      { type: 'percent', value: 10   },
+};
+
 interface CartContextType {
   cart: CartItem[];
   addToCart: (product: Product, variant: ProductVariant) => void;
@@ -11,12 +23,20 @@ interface CartContextType {
   getSubtotal: () => number;
   getDiscount: () => number;
   getDiscountAmount: () => number;
+  // coupon
+  couponCode: string | null;
+  couponDiscount: CouponDiscount | null;
+  applyCoupon: (code: string) => { success: boolean; message: string };
+  removeCoupon: () => void;
+  getCouponAmount: () => number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [couponCode,     setCouponCode]     = useState<string | null>(null);
+  const [couponDiscount, setCouponDiscount] = useState<CouponDiscount | null>(null);
 
   const addToCart = (product: Product, variant: ProductVariant) => {
     setCart((prevCart) => {
@@ -94,8 +114,33 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return Math.round((getDiscountableSubtotal() * discount) / 100);
   };
 
+  // ── Coupon methods ──────────────────────────────────────────────────────────
+  const applyCoupon = (code: string): { success: boolean; message: string } => {
+    const found = COUPONS[code.trim().toLowerCase()];
+    if (!found) {
+      return { success: false, message: 'Invalid coupon code' };
+    }
+    setCouponCode(code.trim());
+    setCouponDiscount(found);
+    return { success: true, message: 'Coupon applied!' };
+  };
+
+  const removeCoupon = () => {
+    setCouponCode(null);
+    setCouponDiscount(null);
+  };
+
+  const getCouponAmount = (): number => {
+    if (!couponDiscount) return 0;
+    const base = getSubtotal() - getDiscountAmount(); // post-volume-discount total
+    if (couponDiscount.type === 'flat') {
+      return Math.min(couponDiscount.value, base); // never make total negative
+    }
+    return Math.round((base * couponDiscount.value) / 100);
+  };
+
   const getTotal = () => {
-    return getSubtotal() - getDiscountAmount();
+    return getSubtotal() - getDiscountAmount() - getCouponAmount();
   };
 
   return (
@@ -110,6 +155,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
         getSubtotal,
         getDiscount,
         getDiscountAmount,
+        couponCode,
+        couponDiscount,
+        applyCoupon,
+        removeCoupon,
+        getCouponAmount,
       }}
     >
       {children}

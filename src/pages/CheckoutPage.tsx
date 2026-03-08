@@ -9,7 +9,7 @@ import {
   Divider,
 } from '@heroui/react';
 import { getProductImageUrl, BAC_WATER_IMAGE_URL } from '../utils/imageUrl';
-import { Minus, Plus, Trash2, Check, MessageCircle, Tag, ShoppingBag, ArrowRight, LogIn, UserPlus } from 'lucide-react';
+import { Minus, Plus, Trash2, Check, MessageCircle, Tag, ShoppingBag, ArrowRight, LogIn, UserPlus, X, GraduationCap } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { OrderFormData } from '../types';
@@ -26,6 +26,10 @@ export default function CheckoutPage() {
     getSubtotal,
     getDiscount,
     getDiscountAmount,
+    couponCode,
+    applyCoupon,
+    removeCoupon,
+    getCouponAmount,
   } = useCart();
 
   const [formData, setFormData] = useState<OrderFormData>({
@@ -52,6 +56,19 @@ export default function CheckoutPage() {
   const [whatsappUrl, setWhatsappUrl] = useState('');
   const [orderSent, setOrderSent] = useState(false);     // step 3: done
 
+  // coupon input state
+  const [couponInput,  setCouponInput]  = useState('');
+  const [couponStatus, setCouponStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [couponMsg,    setCouponMsg]    = useState('');
+
+  const handleApplyCoupon = () => {
+    if (!couponInput.trim()) return;
+    const result = applyCoupon(couponInput);
+    setCouponStatus(result.success ? 'success' : 'error');
+    setCouponMsg(result.message);
+    if (result.success) setCouponInput('');
+  };
+
   /** Step 1 → 2: validate form and build WhatsApp URL, but don't open yet */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,8 +82,13 @@ export default function CheckoutPage() {
     const discount = getDiscount();
     const discountText =
       discount > 0
-        ? `\n*Subtotal:* ₹${getSubtotal().toLocaleString('en-IN')}\n*Discount (${discount}%):* -₹${getDiscountAmount().toLocaleString('en-IN')}`
+        ? `\n*Subtotal:* ₹${getSubtotal().toLocaleString('en-IN')}\n*Volume Discount (${discount}%):* -₹${getDiscountAmount().toLocaleString('en-IN')}`
         : '';
+
+    const couponAmt = getCouponAmount();
+    const couponText = couponCode && couponAmt > 0
+      ? `\n*Coupon (${couponCode}):* -₹${couponAmt.toLocaleString('en-IN')}`
+      : '';
 
     const message =
       `*New Order — RetraLabs.in*\n\n` +
@@ -76,7 +98,8 @@ export default function CheckoutPage() {
       `Phone: ${formData.customer_phone}\n\n` +
       `*Shipping Address*\n${formData.shipping_address}\n\n` +
       `*Items*\n${lines.join('\n')}` +
-      `${discountText}\n\n` +
+      `${discountText}` +
+      `${couponText}\n\n` +
       `*Total: ₹${getTotal().toLocaleString('en-IN')}*\n\n` +
       `Payment via UPI preferred.`;
 
@@ -171,6 +194,22 @@ export default function CheckoutPage() {
                 </div>
               ))}
             </div>
+            {(getDiscount() > 0 || getCouponAmount() > 0) && (
+              <div className="border-t border-slate-100 pt-3 space-y-1.5">
+                {getDiscount() > 0 && (
+                  <div className="flex justify-between text-sm text-emerald-600">
+                    <span>Volume Discount ({getDiscount()}%)</span>
+                    <span>&minus;₹{getDiscountAmount().toLocaleString('en-IN')}</span>
+                  </div>
+                )}
+                {couponCode && getCouponAmount() > 0 && (
+                  <div className="flex justify-between text-sm text-emerald-600">
+                    <span>Coupon ({couponCode.toUpperCase()})</span>
+                    <span>&minus;₹{getCouponAmount().toLocaleString('en-IN')}</span>
+                  </div>
+                )}
+              </div>
+            )}
             <div className="border-t border-slate-100 pt-3 flex justify-between items-center">
               <span className="font-semibold text-slate-700">Total</span>
               <span className="text-xl font-black text-slate-900">₹{getTotal().toLocaleString('en-IN')}</span>
@@ -362,10 +401,59 @@ export default function CheckoutPage() {
 
                   {getDiscount() > 0 && (
                     <div className="flex justify-between items-center text-emerald-600">
-                      <span className="font-medium">Discount ({getDiscount()}%)</span>
+                      <span className="font-medium">Volume Discount ({getDiscount()}%)</span>
                       <span className="font-semibold">
                         &minus;₹{getDiscountAmount().toLocaleString('en-IN')}
                       </span>
+                    </div>
+                  )}
+
+                  {/* ── Coupon row ── */}
+                  {couponCode ? (
+                    <>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex items-center gap-1.5 bg-indigo-100 text-indigo-700 text-xs font-bold px-2.5 py-1 rounded-full">
+                            <GraduationCap className="w-3 h-3" />
+                            {couponCode.toUpperCase()}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => { removeCoupon(); setCouponStatus('idle'); setCouponMsg(''); }}
+                            className="text-slate-400 hover:text-slate-600 transition-colors"
+                            aria-label="Remove coupon"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                        <span className="font-semibold text-emerald-600">
+                          &minus;₹{getCouponAmount().toLocaleString('en-IN')}
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <div>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="Coupon code"
+                          value={couponInput}
+                          onChange={(e) => { setCouponInput(e.target.value); setCouponStatus('idle'); }}
+                          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleApplyCoupon(); } }}
+                          className="flex-1 px-3 py-2 rounded-lg border-2 border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-500 transition-colors bg-white"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleApplyCoupon}
+                          disabled={!couponInput.trim()}
+                          className="px-4 py-2 bg-slate-900 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-bold rounded-lg transition-colors"
+                        >
+                          Apply
+                        </button>
+                      </div>
+                      {couponStatus === 'error' && (
+                        <p className="mt-1.5 text-xs text-red-500 font-medium">{couponMsg}</p>
+                      )}
                     </div>
                   )}
 
@@ -378,11 +466,11 @@ export default function CheckoutPage() {
                     </span>
                   </div>
 
-                  {getDiscount() > 0 && (
+                  {(getDiscount() > 0 || getCouponAmount() > 0) && (
                     <div className="flex items-center gap-2 pt-1">
                       <Check className="w-4 h-4 text-emerald-500" />
                       <span className="text-sm text-emerald-600 font-medium">
-                        You saved ₹{getDiscountAmount().toLocaleString('en-IN')}
+                        You saved ₹{(getDiscountAmount() + getCouponAmount()).toLocaleString('en-IN')} in total
                       </span>
                     </div>
                   )}
