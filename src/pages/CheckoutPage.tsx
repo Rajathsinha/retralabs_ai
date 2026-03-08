@@ -9,11 +9,13 @@ import {
   Divider,
 } from '@heroui/react';
 import { getProductImageUrl, BAC_WATER_IMAGE_URL } from '../utils/imageUrl';
-import { Minus, Plus, Trash2, Check, MessageCircle, Tag, ShoppingBag, ArrowRight, LogIn, UserPlus, X, GraduationCap } from 'lucide-react';
+import { Minus, Plus, Trash2, Check, MessageCircle, Tag, ShoppingBag, ArrowRight, LogIn, UserPlus, X, GraduationCap, Zap, Clock } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { OrderFormData } from '../types';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+
+const FAST_DELIVERY_CHARGE = 800;
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
@@ -42,7 +44,11 @@ export default function CheckoutPage() {
     age_confirmed: false,
     no_dosing_accepted: false,
     referral_source: '',
+    delivery_option: 'normal',
   });
+
+  const deliveryCharge = formData.delivery_option === 'fast' ? FAST_DELIVERY_CHARGE : 0;
+  const grandTotal = getTotal() + deliveryCharge;
 
   /* ── Pre-fill from user profile if signed in ── */
   useEffect(() => {
@@ -100,6 +106,10 @@ export default function CheckoutPage() {
       ? `\nFound us via: ${formData.referral_source}`
       : '';
 
+    const deliveryLine = formData.delivery_option === 'fast'
+      ? `\n*Delivery: Fast (1 day) — +₹${FAST_DELIVERY_CHARGE.toLocaleString('en-IN')}*`
+      : `\n*Delivery: Standard (3–4 days) — Free*`;
+
     const message =
       `*New Order — RetraLabs.in*\n\n` +
       `*Customer*\n` +
@@ -109,8 +119,9 @@ export default function CheckoutPage() {
       `*Shipping Address*\n${formData.shipping_address}\n\n` +
       `*Items*\n${lines.join('\n')}` +
       `${discountText}` +
-      `${couponText}\n\n` +
-      `*Total: ₹${getTotal().toLocaleString('en-IN')}*\n\n` +
+      `${couponText}` +
+      `${deliveryLine}\n\n` +
+      `*Total: ₹${grandTotal.toLocaleString('en-IN')}*\n\n` +
       `Payment via UPI preferred.`;
 
     setWhatsappUrl(`https://wa.me/918217824384?text=${encodeURIComponent(message)}`);
@@ -136,7 +147,7 @@ export default function CheckoutPage() {
             customer_email:   formData.customer_email,
             customer_phone:   formData.customer_phone,
             shipping_address: formData.shipping_address,
-            total_amount:     getTotal(),
+            total_amount:     grandTotal,
             status:           'pending',
             order_status:     'pending',
             payment_status:   'pending',
@@ -264,7 +275,7 @@ export default function CheckoutPage() {
                 </div>
               ))}
             </div>
-            {(getDiscount() > 0 || getCouponAmount() > 0) && (
+            {(getDiscount() > 0 || getCouponAmount() > 0 || deliveryCharge > 0) && (
               <div className="border-t border-slate-100 pt-3 space-y-1.5">
                 {getDiscount() > 0 && (
                   <div className="flex justify-between text-sm text-emerald-600">
@@ -278,11 +289,20 @@ export default function CheckoutPage() {
                     <span>&minus;₹{getCouponAmount().toLocaleString('en-IN')}</span>
                   </div>
                 )}
+                {deliveryCharge > 0 && (
+                  <div className="flex justify-between text-sm text-amber-600">
+                    <span className="flex items-center gap-1">
+                      <Zap className="w-3.5 h-3.5" />
+                      Fast Delivery (1 day)
+                    </span>
+                    <span>+₹{deliveryCharge.toLocaleString('en-IN')}</span>
+                  </div>
+                )}
               </div>
             )}
             <div className="border-t border-slate-100 pt-3 flex justify-between items-center">
               <span className="font-semibold text-slate-700">Total</span>
-              <span className="text-xl font-black text-slate-900">₹{getTotal().toLocaleString('en-IN')}</span>
+              <span className="text-xl font-black text-slate-900">₹{grandTotal.toLocaleString('en-IN')}</span>
             </div>
           </div>
 
@@ -527,12 +547,25 @@ export default function CheckoutPage() {
                     </div>
                   )}
 
+                  {/* ── Delivery charge row ── */}
+                  <div className="flex justify-between items-center">
+                    <span className={`flex items-center gap-1.5 text-sm font-medium ${formData.delivery_option === 'fast' ? 'text-amber-600' : 'text-slate-500'}`}>
+                      {formData.delivery_option === 'fast'
+                        ? <><Zap className="w-3.5 h-3.5" />Fast Delivery (1 day)</>
+                        : <><Clock className="w-3.5 h-3.5" />Standard Delivery (3–4 days)</>
+                      }
+                    </span>
+                    <span className={`font-semibold text-sm ${formData.delivery_option === 'fast' ? 'text-amber-600' : 'text-emerald-600'}`}>
+                      {formData.delivery_option === 'fast' ? `+₹${FAST_DELIVERY_CHARGE.toLocaleString('en-IN')}` : 'FREE'}
+                    </span>
+                  </div>
+
                   <Divider />
 
                   <div className="flex justify-between items-center">
                     <span className="text-lg font-semibold text-slate-900">Total</span>
                     <span className="text-2xl font-bold text-slate-900">
-                      ₹{getTotal().toLocaleString('en-IN')}
+                      ₹{grandTotal.toLocaleString('en-IN')}
                     </span>
                   </div>
 
@@ -610,6 +643,68 @@ export default function CheckoutPage() {
                     onChange={(e) => setFormData({ ...formData, shipping_address: e.target.value })}
                     className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-800 transition-colors text-base resize-none"
                   />
+                </div>
+
+                {/* ── Delivery Option ── */}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Delivery Speed <span className="text-red-500">*</span>
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* Normal delivery */}
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, delivery_option: 'normal' })}
+                      className={`relative flex flex-col items-start gap-1.5 p-4 rounded-xl border-2 text-left transition-all ${
+                        formData.delivery_option === 'normal'
+                          ? 'border-slate-900 bg-slate-900 text-white shadow-lg'
+                          : 'border-slate-200 bg-white text-slate-700 hover:border-slate-400'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Clock className={`w-4 h-4 ${formData.delivery_option === 'normal' ? 'text-white' : 'text-slate-500'}`} />
+                        <span className="text-sm font-bold">Standard</span>
+                      </div>
+                      <p className={`text-xs ${formData.delivery_option === 'normal' ? 'text-slate-300' : 'text-slate-500'}`}>
+                        3–4 business days
+                      </p>
+                      <span className={`text-base font-black ${formData.delivery_option === 'normal' ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                        FREE
+                      </span>
+                      {formData.delivery_option === 'normal' && (
+                        <div className="absolute top-2.5 right-2.5 w-5 h-5 bg-white rounded-full flex items-center justify-center">
+                          <Check className="w-3 h-3 text-slate-900" />
+                        </div>
+                      )}
+                    </button>
+
+                    {/* Fast delivery */}
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, delivery_option: 'fast' })}
+                      className={`relative flex flex-col items-start gap-1.5 p-4 rounded-xl border-2 text-left transition-all ${
+                        formData.delivery_option === 'fast'
+                          ? 'border-amber-500 bg-amber-500 text-white shadow-lg shadow-amber-500/30'
+                          : 'border-slate-200 bg-white text-slate-700 hover:border-amber-400'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Zap className={`w-4 h-4 ${formData.delivery_option === 'fast' ? 'text-white' : 'text-amber-500'}`} />
+                        <span className="text-sm font-bold">Fast</span>
+                      </div>
+                      <p className={`text-xs ${formData.delivery_option === 'fast' ? 'text-amber-100' : 'text-slate-500'}`}>
+                        1 business day
+                      </p>
+                      <span className={`text-base font-black ${formData.delivery_option === 'fast' ? 'text-white' : 'text-amber-600'}`}>
+                        +₹{FAST_DELIVERY_CHARGE.toLocaleString('en-IN')}
+                      </span>
+                      {formData.delivery_option === 'fast' && (
+                        <div className="absolute top-2.5 right-2.5 w-5 h-5 bg-white rounded-full flex items-center justify-center">
+                          <Check className="w-3 h-3 text-amber-500" />
+                        </div>
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                 {/* ── How did you find us? ── */}

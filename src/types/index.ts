@@ -38,4 +38,5 @@ export interface OrderFormData {
   age_confirmed: boolean;
   no_dosing_accepted: boolean;
   referral_source: string;
+  delivery_option: 'normal' | 'fast';
 }
