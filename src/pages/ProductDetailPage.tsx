@@ -506,8 +506,8 @@ export default function ProductDetailPage() {
                       if (n.includes('retatrutide'))      t.src = '/retatrutide.jpg';
                       else if (n.includes('tirzepatide')) t.src = '/tirzepatide.jpg';
                       else if (n.includes('ghk'))         t.src = '/ghk-cu.jpg';
-                      else if (n.includes('igf'))         t.src = '/igf-1-lr3.jpg';
-                      else if (n.includes('hgh'))         t.src = '/hgh-191aa.jpg';
+                      else if (n.includes('semax'))       t.src = '/ghk-cu.jpg';
+                      else if (n.includes('selank'))      t.src = '/ghk-cu.jpg';
                       else                                t.src = BAC_WATER_IMAGE_URL;
                     }}
                   />

@@ -15,9 +15,8 @@ const NAME_TO_LOCAL_IMAGE: Array<[string, string]> = [
   ['tirzepatide',    '/tirzepatide.jpg'],
   ['ghk-cu',         '/ghk-cu.jpg'],
   ['ghk cu',         '/ghk-cu.jpg'],
-  ['igf-1',          '/igf-1-lr3.jpg'],
-  ['igf1',           '/igf-1-lr3.jpg'],
-  ['hgh',            '/hgh-191aa.jpg'],
+  ['semax',          '/ghk-cu.jpg'],
+  ['selank',         '/ghk-cu.jpg'],
 ];
 
 /**
