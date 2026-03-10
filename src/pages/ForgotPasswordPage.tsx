@@ -16,7 +16,9 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     const { error: err } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: `${window.location.origin}/signin`,
+      // Supabase appends the hash tokens to this URL:
+      // https://retralabs.in/reset-password#access_token=...&type=recovery
+      redirectTo: `${window.location.origin}/reset-password`,
     });
 
     setLoading(false);

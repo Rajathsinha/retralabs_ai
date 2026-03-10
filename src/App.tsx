@@ -1,8 +1,9 @@
 import { Component, ReactNode, useEffect } from 'react';
-import { Routes, Route, Outlet, useLocation, Navigate } from 'react-router-dom';
+import { Routes, Route, Outlet, useLocation, Navigate, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { CartProvider } from './context/CartContext';
 import { useAuth } from './context/AuthContext';
+import { supabase } from './lib/supabase';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import WhatsAppButton from './components/WhatsAppButton';
@@ -23,6 +24,7 @@ import RefundPolicyPage from './pages/RefundPolicyPage';
 import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import AccountPage from './pages/AccountPage';
 
 // ─── Error Boundary ───────────────────────────────────────────────────────────
@@ -58,6 +60,43 @@ class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryStat
 function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }); }, [pathname]);
+  return null;
+}
+
+// ─── Auth Callback Handler ────────────────────────────────────────────────────
+// Safety net: if a Supabase auth email link deposits tokens on a page other
+// than /reset-password (e.g. site URL is misconfigured in the Supabase dashboard),
+// we detect the hash fragment here and redirect to the correct page.
+function AuthCallbackHandler() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const hash = window.location.hash;
+
+    // Password recovery token landed on the wrong page — redirect to /reset-password
+    if (
+      hash.includes('type=recovery') &&
+      !window.location.pathname.includes('/reset-password')
+    ) {
+      navigate('/reset-password', { replace: true });
+      return;
+    }
+
+    // Email verification / magic-link: after SIGNED_IN fires, redirect to /account
+    // We listen once; Supabase will fire SIGNED_IN when the hash is processed.
+    if (hash.includes('type=signup') || hash.includes('type=magiclink')) {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+        if (event === 'SIGNED_IN') {
+          window.history.replaceState(null, '', window.location.pathname);
+          navigate('/account', { replace: true });
+          subscription.unsubscribe();
+        }
+      });
+      return () => subscription.unsubscribe();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return null;
 }
 
@@ -120,6 +159,8 @@ export default function App() {
     <ErrorBoundary>
       <CartProvider>
         <ScrollToTop />
+        {/* Handles Supabase auth hash tokens that land on the wrong page */}
+        <AuthCallbackHandler />
         <Routes location={location} key={location.pathname}>
           <Route element={<RootLayout />}>
             <Route path="/"               element={<AnimatedPage><HomePage /></AnimatedPage>} />
@@ -139,6 +180,8 @@ export default function App() {
             <Route path="/signin"         element={<AnimatedPage><SignInPage /></AnimatedPage>} />
             <Route path="/register"       element={<AnimatedPage><SignUpPage /></AnimatedPage>} />
             <Route path="/forgot-password" element={<AnimatedPage><ForgotPasswordPage /></AnimatedPage>} />
+            {/* Handles password reset links: /reset-password#access_token=...&type=recovery */}
+            <Route path="/reset-password" element={<AnimatedPage><ResetPasswordPage /></AnimatedPage>} />
             <Route path="/account"        element={<AnimatedPage><ProtectedRoute><AccountPage /></ProtectedRoute></AnimatedPage>} />
           </Route>
         </Routes>
