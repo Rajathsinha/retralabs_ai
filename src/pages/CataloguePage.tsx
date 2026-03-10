@@ -63,29 +63,28 @@ const DEMO_PRODUCTS: ProductWithVariants[] = [
   },
   {
     id: '4',
-    name: 'IGF-1 LR3',
-    description: 'Long R3 insulin-like growth factor for cellular proliferation and differentiation research.',
+    name: 'Semax',
+    description: 'Synthetic ACTH analogue nootropic peptide for cognitive function, neuroprotection, and CNS research.',
     category: 'research-peptide',
-    image_url: '/igf-1-lr3.jpg',
+    image_url: '/semax.jpg',
     created_at: new Date().toISOString(),
     variants: [
-      { id: '4a', product_id: '4', dosage_mg: 1, price_inr: 5000, in_stock: true, created_at: new Date().toISOString() },
-      { id: '4b', product_id: '4', dosage_mg: 5, price_inr: 20000, in_stock: true, created_at: new Date().toISOString() },
-      { id: '4c', product_id: '4', dosage_mg: 10, price_inr: 35000, in_stock: true, created_at: new Date().toISOString() },
+      { id: '4a', product_id: '4', dosage_mg: 20, price_inr: 3000, in_stock: true, created_at: new Date().toISOString() },
+      { id: '4b', product_id: '4', dosage_mg: 50, price_inr: 6000, in_stock: true, created_at: new Date().toISOString() },
+      { id: '4c', product_id: '4', dosage_mg: 100, price_inr: 11000, in_stock: true, created_at: new Date().toISOString() },
     ],
   },
   {
     id: '5',
-    name: 'HGH 191AA',
-    description: 'Human growth hormone (Somatropin) 191 amino acid sequence for laboratory analysis and research.',
+    name: 'Selank',
+    description: 'Anxiolytic and nootropic heptapeptide derived from tuftsin, researched for anti-anxiety and cognitive enhancement.',
     category: 'research-peptide',
-    image_url: '/hgh-191aa.jpg',
+    image_url: '/selank.jpg',
     created_at: new Date().toISOString(),
     variants: [
-      { id: '5a', product_id: '5', dosage_mg: 50, price_inr: 7000, in_stock: true, vial_configuration: '10IU x 5 vials', created_at: new Date().toISOString() },
-      { id: '5b', product_id: '5', dosage_mg: 100, price_inr: 11000, in_stock: true, vial_configuration: '10IU x 10 vials', created_at: new Date().toISOString() },
-      { id: '5g', product_id: '5', dosage_mg: 120, price_inr: 13000, in_stock: true, vial_configuration: '24IU x 5 vials', created_at: new Date().toISOString() },
-      { id: '5h', product_id: '5', dosage_mg: 240, price_inr: 18000, in_stock: true, vial_configuration: '24IU x 10 vials', created_at: new Date().toISOString() },
+      { id: '5a', product_id: '5', dosage_mg: 20, price_inr: 3000, in_stock: true, created_at: new Date().toISOString() },
+      { id: '5b', product_id: '5', dosage_mg: 50, price_inr: 6000, in_stock: true, created_at: new Date().toISOString() },
+      { id: '5c', product_id: '5', dosage_mg: 100, price_inr: 11000, in_stock: true, created_at: new Date().toISOString() },
     ],
   },
   {
@@ -108,15 +107,16 @@ const PURITY_MAP: Record<string, string> = {
   'Retatrutide': '99.2%',
   'Tirzepatide': '99.4%',
   'GHK-Cu': '99.1%',
-  'IGF-1 LR3': '99.3%',
-  'HGH 191AA': '99.0%',
+  'Semax': '99.1%',
+  'Selank': '99.2%',
   'Bacteriostatic Water (Pharma Grade)': 'Pharma',
 };
 
 const BADGE_MAP: Record<string, { label: string; color: 'warning' | 'primary' | 'secondary' }> = {
   'Retatrutide': { label: 'BESTSELLER', color: 'warning' },
   'Tirzepatide': { label: 'POPULAR', color: 'primary' },
-  'HGH 191AA': { label: 'PREMIUM', color: 'secondary' },
+  'Semax': { label: 'NEW', color: 'secondary' },
+  'Selank': { label: 'NEW', color: 'secondary' },
 };
 
 type FilterType = 'all' | 'peptide' | 'supplies';
@@ -153,7 +153,7 @@ export default function CataloguePage() {
 
   useSEO({
     title: 'Buy Research Peptides India | Retatrutide, Tirzepatide, GHK-Cu | RetraLabs',
-    description: 'Buy research-grade Retatrutide, Tirzepatide, GHK-Cu, HGH 191AA & IGF-1 LR3 in India. 99%+ HPLC purity, COA verified. Retatrutide from ₹4,000. India-wide shipping.',
+    description: 'Buy research-grade Retatrutide, Tirzepatide, GHK-Cu, Semax & Selank in India. 99%+ HPLC purity, COA verified. Retatrutide from ₹4,000. India-wide shipping.',
     keywords: 'buy retatrutide india, retatrutide catalogue india, buy tirzepatide india, GHK-Cu india, research peptides india, reta india, peptide catalogue india, buy peptides online india',
     canonical: 'https://retralabs.in/catalogue',
     ogImage: 'https://retralabs.in/retatrutide.jpg',
@@ -184,7 +184,7 @@ export default function CataloguePage() {
 
       if (variantsError) throw variantsError;
 
-      const productOrder = ['Retatrutide', 'Tirzepatide', 'GHK-Cu', 'IGF-1 LR3', 'HGH 191AA', 'Bacteriostatic Water (Pharma Grade)'];
+      const productOrder = ['Retatrutide', 'Tirzepatide', 'GHK-Cu', 'Semax', 'Selank', 'Bacteriostatic Water (Pharma Grade)'];
 
       const sortedProducts = productsData.sort((a, b) => {
         const indexA = productOrder.indexOf(a.name);
