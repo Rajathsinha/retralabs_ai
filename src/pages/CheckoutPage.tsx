@@ -9,12 +9,13 @@ import {
   Divider,
 } from '@heroui/react';
 import { getProductImageUrl, BAC_WATER_IMAGE_URL } from '../utils/imageUrl';
-import { Minus, Plus, Trash2, Check, MessageCircle, Tag, ShoppingBag, ArrowRight, LogIn, UserPlus, X, GraduationCap, Zap, Clock } from 'lucide-react';
+import { Minus, Plus, Trash2, Check, MessageCircle, Tag, ShoppingBag, ArrowRight, LogIn, UserPlus, X, GraduationCap, Zap, Clock, QrCode } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { OrderFormData } from '../types';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import UpiQrModal from '../components/UpiQrModal';
 
 const FAST_DELIVERY_CHARGE = 800;
 
@@ -66,8 +67,9 @@ export default function CheckoutPage() {
   }, [user]);
   const [orderReady, setOrderReady] = useState(false);   // step 2: review screen
   const [whatsappUrl, setWhatsappUrl] = useState('');
-  const [orderSent,   setOrderSent]   = useState(false); // step 3: done
+  const [orderSent,   setOrderSent]   = useState(false); // step 3: done (WhatsApp flow)
   const [savedOrderId, setSavedOrderId] = useState<string | null>(null); // Supabase order ID
+  const [showQrModal,  setShowQrModal]  = useState(false); // UPI QR modal
   const orderSaving = useRef(false); // prevent double-save
 
   // coupon input state
@@ -190,6 +192,71 @@ export default function CheckoutPage() {
     orderSaving.current = false;
   };
 
+  /** UPI QR flow: save order as paid, send merchant WhatsApp, navigate to /payment-success */
+  const handleQrPaymentConfirmed = async () => {
+    if (orderSaving.current) return;
+    orderSaving.current = true;
+
+    let fullOrderId: string | null = null;
+    let shortId: string | null = null;
+
+    // ── Save to Supabase if configured ──────────────────────────────────────
+    if (isSupabaseConfigured()) {
+      try {
+        // 1. Insert order row — mark as paid immediately
+        const { data: order, error: orderErr } = await supabase
+          .from('orders')
+          .insert({
+            customer_name:    formData.customer_name,
+            customer_email:   formData.customer_email,
+            customer_phone:   formData.customer_phone,
+            shipping_address: formData.shipping_address,
+            total_amount:     grandTotal,
+            status:           'pending',
+            order_status:     'processing',
+            payment_status:   'completed',
+          })
+          .select('id')
+          .single();
+
+        if (!orderErr && order?.id) {
+          fullOrderId = order.id as string;
+          shortId = fullOrderId.slice(0, 8).toUpperCase();
+          setSavedOrderId(shortId);
+
+          // 2. Insert order_items rows
+          await supabase.from('order_items').insert(
+            cart.map(item => ({
+              order_id:   order.id,
+              product_id: item.product.id,
+              variant_id: item.variant.id,
+              quantity:   item.quantity,
+              unit_price: item.variant.price_inr,
+            }))
+          );
+
+          // 3. Send merchant WhatsApp notification with "PAID VIA UPI QR" prefix
+          const rawMsg = decodeURIComponent(whatsappUrl.split('?text=')[1] || '');
+          const merchantMsg = `✅ *PAID VIA UPI QR — Order #${shortId}*\n\n` + rawMsg;
+          const merchantUrl = `https://wa.me/918217824384?text=${encodeURIComponent(merchantMsg)}`;
+          window.open(merchantUrl, '_blank');
+        }
+      } catch (_) {
+        // Supabase save failed — still open WhatsApp so merchant is notified
+        window.open(whatsappUrl, '_blank');
+      }
+    }
+
+    clearCart();
+    orderSaving.current = false;
+
+    if (fullOrderId) {
+      navigate(`/payment-success?orderId=${fullOrderId}`);
+    } else {
+      navigate('/payment-success');
+    }
+  };
+
   /* ── Step 3: enquiry sent → prompt sign-in if guest ── */
   if (orderSent) {
     return (
@@ -247,7 +314,7 @@ export default function CheckoutPage() {
     );
   }
 
-  /* ── Step 2: order review + WhatsApp send ── */
+  /* ── Step 2: order review + payment ── */
   if (orderReady) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-12">
@@ -255,11 +322,11 @@ export default function CheckoutPage() {
 
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <MessageCircle className="w-8 h-8 text-green-600" />
+            <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <QrCode className="w-8 h-8 text-purple-600" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-900 mb-1">Ready to Send</h2>
-            <p className="text-slate-500 text-sm">Your order is packed. One tap and we're on it.</p>
+            <h2 className="text-2xl font-bold text-slate-900 mb-1">Review & Pay</h2>
+            <p className="text-slate-500 text-sm">Everything looks good? Scan the QR to pay instantly.</p>
           </div>
 
           {/* Order summary card */}
@@ -321,13 +388,13 @@ export default function CheckoutPage() {
             <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">What happens next</p>
             <div className="space-y-2.5">
               {[
-                'Tap the green button below',
-                'WhatsApp opens with your order pre-filled',
-                'Hit SEND — takes 2 seconds',
-                'We confirm + send UPI within 1 hour',
+                'Tap "Pay via PhonePe QR" below',
+                'Scan the QR code in the popup',
+                'Enter the exact amount in your UPI app and pay',
+                'Tap "I\'ve Completed the Payment" to confirm',
               ].map((step, i) => (
                 <div key={i} className="flex items-start gap-3">
-                  <span className="w-5 h-5 rounded-full bg-green-500/20 text-green-400 text-[11px] font-black flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="w-5 h-5 rounded-full bg-purple-500/20 text-purple-400 text-[11px] font-black flex items-center justify-center flex-shrink-0 mt-0.5">
                     {i + 1}
                   </span>
                   <p className="text-sm text-slate-300">{step}</p>
@@ -336,13 +403,22 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* THE button */}
+          {/* ── Primary: UPI QR ── */}
+          <button
+            onClick={() => setShowQrModal(true)}
+            className="w-full flex items-center justify-center gap-3 bg-[#5f259f] hover:bg-[#4e1d84] active:bg-[#3d1668] text-white font-bold text-lg py-4 rounded-2xl transition-all duration-200 shadow-lg shadow-purple-700/30 hover:shadow-purple-700/50 hover:-translate-y-0.5"
+          >
+            <QrCode className="w-6 h-6" />
+            Pay via PhonePe QR
+          </button>
+
+          {/* ── Secondary: WhatsApp fallback ── */}
           <button
             onClick={handleSendOnWhatsApp}
-            className="w-full flex items-center justify-center gap-3 bg-green-500 hover:bg-green-400 active:bg-green-600 text-white font-bold text-lg py-4 rounded-2xl transition-all duration-200 shadow-lg shadow-green-500/30 hover:shadow-green-500/50 hover:-translate-y-0.5"
+            className="w-full mt-3 flex items-center justify-center gap-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3.5 rounded-2xl transition-colors text-sm"
           >
-            <MessageCircle className="w-6 h-6" />
-            Send Order on WhatsApp
+            <MessageCircle className="w-4 h-4" />
+            Send via WhatsApp instead
           </button>
 
           <button
@@ -351,6 +427,15 @@ export default function CheckoutPage() {
           >
             ← Go back and edit
           </button>
+
+          {/* ── UPI QR Modal ── */}
+          <UpiQrModal
+            isOpen={showQrModal}
+            onClose={() => setShowQrModal(false)}
+            amount={grandTotal}
+            onConfirm={handleQrPaymentConfirmed}
+            whatsappUrl={whatsappUrl}
+          />
 
         </div>
       </div>
@@ -362,19 +447,19 @@ export default function CheckoutPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Page header */}
         <h1 className="text-3xl font-bold text-slate-900 mb-2">Lock It In.</h1>
-        <p className="text-slate-500 mb-8">Review your cart, fill in your details, and we'll sort the rest via WhatsApp. Old school? Yes. Works? Also yes.</p>
+        <p className="text-slate-500 mb-8">Review your cart, fill in your details, then scan the QR code to pay instantly via PhonePe UPI.</p>
 
         {/* Payment notice */}
-        <Card className="mb-4 border border-blue-200 bg-blue-50" shadow="none">
+        <Card className="mb-4 border border-purple-200 bg-purple-50" shadow="none">
           <CardBody className="flex flex-row items-start gap-4 p-5">
-            <div className="p-2 bg-blue-100 rounded-xl flex-shrink-0">
-              <MessageCircle className="w-5 h-5 text-blue-600" />
+            <div className="p-2 bg-purple-100 rounded-xl flex-shrink-0">
+              <QrCode className="w-5 h-5 text-purple-600" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-blue-900 mb-1">One Thing Before We Ship...</h3>
-              <p className="text-sm text-blue-800 leading-relaxed">
-                Online payment through our website is currently unavailable. At the moment, we
-                only accept <strong>UPI payments through WhatsApp</strong>.
+              <h3 className="text-base font-bold text-purple-900 mb-1">Pay Instantly via PhonePe UPI</h3>
+              <p className="text-sm text-purple-800 leading-relaxed">
+                Fill in your details below, then scan the QR code at checkout.
+                Fast, secure — no waiting for a payment link.
               </p>
             </div>
           </CardBody>
@@ -786,10 +871,10 @@ export default function CheckoutPage() {
                 <button
                   type="submit"
                   disabled={!formData.disclaimer_accepted || !formData.age_confirmed || !formData.no_dosing_accepted}
-                  className="w-full flex items-center justify-center gap-2.5 bg-slate-900 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-base py-4 rounded-xl transition-colors"
+                  className="w-full flex items-center justify-center gap-2.5 bg-[#5f259f] hover:bg-[#4e1d84] disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-base py-4 rounded-xl transition-colors"
                 >
-                  <MessageCircle className="w-5 h-5" />
-                  Continue on WhatsApp for Payment
+                  <QrCode className="w-5 h-5" />
+                  Review Order &amp; Pay
                 </button>
               </form>
             </div>
