@@ -1,7 +1,9 @@
 import { Component, ReactNode, useEffect } from 'react';
-import { Routes, Route, Outlet, useLocation, Navigate } from 'react-router-dom';
+import { Routes, Route, Outlet, useLocation, Navigate, useNavigate } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import { CartProvider } from './context/CartContext';
 import { useAuth } from './context/AuthContext';
+import { supabase } from './lib/supabase';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import WhatsAppButton from './components/WhatsAppButton';
@@ -22,6 +24,7 @@ import RefundPolicyPage from './pages/RefundPolicyPage';
 import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import AccountPage from './pages/AccountPage';
 
 // ─── Error Boundary ───────────────────────────────────────────────────────────
@@ -56,7 +59,44 @@ class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryStat
 // ─── Scroll to top on route change ───────────────────────────────────────────
 function ScrollToTop() {
   const { pathname } = useLocation();
-  useEffect(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, [pathname]);
+  useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }); }, [pathname]);
+  return null;
+}
+
+// ─── Auth Callback Handler ────────────────────────────────────────────────────
+// Safety net: if a Supabase auth email link deposits tokens on a page other
+// than /reset-password (e.g. site URL is misconfigured in the Supabase dashboard),
+// we detect the hash fragment here and redirect to the correct page.
+function AuthCallbackHandler() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const hash = window.location.hash;
+
+    // Password recovery token landed on the wrong page — redirect to /reset-password
+    if (
+      hash.includes('type=recovery') &&
+      !window.location.pathname.includes('/reset-password')
+    ) {
+      navigate('/reset-password', { replace: true });
+      return;
+    }
+
+    // Email verification / magic-link: after SIGNED_IN fires, redirect to /account
+    // We listen once; Supabase will fire SIGNED_IN when the hash is processed.
+    if (hash.includes('type=signup') || hash.includes('type=magiclink')) {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+        if (event === 'SIGNED_IN') {
+          window.history.replaceState(null, '', window.location.pathname);
+          navigate('/account', { replace: true });
+          subscription.unsubscribe();
+        }
+      });
+      return () => subscription.unsubscribe();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return null;
 }
 
@@ -74,13 +114,37 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
-// ─── Root layout ─────────────────────────────────────────────────────────────
+// ─── Animated page wrapper ────────────────────────────────────────────────────
+const pageVariants = {
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0,  transition: { duration: 0.38, ease: [0.16, 1, 0.3, 1] } },
+  exit:    { opacity: 0, y: -6, transition: { duration: 0.22, ease: 'easeIn' } },
+};
+
+function AnimatedPage({ children }: { children: ReactNode }) {
+  return (
+    <motion.div
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+// ─── Root layout with AnimatePresence ────────────────────────────────────────
 function RootLayout() {
+  const location = useLocation();
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Header />
       <main className="flex-1">
-        <Outlet />
+        {/* AnimatePresence enables exit animations when route changes */}
+        <AnimatePresence mode="wait" initial={false}>
+          <Outlet key={location.pathname} />
+        </AnimatePresence>
       </main>
       <Footer />
       <WhatsAppButton />
@@ -90,30 +154,35 @@ function RootLayout() {
 
 // ─── App ──────────────────────────────────────────────────────────────────────
 export default function App() {
+  const location = useLocation();
   return (
     <ErrorBoundary>
       <CartProvider>
         <ScrollToTop />
-        <Routes>
+        {/* Handles Supabase auth hash tokens that land on the wrong page */}
+        <AuthCallbackHandler />
+        <Routes location={location} key={location.pathname}>
           <Route element={<RootLayout />}>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/catalogue" element={<CataloguePage />} />
-            <Route path="/product/:id" element={<ProductDetailPage />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/reviews" element={<ReviewsPage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/support" element={<SupportPage />} />
-            <Route path="/track-order" element={<OrderTrackingPage />} />
-            <Route path="/payment-success" element={<PaymentSuccessPage />} />
-            <Route path="/payment-failed" element={<PaymentFailedPage />} />
-            <Route path="/privacy" element={<PrivacyPolicyPage />} />
-            <Route path="/terms" element={<TermsPage />} />
-            <Route path="/refund" element={<RefundPolicyPage />} />
-            <Route path="/signin" element={<SignInPage />} />
-            <Route path="/register" element={<SignUpPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
+            <Route path="/"               element={<AnimatedPage><HomePage /></AnimatedPage>} />
+            <Route path="/catalogue"      element={<AnimatedPage><CataloguePage /></AnimatedPage>} />
+            <Route path="/product/:id"    element={<AnimatedPage><ProductDetailPage /></AnimatedPage>} />
+            <Route path="/checkout"       element={<AnimatedPage><CheckoutPage /></AnimatedPage>} />
+            <Route path="/reviews"        element={<AnimatedPage><ReviewsPage /></AnimatedPage>} />
+            <Route path="/about"          element={<AnimatedPage><AboutPage /></AnimatedPage>} />
+            <Route path="/contact"        element={<AnimatedPage><ContactPage /></AnimatedPage>} />
+            <Route path="/support"        element={<AnimatedPage><SupportPage /></AnimatedPage>} />
+            <Route path="/track-order"    element={<AnimatedPage><OrderTrackingPage /></AnimatedPage>} />
+            <Route path="/payment-success" element={<AnimatedPage><PaymentSuccessPage /></AnimatedPage>} />
+            <Route path="/payment-failed"  element={<AnimatedPage><PaymentFailedPage /></AnimatedPage>} />
+            <Route path="/privacy"        element={<AnimatedPage><PrivacyPolicyPage /></AnimatedPage>} />
+            <Route path="/terms"          element={<AnimatedPage><TermsPage /></AnimatedPage>} />
+            <Route path="/refund"         element={<AnimatedPage><RefundPolicyPage /></AnimatedPage>} />
+            <Route path="/signin"         element={<AnimatedPage><SignInPage /></AnimatedPage>} />
+            <Route path="/register"       element={<AnimatedPage><SignUpPage /></AnimatedPage>} />
+            <Route path="/forgot-password" element={<AnimatedPage><ForgotPasswordPage /></AnimatedPage>} />
+            {/* Handles password reset links: /reset-password#access_token=...&type=recovery */}
+            <Route path="/reset-password" element={<AnimatedPage><ResetPasswordPage /></AnimatedPage>} />
+            <Route path="/account"        element={<AnimatedPage><ProtectedRoute><AccountPage /></ProtectedRoute></AnimatedPage>} />
           </Route>
         </Routes>
       </CartProvider>

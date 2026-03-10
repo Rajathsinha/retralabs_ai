@@ -45,11 +45,11 @@ const DEMO_PRODUCTS: ProductWithVariants[] = [
     name: 'Retatrutide',
     description: 'Triple agonist peptide targeting GLP-1, GIP, and glucagon receptors for metabolic and obesity research.',
     category: 'research-peptide',
-    image_url: '/retatrutide.jpg',
+    image_url: '/Retatrutide.png',
     created_at: new Date().toISOString(),
     variants: [
-      { id: '1s', product_id: '1', dosage_mg: 10, price_inr: 4000, in_stock: true, vial_configuration: 'Starter vial', created_at: new Date().toISOString() },
-      { id: '1a', product_id: '1', dosage_mg: 20, price_inr: 7000, in_stock: true, vial_configuration: 'Single vial', created_at: new Date().toISOString() },
+      { id: '1s', product_id: '1', dosage_mg: 10, price_inr: 3500, in_stock: true, vial_configuration: 'Starter vial', created_at: new Date().toISOString() },
+      { id: '1a', product_id: '1', dosage_mg: 20, price_inr: 6000, in_stock: true, vial_configuration: 'Single vial', created_at: new Date().toISOString() },
       { id: '1b', product_id: '1', dosage_mg: 50, price_inr: 13000, in_stock: true, vial_configuration: '10mg x 5 vials', created_at: new Date().toISOString() },
       { id: '1c', product_id: '1', dosage_mg: 100, price_inr: 21000, in_stock: true, vial_configuration: '10mg x 10 vials / 20mg x 5 vials', created_at: new Date().toISOString() },
     ],
@@ -59,12 +59,13 @@ const DEMO_PRODUCTS: ProductWithVariants[] = [
     name: 'Tirzepatide',
     description: 'Dual GIP and GLP-1 receptor agonist for metabolic research and analytical applications.',
     category: 'research-peptide',
-    image_url: '/tirzepatide.jpg',
+    image_url: '/TIRZEPATIDE.png',
     created_at: new Date().toISOString(),
     variants: [
-      { id: '2a', product_id: '2', dosage_mg: 20, price_inr: 6000, in_stock: true, vial_configuration: 'Single vial', created_at: new Date().toISOString() },
-      { id: '2b', product_id: '2', dosage_mg: 50, price_inr: 11000, in_stock: true, vial_configuration: '10mg x 5 vials', created_at: new Date().toISOString() },
-      { id: '2c', product_id: '2', dosage_mg: 100, price_inr: 18000, in_stock: true, vial_configuration: '10mg x 10 vials / 20mg x 5 vials', created_at: new Date().toISOString() },
+      { id: '2x', product_id: '2', dosage_mg: 10, price_inr: 2500, in_stock: true, vial_configuration: 'Single vial', created_at: new Date().toISOString() },
+      { id: '2a', product_id: '2', dosage_mg: 20, price_inr: 4000, in_stock: true, vial_configuration: '2 vials', created_at: new Date().toISOString() },
+      { id: '2b', product_id: '2', dosage_mg: 50, price_inr: 9000, in_stock: true, vial_configuration: '5 vials', created_at: new Date().toISOString() },
+      { id: '2c', product_id: '2', dosage_mg: 100, price_inr: 16000, in_stock: true, vial_configuration: '10 vials', created_at: new Date().toISOString() },
     ],
   },
   {
@@ -72,41 +73,111 @@ const DEMO_PRODUCTS: ProductWithVariants[] = [
     name: 'GHK-Cu',
     description: 'Copper peptide complex for skin regeneration, wound healing, and anti-aging research applications.',
     category: 'research-peptide',
-    image_url: '/ghk-cu.jpg',
+    image_url: '/GHKCU.png',
     created_at: new Date().toISOString(),
     variants: [
-      { id: '3a', product_id: '3', dosage_mg: 50, price_inr: 4000, in_stock: true, created_at: new Date().toISOString() },
-      { id: '3b', product_id: '3', dosage_mg: 100, price_inr: 7000, in_stock: true, created_at: new Date().toISOString() },
-      { id: '3c', product_id: '3', dosage_mg: 150, price_inr: 10000, in_stock: true, created_at: new Date().toISOString() },
-      { id: '3d', product_id: '3', dosage_mg: 200, price_inr: 13000, in_stock: true, created_at: new Date().toISOString() },
-      { id: '3e', product_id: '3', dosage_mg: 250, price_inr: 16500, in_stock: true, created_at: new Date().toISOString() },
+      { id: '3a', product_id: '3', dosage_mg: 100, price_inr: 4000,  in_stock: true, vial_configuration: '2×50mg', created_at: new Date().toISOString() },
+      { id: '3b', product_id: '3', dosage_mg: 150, price_inr: 3500,  in_stock: true, vial_configuration: '3×50mg', created_at: new Date().toISOString() },
+      { id: '3c', product_id: '3', dosage_mg: 200, price_inr: 6500,  in_stock: true, vial_configuration: '4×50mg', created_at: new Date().toISOString() },
+      { id: '3d', product_id: '3', dosage_mg: 250, price_inr: 9000,  in_stock: true, vial_configuration: '5×50mg', created_at: new Date().toISOString() },
     ],
   },
   {
     id: '4',
-    name: 'IGF-1 LR3',
-    description: 'Long R3 insulin-like growth factor for cellular proliferation and differentiation research.',
+    name: 'Semax',
+    description: 'Synthetic ACTH analogue nootropic peptide for cognitive function, neuroprotection, and CNS research.',
     category: 'research-peptide',
-    image_url: '/igf-1-lr3.jpg',
+    image_url: '/SEMAX.png',
     created_at: new Date().toISOString(),
     variants: [
-      { id: '4a', product_id: '4', dosage_mg: 1, price_inr: 5000, in_stock: true, created_at: new Date().toISOString() },
-      { id: '4b', product_id: '4', dosage_mg: 5, price_inr: 20000, in_stock: true, created_at: new Date().toISOString() },
-      { id: '4c', product_id: '4', dosage_mg: 10, price_inr: 35000, in_stock: true, created_at: new Date().toISOString() },
+      { id: '4a', product_id: '4', dosage_mg: 10, price_inr: 2000, in_stock: true, created_at: new Date().toISOString() },
+      { id: '4b', product_id: '4', dosage_mg: 20, price_inr: 3500, in_stock: true, created_at: new Date().toISOString() },
+      { id: '4c', product_id: '4', dosage_mg: 50, price_inr: 7000, in_stock: true, created_at: new Date().toISOString() },
+      { id: '4d', product_id: '4', dosage_mg: 100, price_inr: 12000, in_stock: true, created_at: new Date().toISOString() },
     ],
   },
   {
     id: '5',
-    name: 'HGH 191AA',
-    description: 'Human growth hormone (Somatropin) 191 amino acid sequence for laboratory analysis and research.',
+    name: 'Selank',
+    description: 'Anxiolytic and nootropic heptapeptide derived from tuftsin, researched for anti-anxiety and cognitive enhancement.',
     category: 'research-peptide',
-    image_url: '/hgh-191aa.jpg',
+    image_url: '/SELANK.png',
     created_at: new Date().toISOString(),
     variants: [
-      { id: '5a', product_id: '5', dosage_mg: 50, price_inr: 7000, in_stock: true, vial_configuration: '10IU x 5 vials', created_at: new Date().toISOString() },
-      { id: '5b', product_id: '5', dosage_mg: 100, price_inr: 11000, in_stock: true, vial_configuration: '10IU x 10 vials', created_at: new Date().toISOString() },
-      { id: '5g', product_id: '5', dosage_mg: 120, price_inr: 13000, in_stock: true, vial_configuration: '24IU x 5 vials', created_at: new Date().toISOString() },
-      { id: '5h', product_id: '5', dosage_mg: 240, price_inr: 18000, in_stock: true, vial_configuration: '24IU x 10 vials', created_at: new Date().toISOString() },
+      { id: '5a', product_id: '5', dosage_mg: 10, price_inr: 2000, in_stock: true, created_at: new Date().toISOString() },
+      { id: '5b', product_id: '5', dosage_mg: 20, price_inr: 3500, in_stock: true, created_at: new Date().toISOString() },
+      { id: '5c', product_id: '5', dosage_mg: 50, price_inr: 7000, in_stock: true, created_at: new Date().toISOString() },
+      { id: '5d', product_id: '5', dosage_mg: 100, price_inr: 12000, in_stock: true, created_at: new Date().toISOString() },
+    ],
+  },
+  {
+    id: '7',
+    name: 'BPC-157',
+    description: 'Body protection compound derived from human gastric juice, researched for tissue repair, gut health, and injury recovery.',
+    category: 'research-peptide',
+    image_url: '/BPC.png',
+    created_at: new Date().toISOString(),
+    variants: [
+      { id: '7a', product_id: '7', dosage_mg: 10,  price_inr: 2500,  in_stock: true, created_at: new Date().toISOString() },
+      { id: '7b', product_id: '7', dosage_mg: 20,  price_inr: 4000,  in_stock: true, created_at: new Date().toISOString() },
+      { id: '7c', product_id: '7', dosage_mg: 50,  price_inr: 7000,  in_stock: true, created_at: new Date().toISOString() },
+      { id: '7d', product_id: '7', dosage_mg: 100, price_inr: 13000, in_stock: true, created_at: new Date().toISOString() },
+    ],
+  },
+  {
+    id: '8',
+    name: 'NAD+',
+    description: 'Nicotinamide adenine dinucleotide coenzyme for cellular energy metabolism, DNA repair, and longevity research.',
+    category: 'research-peptide',
+    image_url: '/NAD+.png',
+    created_at: new Date().toISOString(),
+    variants: [
+      { id: '8a', product_id: '8', dosage_mg: 10, price_inr: 4500, in_stock: true, created_at: new Date().toISOString() },
+      { id: '8b', product_id: '8', dosage_mg: 20, price_inr: 8000, in_stock: true, created_at: new Date().toISOString() },
+      { id: '8c', product_id: '8', dosage_mg: 50, price_inr: 17000, in_stock: true, created_at: new Date().toISOString() },
+      { id: '8d', product_id: '8', dosage_mg: 100, price_inr: 30000, in_stock: true, created_at: new Date().toISOString() },
+    ],
+  },
+  {
+    id: '9',
+    name: 'TB-500',
+    description: 'Synthetic analogue of Thymosin Beta-4, studied for tissue regeneration, wound healing, and inflammation modulation.',
+    category: 'research-peptide',
+    image_url: '/TB500.png',
+    created_at: new Date().toISOString(),
+    variants: [
+      { id: '9a', product_id: '9', dosage_mg: 10, price_inr: 4000, in_stock: true, created_at: new Date().toISOString() },
+      { id: '9b', product_id: '9', dosage_mg: 20, price_inr: 7000, in_stock: true, created_at: new Date().toISOString() },
+      { id: '9c', product_id: '9', dosage_mg: 50, price_inr: 14000, in_stock: true, created_at: new Date().toISOString() },
+      { id: '9d', product_id: '9', dosage_mg: 100, price_inr: 24000, in_stock: true, created_at: new Date().toISOString() },
+    ],
+  },
+  {
+    id: '10',
+    name: 'Tesamorelin',
+    description: 'GHRH analogue that stimulates growth hormone release, researched for metabolic regulation and body composition studies.',
+    category: 'research-peptide',
+    image_url: '/Tesa.png',
+    created_at: new Date().toISOString(),
+    variants: [
+      { id: '10a', product_id: '10', dosage_mg: 1,  price_inr: 3000,  in_stock: true, vial_configuration: '1×1000mcg', created_at: new Date().toISOString() },
+      { id: '10b', product_id: '10', dosage_mg: 2,  price_inr: 5000,  in_stock: true, vial_configuration: '2×1000mcg', created_at: new Date().toISOString() },
+      { id: '10c', product_id: '10', dosage_mg: 5,  price_inr: 12000, in_stock: true, vial_configuration: '5×1000mcg', created_at: new Date().toISOString() },
+      { id: '10d', product_id: '10', dosage_mg: 10, price_inr: 22000, in_stock: true, vial_configuration: '10×1000mcg', created_at: new Date().toISOString() },
+    ],
+  },
+  {
+    id: '11',
+    name: 'MOT-C',
+    description: 'MOTS-c mitochondrial-derived peptide studied for metabolic regulation, insulin sensitivity, and cellular homeostasis.',
+    category: 'research-peptide',
+    image_url: '/motc.png',
+    created_at: new Date().toISOString(),
+    variants: [
+      { id: '11a', product_id: '11', dosage_mg: 10,  price_inr: 2000,  in_stock: true, created_at: new Date().toISOString() },
+      { id: '11b', product_id: '11', dosage_mg: 20,  price_inr: 3000,  in_stock: true, created_at: new Date().toISOString() },
+      { id: '11c', product_id: '11', dosage_mg: 50,  price_inr: 6000,  in_stock: true, created_at: new Date().toISOString() },
+      { id: '11d', product_id: '11', dosage_mg: 100, price_inr: 11000, in_stock: true, created_at: new Date().toISOString() },
     ],
   },
   {
@@ -131,8 +202,13 @@ const PURITY_MAP: Record<string, string> = {
   'Retatrutide': '99.2',
   'Tirzepatide': '99.4',
   'GHK-Cu': '99.1',
-  'IGF-1 LR3': '99.3',
-  'HGH 191AA': '99.0',
+  'Semax': '99.1',
+  'Selank': '99.2',
+  'BPC-157': '99.3',
+  'NAD+': '99.0',
+  'TB-500': '99.1',
+  'Tesamorelin': '99.2',
+  'MOT-C': '99.0',
 };
 
 const FAQ_MAP: Record<string, { q: string; a: string }[]> = {
@@ -504,11 +580,16 @@ export default function ProductDetailPage() {
                     onError={(e) => {
                       const t = e.target as HTMLImageElement;
                       const n = product.name.toLowerCase();
-                      if (n.includes('retatrutide'))      t.src = '/retatrutide.jpg';
-                      else if (n.includes('tirzepatide')) t.src = '/tirzepatide.jpg';
-                      else if (n.includes('ghk'))         t.src = '/ghk-cu.jpg';
-                      else if (n.includes('igf'))         t.src = '/igf-1-lr3.jpg';
-                      else if (n.includes('hgh'))         t.src = '/hgh-191aa.jpg';
+                      if (n.includes('retatrutide'))      t.src = '/Retatrutide.png';
+                      else if (n.includes('tirzepatide')) t.src = '/TIRZEPATIDE.png';
+                      else if (n.includes('ghk'))         t.src = '/GHKCU.png';
+                      else if (n.includes('semax'))       t.src = '/SEMAX.png';
+                      else if (n.includes('selank'))      t.src = '/SELANK.png';
+                      else if (n.includes('bpc'))         t.src = '/BPC.png';
+                      else if (n.includes('nad'))         t.src = '/NAD+.png';
+                      else if (n.includes('tb-500') || n.includes('tb500')) t.src = '/TB500.png';
+                      else if (n.includes('tesamorelin')) t.src = '/Tesa.png';
+                      else if (n.includes('mot'))         t.src = '/motc.png';
                       else                                t.src = BAC_WATER_IMAGE_URL;
                     }}
                   />

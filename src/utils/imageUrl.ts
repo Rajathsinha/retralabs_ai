@@ -11,13 +11,21 @@ export const BAC_WATER_IMAGE_URL = bacWaterImage;
 const NAME_TO_LOCAL_IMAGE: Array<[string, string]> = [
   ['bacteriostatic', bacWaterImage],
   ['bac-water',      bacWaterImage],
-  ['retatrutide',    '/retatrutide.jpg'],
-  ['tirzepatide',    '/tirzepatide.jpg'],
-  ['ghk-cu',         '/ghk-cu.jpg'],
-  ['ghk cu',         '/ghk-cu.jpg'],
-  ['igf-1',          '/igf-1-lr3.jpg'],
-  ['igf1',           '/igf-1-lr3.jpg'],
-  ['hgh',            '/hgh-191aa.jpg'],
+  ['retatrutide',    '/Retatrutide.png'],
+  ['tirzepatide',    '/TIRZEPATIDE.png'],
+  ['ghk-cu',         '/GHKCU.png'],
+  ['ghk cu',         '/GHKCU.png'],
+  ['semax',          '/SEMAX.png'],
+  ['selank',         '/SELANK.png'],
+  ['bpc',            '/BPC.png'],
+  ['nad+',           '/NAD+.png'],
+  ['nad ',           '/NAD+.png'],
+  ['tb-500',         '/TB500.png'],
+  ['tb500',          '/TB500.png'],
+  ['tesamorelin',    '/Tesa.png'],
+  ['mot-c',          '/motc.png'],
+  ['motc',           '/motc.png'],
+  ['mots-c',         '/motc.png'],
 ];
 
 /**

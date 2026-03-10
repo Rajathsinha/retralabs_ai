@@ -6,6 +6,8 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  /** True while a valid PASSWORD_RECOVERY token is active (user clicked a reset link). */
+  recoveryMode: boolean;
   signInWithPassword: (email: string, password: string) => Promise<AuthError | null>;
   signInWithGoogle: () => Promise<void>;
   signInWithMagicLink: (email: string) => Promise<AuthError | null>;
@@ -17,22 +19,35 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user,    setUser]    = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user,         setUser]         = useState<User | null>(null);
+  const [session,      setSession]      = useState<Session | null>(null);
+  const [loading,      setLoading]      = useState(true);
+  // Set to true when Supabase fires PASSWORD_RECOVERY (user clicked a reset link).
+  // Consumed by ResetPasswordPage to show the new-password form.
+  const [recoveryMode, setRecoveryMode] = useState(false);
 
   useEffect(() => {
-    /* Initial session */
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setUser(data.session?.user ?? null);
+    /* Listen for auth state changes BEFORE calling getSession so we never
+       miss the PASSWORD_RECOVERY event that fires when the hash is processed. */
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        // User arrived via a password-reset email link
+        setRecoveryMode(true);
+      } else if (event === 'USER_UPDATED' || event === 'SIGNED_OUT') {
+        // Password was updated or user signed out — clear recovery mode
+        setRecoveryMode(false);
+      }
+      setSession(s);
+      setUser(s?.user ?? null);
       setLoading(false);
     });
 
-    /* Listen for changes */
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
-      setSession(s);
-      setUser(s?.user ?? null);
+    /* getSession triggers processing of the URL hash fragment (access_token,
+       refresh_token, type) and causes onAuthStateChange to fire above. */
+    supabase.auth.getSession().then(({ data }) => {
+      // Only update if onAuthStateChange hasn't already done so
+      setSession(prev => prev ?? data.session);
+      setUser(prev => prev ?? (data.session?.user ?? null));
       setLoading(false);
     });
 
@@ -85,7 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider value={{
-      user, session, loading,
+      user, session, loading, recoveryMode,
       signInWithPassword, signInWithGoogle, signInWithMagicLink,
       signUp, signOut, updateProfile,
     }}>
