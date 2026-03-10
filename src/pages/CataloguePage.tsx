@@ -378,7 +378,7 @@ export default function CataloguePage() {
       </section>
 
       {/* ─── PRODUCT GRID ─── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <section id="products" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => <SkeletonCard key={i} />)}
@@ -570,7 +570,9 @@ export default function CataloguePage() {
                   variant="solid"
                   className="shrink-0 bg-white text-slate-900 font-bold shadow-lg hover:bg-slate-100"
                   endContent={<ArrowRight className="w-4 h-4" />}
-                  onPress={() => navigate('/catalogue')}
+                  onPress={() =>
+                    document.getElementById('products')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  }
                 >
                   Browse the Catalogue →
                 </Button>
