@@ -15,6 +15,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { OrderFormData } from '../types';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+// import UpiQrModal from '../components/UpiQrModal'; // 💳 UPI QR — commented out, re-enable when ready
 
 const FAST_DELIVERY_CHARGE = 800;
 
@@ -68,6 +69,7 @@ export default function CheckoutPage() {
   const [whatsappUrl, setWhatsappUrl] = useState('');
   const [orderSent,   setOrderSent]   = useState(false); // step 3: done
   const [savedOrderId, setSavedOrderId] = useState<string | null>(null); // Supabase order ID
+  // const [showQrModal, setShowQrModal] = useState(false); // 💳 UPI QR — commented out
   const orderSaving = useRef(false); // prevent double-save
 
   // coupon input state
@@ -189,6 +191,60 @@ export default function CheckoutPage() {
     setTimeout(() => navigate('/'), 6000);
     orderSaving.current = false;
   };
+
+  /* 💳 UPI QR handler — commented out, re-enable when QR payment goes live
+  const handleQrPaymentConfirmed = async () => {
+    if (orderSaving.current) return;
+    orderSaving.current = true;
+    let fullOrderId: string | null = null;
+    let shortId: string | null = null;
+    if (isSupabaseConfigured()) {
+      try {
+        const { data: order, error: orderErr } = await supabase
+          .from('orders')
+          .insert({
+            customer_name:    formData.customer_name,
+            customer_email:   formData.customer_email,
+            customer_phone:   formData.customer_phone,
+            shipping_address: formData.shipping_address,
+            total_amount:     grandTotal,
+            status:           'pending',
+            order_status:     'processing',
+            payment_status:   'completed',
+          })
+          .select('id')
+          .single();
+        if (!orderErr && order?.id) {
+          fullOrderId = order.id as string;
+          shortId = fullOrderId.slice(0, 8).toUpperCase();
+          setSavedOrderId(shortId);
+          await supabase.from('order_items').insert(
+            cart.map(item => ({
+              order_id:   order.id,
+              product_id: item.product.id,
+              variant_id: item.variant.id,
+              quantity:   item.quantity,
+              unit_price: item.variant.price_inr,
+            }))
+          );
+          const rawMsg = decodeURIComponent(whatsappUrl.split('?text=')[1] || '');
+          const merchantMsg = `✅ *PAID VIA UPI QR — Order #${shortId}*\n\n` + rawMsg;
+          const merchantUrl = `https://wa.me/918217824384?text=${encodeURIComponent(merchantMsg)}`;
+          window.open(merchantUrl, '_blank');
+        }
+      } catch (_) {
+        window.open(whatsappUrl, '_blank');
+      }
+    }
+    clearCart();
+    orderSaving.current = false;
+    if (fullOrderId) {
+      navigate(`/payment-success?orderId=${fullOrderId}`);
+    } else {
+      navigate('/payment-success');
+    }
+  };
+  */
 
   /* ── Step 3: enquiry sent → prompt sign-in if guest ── */
   if (orderSent) {
@@ -344,6 +400,22 @@ export default function CheckoutPage() {
             <MessageCircle className="w-6 h-6" />
             Send Order on WhatsApp
           </button>
+
+          {/* 💳 UPI QR button — commented out, re-enable when QR payment goes live
+          <button
+            onClick={() => setShowQrModal(true)}
+            className="w-full flex items-center justify-center gap-3 bg-[#5f259f] hover:bg-[#4e1d84] active:bg-[#3d1668] text-white font-bold text-lg py-4 rounded-2xl transition-all duration-200 shadow-lg shadow-purple-700/30 hover:shadow-purple-700/50 hover:-translate-y-0.5"
+          >
+            Pay via PhonePe QR
+          </button>
+          <UpiQrModal
+            isOpen={showQrModal}
+            onClose={() => setShowQrModal(false)}
+            amount={grandTotal}
+            onConfirm={handleQrPaymentConfirmed}
+            whatsappUrl={whatsappUrl}
+          />
+          */}
 
           <button
             onClick={() => setOrderReady(false)}
