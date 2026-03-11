@@ -10,7 +10,7 @@ import {
   Divider,
 } from '@heroui/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
+// Products are static (DEMO_PRODUCTS) — Supabase is used for orders only
 import { getProductImageUrl, BAC_WATER_IMAGE_URL } from '../utils/imageUrl';
 import { ProductWithVariants } from '../types';
 import { useCurrency } from '../context/CurrencyContext';
@@ -321,31 +321,11 @@ export default function CataloguePage() {
   }, []);
 
   async function loadProducts() {
-    if (!isSupabaseConfigured()) {
-      setProducts(DEMO_PRODUCTS);
-      setLoading(false);
-      return;
-    }
-    try {
-      const { data: productsData, error: productsError } = await supabase.from('products').select('*');
-      if (productsError) throw productsError;
-
-      const { data: variantsData, error: variantsError } = await supabase
-        .from('product_variants').select('*').order('dosage_mg');
-      if (variantsError) throw variantsError;
-
-      const productOrder = ['Retatrutide', 'Tirzepatide', 'GHK-Cu', 'BPC-157', 'TB-500', 'NAD+', 'Tesamorelin', 'MOT-C', 'Semax', 'Selank', 'Bacteriostatic Water (Pharma Grade)'];
-      const sorted = [...productsData].sort((a, b) => {
-        const ia = productOrder.indexOf(a.name), ib = productOrder.indexOf(b.name);
-        return ia === -1 ? 1 : ib === -1 ? -1 : ia - ib;
-      });
-      const withVariants = sorted.map(p => ({ ...p, variants: variantsData.filter(v => v.product_id === p.id) }));
-      setProducts(withVariants.length > 0 ? withVariants : DEMO_PRODUCTS);
-    } catch {
-      setProducts(DEMO_PRODUCTS);
-    } finally {
-      setLoading(false);
-    }
+    // Catalogue is managed in-code (DEMO_PRODUCTS) — Supabase products table
+    // may have different category values or be missing entries, so we always
+    // use the authoritative local list here. Supabase is used for orders only.
+    setProducts(DEMO_PRODUCTS);
+    setLoading(false);
   }
 
   const getStartingPrice = (p: ProductWithVariants) =>
@@ -670,10 +650,9 @@ export default function CataloguePage() {
                   <motion.div
                     key={product.id}
                     layout
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: '-50px' }}
-                    transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                     exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.18 } }}
                     className="cursor-pointer group"
                     onClick={() => navigate(`/product/${product.id}`)}
