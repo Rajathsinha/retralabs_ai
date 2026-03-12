@@ -95,10 +95,9 @@ export default function CheckoutPage() {
         `• ${item.product.name} (${item.variant.dosage_mg}mg) — ₹${item.variant.price_inr.toLocaleString('en-IN')} × ${item.quantity}`
     );
 
-    const discount = getDiscount();
     const discountText =
-      discount > 0
-        ? `\n*Subtotal:* ₹${getSubtotal().toLocaleString('en-IN')}\n*Volume Discount (${discount}%):* -₹${getDiscountAmount().toLocaleString('en-IN')}`
+      getDiscountAmount() > 0
+        ? `\n*Subtotal:* ₹${getSubtotal().toLocaleString('en-IN')}\n*Qty Discount:* -₹${getDiscountAmount().toLocaleString('en-IN')}`
         : '';
 
     const couponAmt = getCouponAmount();
@@ -338,7 +337,7 @@ export default function CheckoutPage() {
               <div className="border-t border-slate-100 pt-3 space-y-1.5">
                 {getDiscount() > 0 && (
                   <div className="flex justify-between text-sm text-emerald-600">
-                    <span>Volume Discount ({getDiscount()}%)</span>
+                    <span>Qty Discount</span>
                     <span>&minus;{format(getDiscountAmount())}</span>
                   </div>
                 )}
@@ -459,13 +458,13 @@ export default function CheckoutPage() {
               <Tag className="w-5 h-5 text-emerald-600" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-emerald-900 mb-3">The More You Order, The Less You Pay.</h3>
+              <h3 className="text-base font-bold text-emerald-900 mb-3">Buy More of the Same, Pay Less.</h3>
               <div className="flex flex-wrap gap-2">
                 <Chip color="success" variant="flat" size="sm">
-                  2 items = 20% OFF
+                  Same peptide ×2 = 10% OFF
                 </Chip>
                 <Chip color="success" variant="flat" size="sm">
-                  3+ items = 25% OFF
+                  Same peptide ×3 = 20% OFF
                 </Chip>
               </div>
             </div>
@@ -566,7 +565,7 @@ export default function CheckoutPage() {
 
                   {getDiscount() > 0 && (
                     <div className="flex justify-between items-center text-emerald-600">
-                      <span className="font-medium">Volume Discount ({getDiscount()}%)</span>
+                      <span className="font-medium">Qty Discount</span>
                       <span className="font-semibold">
                         &minus;{format(getDiscountAmount())}
                       </span>
