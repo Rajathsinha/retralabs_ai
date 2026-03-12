@@ -80,39 +80,27 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const isBacWater = (name: string) =>
     name.toLowerCase().includes('bacteriostatic water');
 
-  const getDiscountableQuantity = () => {
-    return cart.reduce(
-      (total, item) => total + (isBacWater(item.product.name) ? 0 : item.quantity),
-      0
-    );
-  };
-
-  const getDiscount = () => {
-    const qty = getDiscountableQuantity();
-    if (qty >= 3) return 25;
-    if (qty === 2) return 20;
+  // Per-item discount rate: only applies when buying 2+ of the SAME peptide
+  // qty 2 → 10%  |  qty 3+ → 20%  |  supplies / qty 1 → 0%
+  const getItemDiscountRate = (item: CartItem): number => {
+    if (isBacWater(item.product.name)) return 0;
+    if (item.quantity >= 3) return 20;
+    if (item.quantity === 2) return 10;
     return 0;
   };
 
-  const getSubtotal = () => {
-    return cart.reduce(
-      (total, item) => total + item.variant.price_inr * item.quantity,
-      0
-    );
-  };
+  // Returns the highest discount tier active in the cart (for display only)
+  const getDiscount = () =>
+    cart.reduce((max, item) => Math.max(max, getItemDiscountRate(item)), 0);
 
-  const getDiscountableSubtotal = () => {
-    return cart.reduce(
-      (total, item) =>
-        total + (isBacWater(item.product.name) ? 0 : item.variant.price_inr * item.quantity),
-      0
-    );
-  };
+  const getSubtotal = () =>
+    cart.reduce((total, item) => total + item.variant.price_inr * item.quantity, 0);
 
-  const getDiscountAmount = () => {
-    const discount = getDiscount();
-    return Math.round((getDiscountableSubtotal() * discount) / 100);
-  };
+  const getDiscountAmount = () =>
+    cart.reduce((total, item) => {
+      const pct = getItemDiscountRate(item);
+      return total + Math.round((item.variant.price_inr * item.quantity * pct) / 100);
+    }, 0);
 
   // ── Coupon methods ──────────────────────────────────────────────────────────
   const applyCoupon = (code: string): { success: boolean; message: string } => {

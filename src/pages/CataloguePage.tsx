@@ -815,13 +815,13 @@ export default function CataloguePage() {
                     <Sparkles className="w-5 h-5 text-amber-400" />
                     <span className="text-amber-400 text-sm font-bold uppercase tracking-wider">Bundle Deal</span>
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-3">Stack More. Pay Less. Simple Math.</h3>
+                  <h3 className="text-2xl font-bold text-white mb-3">Order More of the Same. Pay Less.</h3>
                   <p className="text-slate-400 leading-relaxed mb-5">
-                    Order 2 peptides and take 20% off. Order 3 or more and take 25% off.
+                    Buy the same peptide twice and get 10% off it. Buy three and get 20% off. Per peptide, not per cart.
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    <Chip size="sm" variant="flat" color="success" className="font-semibold bg-white/10 text-emerald-300">20% off 2 items</Chip>
-                    <Chip size="sm" variant="flat" color="success" className="font-semibold bg-white/10 text-emerald-300">25% off 3+ items</Chip>
+                    <Chip size="sm" variant="flat" color="success" className="font-semibold bg-white/10 text-emerald-300">Same peptide ×2 = 10% off</Chip>
+                    <Chip size="sm" variant="flat" color="success" className="font-semibold bg-white/10 text-emerald-300">Same peptide ×3 = 20% off</Chip>
                     <Chip size="sm" variant="flat" color="warning" className="font-semibold bg-white/10 text-amber-300">Auto-applied at checkout</Chip>
                   </div>
                 </div>
