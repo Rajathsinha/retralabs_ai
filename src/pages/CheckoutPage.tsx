@@ -132,18 +132,23 @@ export default function CheckoutPage() {
     setOrderReady(true);
   };
 
-  /** Step 2 → 3: save order to Supabase, then open WhatsApp */
+  /** Step 2 → 3: open WhatsApp immediately, then save order to Supabase */
   const handleSendOnWhatsApp = async () => {
     if (orderSaving.current) return;
     orderSaving.current = true;
 
-    let finalUrl = whatsappUrl;
-    let shortId: string | null = null;
+    // Snapshot cart before clearing (needed for Supabase insert below)
+    const cartSnapshot = cart.map(item => ({ ...item }));
 
-    // ── Save to Supabase if configured ──────────────────────────────────────
+    // ── Open WhatsApp FIRST (must be synchronous — popup blockers kill window.open after any await) ──
+    window.open(whatsappUrl, '_blank');
+    clearCart();
+    setOrderSent(true);
+    setTimeout(() => navigate('/'), 6000);
+
+    // ── Save to Supabase in background (non-blocking) ───────────────────────
     if (isSupabaseConfigured()) {
       try {
-        // 1. Insert order row
         const { data: order, error: orderErr } = await supabase
           .from('orders')
           .insert({
@@ -160,12 +165,11 @@ export default function CheckoutPage() {
           .single();
 
         if (!orderErr && order?.id) {
-          shortId = (order.id as string).slice(0, 8).toUpperCase();
+          const shortId = (order.id as string).slice(0, 8).toUpperCase();
           setSavedOrderId(shortId);
 
-          // 2. Insert order_items rows
           await supabase.from('order_items').insert(
-            cart.map(item => ({
+            cartSnapshot.map(item => ({
               order_id:   order.id,
               product_id: item.product.id,
               variant_id: item.variant.id,
@@ -173,21 +177,12 @@ export default function CheckoutPage() {
               unit_price: item.variant.price_inr,
             }))
           );
-
-          // 3. Prepend Order ID to WhatsApp message
-          const rawMsg = decodeURIComponent(whatsappUrl.split('?text=')[1] || '');
-          const updatedMsg = `*Order ID: #${shortId}*\n\n` + rawMsg;
-          finalUrl = `https://wa.me/918217824384?text=${encodeURIComponent(updatedMsg)}`;
         }
       } catch (_) {
-        // Supabase save failed — still proceed with WhatsApp order
+        // Supabase save failed — WhatsApp order already sent, no user impact
       }
     }
 
-    clearCart();
-    window.open(finalUrl, '_blank');
-    setOrderSent(true);
-    setTimeout(() => navigate('/'), 6000);
     orderSaving.current = false;
   };
 
