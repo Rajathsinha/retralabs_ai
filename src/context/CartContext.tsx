@@ -77,13 +77,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setCart([]);
   };
 
-  const isBacWater = (name: string) =>
-    name.toLowerCase().includes('bacteriostatic water');
+  // Products excluded from qty discounts
+  const isNonDiscountable = (name: string) => {
+    const n = name.toLowerCase();
+    return n.includes('bacteriostatic water') || n.includes('ghk');
+  };
 
   // Per-item discount rate: only applies when buying 2+ of the SAME peptide
-  // qty 2 → 10%  |  qty 3+ → 20%  |  supplies / qty 1 → 0%
+  // qty 2 → 10%  |  qty 3+ → 20%  |  supplies / GHK-Cu / qty 1 → 0%
   const getItemDiscountRate = (item: CartItem): number => {
-    if (isBacWater(item.product.name)) return 0;
+    if (isNonDiscountable(item.product.name)) return 0;
     if (item.quantity >= 3) return 20;
     if (item.quantity === 2) return 10;
     return 0;
