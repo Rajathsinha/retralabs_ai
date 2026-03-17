@@ -125,6 +125,11 @@ export default function WhatsAppButton() {
                     />
                   </div>
                 )}
+                <div className="mb-3 px-1 py-2 bg-amber-950/40 border border-amber-700/40 rounded-lg">
+                  <p className="text-xs text-amber-300 font-semibold leading-snug">
+                    ⚠️ No dosage or medical guidance. All products are strictly for research use only.
+                  </p>
+                </div>
                 <p className="text-xs text-slate-400 mb-3 px-1">How can we help?</p>
                 <div className="flex flex-col gap-2">
                   {QUICK_MESSAGES.map((msg) => (
