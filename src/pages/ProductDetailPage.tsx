@@ -76,10 +76,11 @@ const DEMO_PRODUCTS: ProductWithVariants[] = [
     image_url: '/GHKCU.png',
     created_at: new Date().toISOString(),
     variants: [
-      { id: '3a', product_id: '3', dosage_mg: 100, price_inr: 4000,  in_stock: true, vial_configuration: '2×50mg', created_at: new Date().toISOString() },
-      { id: '3b', product_id: '3', dosage_mg: 150, price_inr: 3500,  in_stock: true, vial_configuration: '3×50mg', created_at: new Date().toISOString() },
-      { id: '3c', product_id: '3', dosage_mg: 200, price_inr: 6500,  in_stock: true, vial_configuration: '4×50mg', created_at: new Date().toISOString() },
-      { id: '3d', product_id: '3', dosage_mg: 250, price_inr: 9000,  in_stock: true, vial_configuration: '5×50mg', created_at: new Date().toISOString() },
+      { id: '3a', product_id: '3', dosage_mg: 100,  price_inr: 4000,  in_stock: true, vial_configuration: '1×100mg',           created_at: new Date().toISOString() },
+      { id: '3b', product_id: '3', dosage_mg: 200,  price_inr: 6000,  in_stock: true, vial_configuration: '2×100mg',           created_at: new Date().toISOString() },
+      { id: '3c', product_id: '3', dosage_mg: 300,  price_inr: 8000,  in_stock: true, vial_configuration: '3×100mg',           created_at: new Date().toISOString() },
+      { id: '3d', product_id: '3', dosage_mg: 500,  price_inr: 11000, in_stock: true, vial_configuration: '5×100mg',           created_at: new Date().toISOString() },
+      { id: '3e', product_id: '3', dosage_mg: 1000, price_inr: 20000, in_stock: true, vial_configuration: 'Full Kit 10×100mg', created_at: new Date().toISOString() },
     ],
   },
   {
@@ -457,6 +458,7 @@ export default function ProductDetailPage() {
   // ── Derived state ─────────────────────────────────────────────────────────
   const isFlagship = product.name === 'Retatrutide' || product.name === 'Tirzepatide';
   const isBacWater = product.name?.includes('Bacteriostatic');
+  const isNonDiscountable = isBacWater || product.name?.includes('GHK');
   const bacWaterPrice = bacWater?.variants.find((v) => v.dosage_mg === 50)?.price_inr || 800;
   const purity = PURITY_MAP[product.name] || '99';
   const purityNum = parseFloat(purity);
@@ -464,7 +466,7 @@ export default function ProductDetailPage() {
 
   const basePrice = selectedVariant ? selectedVariant.price_inr * quantity : 0;
   const subtotal = bundleAdded ? basePrice + bacWaterPrice : basePrice;
-  const discountPercent = isBacWater ? 0 : quantity >= 3 ? 25 : quantity === 2 ? 20 : 0;
+  const discountPercent = isNonDiscountable ? 0 : quantity >= 3 ? 20 : quantity === 2 ? 10 : 0;
   const discountAmount = Math.round((basePrice * discountPercent) / 100);
   const totalPrice = subtotal - discountAmount;
 
@@ -802,11 +804,11 @@ export default function ProductDetailPage() {
                     </span>
                   </div>
                 )}
-                {quantity === 1 && !isBacWater && (
+                {quantity === 1 && !isNonDiscountable && (
                   <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2.5">
                     <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
                     <span className="text-sm text-amber-800">
-                      Add 1 more to get <strong>20% OFF</strong> · Add 2 more for <strong>25% OFF</strong>
+                      Add 1 more to get <strong>10% OFF</strong> · Add 2 more for <strong>20% OFF</strong>
                     </span>
                   </div>
                 )}
