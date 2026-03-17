@@ -36,6 +36,7 @@ import {
   Clock,
   ShoppingCart,
   GraduationCap,
+  X,
 } from 'lucide-react';
 
 // Demo products fallback (when Supabase not configured)
@@ -840,9 +841,10 @@ export default function ProductDetailPage() {
                     isDisabled={!selectedVariant}
                     onPress={() => setBundleAdded(!bundleAdded)}
                     startContent={bundleAdded ? <Check className="w-4 h-4" /> : null}
+                    endContent={bundleAdded ? <X className="w-3.5 h-3.5 opacity-70" /> : null}
                     className={bundleAdded ? 'text-white font-semibold' : 'border-slate-200 text-slate-700 font-semibold hover:bg-slate-50'}
                   >
-                    {bundleAdded ? 'Bundle Added' : 'Add Bacteriostatic Water to Bundle'}
+                    {bundleAdded ? 'Bac Water Added — Remove' : 'Add Bacteriostatic Water to Bundle'}
                   </Button>
                 </CardBody>
               </Card>
