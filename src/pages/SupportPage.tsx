@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Accordion,
@@ -17,6 +18,8 @@ import {
   HelpCircle,
   AlertTriangle,
 } from 'lucide-react';
+
+const REFERRAL_OPTIONS = ['YouTube', 'Instagram', 'Reddit', 'Friend', 'Google', 'Twitter / X', 'TikTok'];
 
 const FAQS = [
   {
@@ -100,9 +103,25 @@ const SUPPORT_CHANNELS = [
 
 export default function SupportPage() {
   const navigate = useNavigate();
+  const [referralSource,  setReferralSource]  = useState('');
+  const [friendName,      setFriendName]      = useState('');
+  const [showReferralErr, setShowReferralErr] = useState(false);
+
+  const buildWhatsAppUrl = () => {
+    const base = 'https://wa.me/918217824384?text=';
+    const suffix = referralSource
+      ? `${encodeURIComponent(`\n\nFound you via: ${referralSource}${referralSource === 'Friend' && friendName ? ` (referred by ${friendName})` : ''}`)}`
+      : '';
+    return `${base}${encodeURIComponent('Hello, I need support with RetraLabs')}${suffix}`;
+  };
+
+  const handleWhatsApp = () => {
+    if (!referralSource) { setShowReferralErr(true); return; }
+    window.open(buildWhatsAppUrl(), '_blank');
+  };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen" style={{ background: 'var(--off-white)' }}>
       {/* Hero heading */}
       <div className="bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
@@ -218,36 +237,106 @@ export default function SupportPage() {
           </CardBody>
         </Card>
 
-        {/* Contact CTA */}
-        <div className="mt-12 text-center py-10 max-w-2xl mx-auto">
-          <h3 className="text-xl font-bold text-slate-900 mb-2">Still have questions?</h3>
-          <p className="text-slate-500 mb-6">
-            Our team is happy to help. Reach out via WhatsApp for a quick response or send us an
-            email for detailed inquiries.
+        {/* ── How did you find us? + Contact CTA ── */}
+        <div className="mt-12 max-w-2xl mx-auto">
+
+          {/* Referral source selector */}
+          <div
+            id="support-referral-section"
+            style={{
+              background: 'var(--white)',
+              border: `1px solid ${showReferralErr && !referralSource ? '#fca5a5' : 'var(--border)'}`,
+              borderRadius: '1rem',
+              padding: '1.5rem',
+              marginBottom: '1.5rem',
+            }}
+          >
+            <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 500, color: 'var(--text)', marginBottom: '0.75rem' }}>
+              How did you find us? <span style={{ color: '#dc2626' }}>*</span>
+            </label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
+              {REFERRAL_OPTIONS.map(src => (
+                <button
+                  key={src}
+                  type="button"
+                  onClick={() => {
+                    setReferralSource(src);
+                    setShowReferralErr(false);
+                    if (src !== 'Friend') setFriendName('');
+                  }}
+                  style={{
+                    padding: '0.35rem 0.85rem',
+                    borderRadius: 9999,
+                    fontSize: '0.78rem',
+                    fontWeight: referralSource === src ? 500 : 300,
+                    border: `2px solid ${referralSource === src ? 'var(--text)' : 'var(--border)'}`,
+                    background: referralSource === src ? 'var(--text)' : 'transparent',
+                    color: referralSource === src ? 'var(--white)' : 'var(--text-muted)',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  {src}
+                </button>
+              ))}
+            </div>
+
+            {referralSource === 'Friend' && (
+              <input
+                type="text"
+                placeholder="Friend's name (may qualify for an extra discount)"
+                value={friendName}
+                onChange={e => setFriendName(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.6rem 0.85rem',
+                  fontSize: '0.82rem',
+                  border: '1px solid var(--border)',
+                  borderRadius: '0.5rem',
+                  color: 'var(--text)',
+                  background: 'var(--white)',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
+                onFocus={e => (e.target.style.borderColor = 'var(--accent)')}
+                onBlur={e => (e.target.style.borderColor = 'var(--border)')}
+              />
+            )}
+
+            {showReferralErr && !referralSource && (
+              <p style={{ fontSize: '0.72rem', color: '#dc2626', marginTop: '0.5rem' }}>
+                Please let us know how you found us before reaching out.
+              </p>
+            )}
+          </div>
+
+          {/* Research disclaimer note */}
+          <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textAlign: 'center', marginBottom: '1.25rem', lineHeight: 1.6 }}>
+            ⚠️ Strictly no dosage or guidance — products are for in vitro research use only.
+            For any scientific or technical queries, our team will respond within 24 hours.
           </p>
-          <div className="flex flex-wrap gap-3 justify-center">
-            <Button
-              as="a"
-              href="https://wa.me/918217824384?text=Hello%2C%20I%20need%20support%20with%20RetraLabs"
-              target="_blank"
-              rel="noopener noreferrer"
-              color="success"
-              size="lg"
-              startContent={<MessageSquare className="w-4 h-4" />}
-              className="font-semibold text-white"
-            >
-              WhatsApp Us
-            </Button>
-            <Button
-              color="primary"
-              variant="bordered"
-              size="lg"
-              startContent={<Mail className="w-4 h-4" />}
-              onPress={() => navigate('/contact')}
-              className="font-semibold"
-            >
-              Contact Page
-            </Button>
+
+          {/* CTA buttons */}
+          <div style={{ textAlign: 'center' }}>
+            <h3 className="section-heading" style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Still have questions?</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.5rem', lineHeight: 1.7 }}>
+              Our team is happy to help. Please select how you found us above, then reach out.
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', justifyContent: 'center' }}>
+              <button
+                onClick={handleWhatsApp}
+                className="btn-dark"
+                style={{ background: referralSource ? 'var(--accent)' : 'var(--text-muted)' }}
+              >
+                <MessageSquare size={16} /> WhatsApp Us
+              </button>
+              <button
+                onClick={() => navigate('/contact')}
+                className="btn-ghost"
+              >
+                <Mail size={16} /> Contact Page
+              </button>
+            </div>
           </div>
         </div>
       </div>

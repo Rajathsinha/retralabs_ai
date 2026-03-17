@@ -1,37 +1,173 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Outfit:wght@300;400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --white: #ffffff;
+    --off-white: #f5f4f0;
+    --cream: #ede9e0;
+    --text: #0d0d0d;
+    --text-muted: #6b6b6b;
+    --text-light: #a0a0a0;
+    --accent: #1a6b4a;
+    --accent-light: #e8f2ed;
+    --border: rgba(0, 0, 0, 0.08);
+    --border-strong: rgba(0, 0, 0, 0.15);
+  }
+
   html {
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+
   body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+    font-weight: 300;
+    color: var(--text);
+    background: var(--white);
   }
+
   ::selection {
-    background-color: rgba(34, 211, 238, 0.2);
-    color: #0e7490;
+    background-color: rgba(26, 107, 74, 0.15);
+    color: var(--accent);
   }
 }
 
 @layer utilities {
-  .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-600 to-accent-500;
+  /* ── Scroll reveal ──────────────────────────────────────────────────── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
   }
+
+  .revealed {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+
+  /* ── Tilt card glow overlay ─────────────────────────────────────────── */
+  .tilt-glow-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+    background: radial-gradient(
+      180px circle at var(--mx, 50%) var(--my, 50%),
+      rgba(26, 107, 74, 0.08),
+      transparent
+    );
+  }
+
+  .tilt-card-wrapper:hover .tilt-glow-overlay {
+    opacity: 1;
+  }
+
+  /* ── Custom cursor ──────────────────────────────────────────────────── */
+  #retra-cursor {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    background: var(--text);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  #retra-cursor-ring {
+    position: fixed;
+    width: 40px;
+    height: 40px;
+    border: 1.5px solid rgba(0, 0, 0, 0.25);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s cubic-bezier(0.23, 1, 0.32, 1),
+                height 0.3s cubic-bezier(0.23, 1, 0.32, 1),
+                border-color 0.3s;
+  }
+
+  body.cursor-hovering #retra-cursor-ring {
+    width: 56px;
+    height: 56px;
+    border-color: rgba(26, 107, 74, 0.5);
+  }
+
+  body.cursor-hovering #retra-cursor {
+    background: var(--accent);
+    transform: translate(-50%, -50%) scale(1.5);
+  }
+
+  /* ── Stagger animations ─────────────────────────────────────────────── */
   .animate-stagger-1 { animation-delay: 100ms; }
   .animate-stagger-2 { animation-delay: 200ms; }
   .animate-stagger-3 { animation-delay: 300ms; }
   .animate-stagger-4 { animation-delay: 400ms; }
   .animate-stagger-5 { animation-delay: 500ms; }
   .animate-stagger-6 { animation-delay: 600ms; }
+
+  /* ── Scrollbar hide ─────────────────────────────────────────────────── */
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
   .scrollbar-hide::-webkit-scrollbar { display: none; }
+
+  /* ── Text gradient ──────────────────────────────────────────────────── */
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, var(--accent), #2d9d6e);
+  }
+}
+
+@layer components {
+  /* ── Section layout helpers ─────────────────────────────────────────── */
+  .section-eyebrow {
+    @apply text-xs tracking-[0.2em] uppercase font-medium;
+    color: var(--accent);
+  }
+
+  .section-heading {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 300;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    line-height: 1.05;
+  }
+
+  /* ── Pill button variants ───────────────────────────────────────────── */
+  .btn-dark {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-sm font-medium transition-all duration-200 no-underline cursor-pointer;
+    background: var(--text);
+    color: var(--white);
+    border: none;
+  }
+
+  .btn-dark:hover {
+    background: var(--accent);
+    transform: translateY(-1px);
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-sm font-medium transition-all duration-200 no-underline cursor-pointer;
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+    background: transparent;
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-1px);
+  }
 }
