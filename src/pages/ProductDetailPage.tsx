@@ -836,13 +836,15 @@ export default function ProductDetailPage() {
                   </div>
                   <Button
                     fullWidth
-                    color={bundleAdded ? 'success' : 'default'}
-                    variant={bundleAdded ? 'solid' : 'bordered'}
+                    color="default"
+                    variant="solid"
                     isDisabled={!selectedVariant}
                     onPress={() => setBundleAdded(!bundleAdded)}
                     startContent={bundleAdded ? <Check className="w-4 h-4" /> : null}
-                    endContent={bundleAdded ? <X className="w-3.5 h-3.5 opacity-70" /> : null}
-                    className={bundleAdded ? 'text-white font-semibold' : 'border-slate-200 text-slate-700 font-semibold hover:bg-slate-50'}
+                    endContent={bundleAdded ? <X className="w-3.5 h-3.5 opacity-80" /> : null}
+                    className={bundleAdded
+                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white font-semibold'
+                      : 'bg-slate-100 border border-slate-200 text-slate-700 font-semibold hover:bg-slate-200'}
                   >
                     {bundleAdded ? 'Bac Water Added — Remove' : 'Add Bacteriostatic Water to Bundle'}
                   </Button>
