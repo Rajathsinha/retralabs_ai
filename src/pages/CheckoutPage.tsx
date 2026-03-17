@@ -47,6 +47,7 @@ export default function CheckoutPage() {
     age_confirmed: false,
     no_dosing_accepted: false,
     referral_source: '',
+    referral_friend_name: '',
     delivery_option: 'normal',
   });
 
@@ -89,6 +90,10 @@ export default function CheckoutPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (cart.length === 0) return;
+    if (!formData.referral_source) {
+      document.getElementById('referral-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
 
     const lines = cart.map(
       (item) =>
@@ -106,7 +111,7 @@ export default function CheckoutPage() {
       : '';
 
     const referralLine = formData.referral_source
-      ? `\nFound us via: ${formData.referral_source}`
+      ? `\nFound us via: ${formData.referral_source}${formData.referral_source === 'Friend' && formData.referral_friend_name ? ` (referred by ${formData.referral_friend_name})` : ''}`
       : '';
 
     const deliveryLine = formData.delivery_option === 'fast'
@@ -776,17 +781,17 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                {/* ── How did you find us? ── */}
-                <div>
+                {/* ── How did you find us? (mandatory) ── */}
+                <div id="referral-section">
                   <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                    How did you find us? <span className="text-slate-400 font-normal">(optional)</span>
+                    How did you find us? <span className="text-red-500">*</span>
                   </label>
-                  <div className="flex flex-wrap gap-2">
-                    {['YouTube', 'Instagram', 'Reddit', 'Friends & Family', 'Google', 'Twitter / X', 'TikTok', 'Other', 'Prefer not to say'].map((src) => (
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {['YouTube', 'Instagram', 'Reddit', 'Friend', 'Google', 'Twitter / X', 'TikTok'].map((src) => (
                       <button
                         key={src}
                         type="button"
-                        onClick={() => setFormData({ ...formData, referral_source: formData.referral_source === src ? '' : src })}
+                        onClick={() => setFormData({ ...formData, referral_source: src, referral_friend_name: src !== 'Friend' ? '' : formData.referral_friend_name })}
                         className={`px-3 py-1.5 rounded-full text-xs font-semibold border-2 transition-all ${
                           formData.referral_source === src
                             ? 'bg-slate-900 border-slate-900 text-white'
@@ -797,6 +802,20 @@ export default function CheckoutPage() {
                       </button>
                     ))}
                   </div>
+                  {formData.referral_source === 'Friend' && (
+                    <div className="mt-2">
+                      <input
+                        type="text"
+                        placeholder="Friend's name (may qualify for an extra discount)"
+                        value={formData.referral_friend_name}
+                        onChange={(e) => setFormData({ ...formData, referral_friend_name: e.target.value })}
+                        className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-xl focus:border-slate-900 focus:outline-none transition-colors"
+                      />
+                    </div>
+                  )}
+                  {!formData.referral_source && (
+                    <p className="text-xs text-red-500 mt-1">Please select how you found us to continue.</p>
+                  )}
                 </div>
 
                 {/* ── Compliance checkboxes ── */}
