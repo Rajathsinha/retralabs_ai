@@ -137,7 +137,7 @@ export default function CheckoutPage() {
     setOrderReady(true);
   };
 
-  /** Step 2 → 3: open WhatsApp immediately, then save order to Supabase */
+  /** Step 2 → 3: side-effects after the <a> tag natively opens WhatsApp */
   const handleSendOnWhatsApp = async () => {
     if (orderSaving.current) return;
     orderSaving.current = true;
@@ -145,8 +145,7 @@ export default function CheckoutPage() {
     // Snapshot cart before clearing (needed for Supabase insert below)
     const cartSnapshot = cart.map(item => ({ ...item }));
 
-    // ── Open WhatsApp FIRST (must be synchronous — popup blockers kill window.open after any await) ──
-    window.open(whatsappUrl, '_blank');
+    // WhatsApp is opened by the native <a href> — never blocked by popup blockers.
     clearCart();
     setOrderSent(true);
     setTimeout(() => navigate('/'), 6000);
@@ -391,14 +390,18 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* THE button */}
-          <button
+          {/* THE button — native <a> avoids popup blockers on all browsers/iOS */}
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             onClick={handleSendOnWhatsApp}
             className="w-full flex items-center justify-center gap-3 bg-green-500 hover:bg-green-400 active:bg-green-600 text-white font-bold text-lg py-4 rounded-2xl transition-all duration-200 shadow-lg shadow-green-500/30 hover:shadow-green-500/50 hover:-translate-y-0.5"
+            style={{ textDecoration: 'none' }}
           >
             <MessageCircle className="w-6 h-6" />
             Send Order on WhatsApp
-          </button>
+          </a>
 
           {/* 💳 UPI QR button — commented out, re-enable when QR payment goes live
           <button
