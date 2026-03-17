@@ -155,7 +155,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div style={{ fontFamily: "'Outfit', system-ui, sans-serif", fontWeight: 300 }}>
+    <div style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", fontWeight: 300 }}>
 
       {/* ══════════ HERO ══════════ */}
       <section

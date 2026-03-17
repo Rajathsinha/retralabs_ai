@@ -123,7 +123,7 @@ export default function Header() {
               onMouseEnter={e => (e.currentTarget.style.opacity = '0.75')}
               onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
             >
-              <Logo size="md" variant="light" />
+              <Logo size="md" variant="dark" />
             </RouterLink>
 
             {/* CENTER — Desktop nav */}
@@ -136,7 +136,7 @@ export default function Header() {
                     position: 'relative',
                     padding: '0.35rem 0.9rem',
                     fontSize: '0.82rem',
-                    fontFamily: "'Outfit', system-ui, sans-serif",
+                    fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
                     fontWeight: 400,
                     letterSpacing: '0.04em',
                     color: active(path) ? 'var(--accent)' : 'var(--text-muted)',
@@ -171,7 +171,7 @@ export default function Header() {
                 style={{
                   padding: '0.35rem 0.9rem',
                   fontSize: '0.82rem',
-                  fontFamily: "'Outfit', system-ui, sans-serif",
+                  fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
                   fontWeight: 400,
                   letterSpacing: '0.04em',
                   color: 'var(--text-muted)',

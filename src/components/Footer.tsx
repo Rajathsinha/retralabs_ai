@@ -46,7 +46,7 @@ export default function Footer() {
         background: 'var(--off-white)',
         borderTop: '1px solid var(--border)',
         marginTop: 'auto',
-        fontFamily: "'Outfit', system-ui, sans-serif",
+        fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
         fontWeight: 300,
       }}
     >
@@ -58,7 +58,7 @@ export default function Footer() {
           {/* Brand column */}
           <div>
             <div style={{ marginBottom: '1.25rem' }}>
-              <Logo size="sm" variant="light" />
+              <Logo size="sm" variant="dark" />
             </div>
             <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.8, marginBottom: '1.5rem', maxWidth: 260 }}>
               India's trusted research peptide supplier. HPLC-verified, COA-backed compounds sourced

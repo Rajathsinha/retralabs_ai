@@ -10,9 +10,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans:    ['Outfit', 'system-ui', '-apple-system', 'sans-serif'],
-        serif:   ['Cormorant Garamond', 'Georgia', 'serif'],
-        display: ['Outfit', 'system-ui', 'sans-serif'],
+        sans:    ['Plus Jakarta Sans', 'system-ui', '-apple-system', 'sans-serif'],
+        serif:   ['Playfair Display', 'Georgia', 'serif'],
+        display: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
       },
       colors: {
         brand: {
