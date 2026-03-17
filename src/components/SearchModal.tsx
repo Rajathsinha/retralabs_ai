@@ -25,7 +25,7 @@ const DEMO: ProductWithVariants[] = [
     id: '3', name: 'GHK-Cu', category: 'research-peptide',
     description: 'Copper peptide for skin regeneration and anti-aging research.',
     image_url: '/GHKCU.png', created_at: '',
-    variants: [{ id: '3a', product_id: '3', dosage_mg: 10, price_inr: 2000, in_stock: true, created_at: '' }],
+    variants: [{ id: '3a', product_id: '3', dosage_mg: 100, price_inr: 4000, in_stock: true, created_at: '' }],
   },
   {
     id: '4', name: 'Semax', category: 'research-peptide',

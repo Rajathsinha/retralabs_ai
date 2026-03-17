@@ -1,8 +1,8 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Accordion,
   AccordionItem,
-  Button,
   Card,
   CardBody,
   Chip,
@@ -98,8 +98,29 @@ const SUPPORT_CHANNELS = [
   },
 ];
 
+const REFERRAL_SOURCES = ['YouTube', 'Instagram', 'Reddit', 'Friend', 'Google', 'Twitter / X', 'TikTok'];
+
 export default function SupportPage() {
   const navigate = useNavigate();
+
+  const [referralSource, setReferralSource] = useState('');
+  const [friendName, setFriendName] = useState('');
+  const [showReferralError, setShowReferralError] = useState(false);
+
+  const buildWhatsAppUrl = () => {
+    const referralLine = referralSource
+      ? `%0A%0AFound you via: ${encodeURIComponent(referralSource)}${referralSource === 'Friend' && friendName ? ` (referred by ${encodeURIComponent(friendName)})` : ''}`
+      : '';
+    return `https://wa.me/918217824384?text=Hello%2C%20I%20need%20support%20with%20RetraLabs${referralLine}`;
+  };
+
+  const handleWhatsAppClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!referralSource) {
+      e.preventDefault();
+      setShowReferralError(true);
+      document.getElementById('support-referral-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -139,18 +160,23 @@ export default function SupportPage() {
                     {channel.chip.label}
                   </Chip>
                 </div>
-                <Button
-                  as="a"
+                <a
                   href={channel.href}
                   target={channel.href.startsWith('http') ? '_blank' : undefined}
                   rel={channel.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                  color={channel.btnColor}
-                  variant="flat"
-                  size="sm"
-                  className="w-full font-medium"
+                  className={`w-full text-center text-sm font-medium py-2 px-3 rounded-xl transition-colors ${
+                    channel.btnColor === 'success'
+                      ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                      : channel.btnColor === 'primary'
+                      ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                      : channel.btnColor === 'secondary'
+                      ? 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
+                  style={{ textDecoration: 'none' }}
                 >
                   {channel.btnLabel}
-                </Button>
+                </a>
               </CardBody>
             </Card>
           ))}
@@ -218,36 +244,81 @@ export default function SupportPage() {
           </CardBody>
         </Card>
 
-        {/* Contact CTA */}
-        <div className="mt-12 text-center py-10 max-w-2xl mx-auto">
-          <h3 className="text-xl font-bold text-slate-900 mb-2">Still have questions?</h3>
-          <p className="text-slate-500 mb-6">
-            Our team is happy to help. Reach out via WhatsApp for a quick response or send us an
-            email for detailed inquiries.
-          </p>
-          <div className="flex flex-wrap gap-3 justify-center">
-            <Button
-              as="a"
-              href="https://wa.me/918217824384?text=Hello%2C%20I%20need%20support%20with%20RetraLabs"
-              target="_blank"
-              rel="noopener noreferrer"
-              color="success"
-              size="lg"
-              startContent={<MessageSquare className="w-4 h-4" />}
-              className="font-semibold text-white"
+        {/* Contact CTA with mandatory referral */}
+        <div className="mt-12 max-w-xl mx-auto">
+          <div className="text-center mb-8">
+            <h3 className="text-xl font-bold text-slate-900 mb-2">Still have questions?</h3>
+            <p className="text-slate-500">
+              Our team is happy to help — reach out via WhatsApp for a quick response.
+            </p>
+            <p className="text-xs text-rose-600 font-semibold mt-1">
+              ⚠ No dosage or guidance provided. Strictly for research use only.
+            </p>
+          </div>
+
+          {/* How did you find us — mandatory */}
+          <div id="support-referral-section" className="bg-white rounded-2xl border border-slate-200 p-5 mb-4">
+            <p className="text-sm font-semibold text-slate-700 mb-1">
+              How did you find us? <span className="text-red-500">*</span>
+            </p>
+            <p className="text-xs text-slate-400 mb-3">Required before contacting us</p>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {REFERRAL_SOURCES.map((src) => (
+                <button
+                  key={src}
+                  type="button"
+                  onClick={() => {
+                    setReferralSource(src);
+                    setShowReferralError(false);
+                    if (src !== 'Friend') setFriendName('');
+                  }}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold border-2 transition-all ${
+                    referralSource === src
+                      ? 'bg-slate-900 border-slate-900 text-white'
+                      : 'bg-white border-slate-200 text-slate-600 hover:border-slate-400'
+                  }`}
+                >
+                  {src}
+                </button>
+              ))}
+            </div>
+            {referralSource === 'Friend' && (
+              <div className="mt-2">
+                <input
+                  type="text"
+                  placeholder="Friend's name (may qualify for an extra discount 🎉)"
+                  value={friendName}
+                  onChange={(e) => setFriendName(e.target.value)}
+                  className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-xl focus:border-slate-900 focus:outline-none transition-colors"
+                />
+              </div>
+            )}
+            {showReferralError && (
+              <p className="text-xs text-red-500 mt-1.5">Please select how you found us to continue.</p>
+            )}
+          </div>
+
+          {/* WhatsApp CTA */}
+          <a
+            href={buildWhatsAppUrl()}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={handleWhatsAppClick}
+            className="w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 active:bg-green-600 text-white font-bold py-4 px-6 rounded-2xl transition-colors text-base shadow-lg shadow-green-500/20"
+            style={{ textDecoration: 'none' }}
+          >
+            <MessageSquare className="w-5 h-5" />
+            WhatsApp Us
+          </a>
+
+          <div className="flex justify-center mt-3">
+            <button
+              onClick={() => navigate('/contact')}
+              className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 transition-colors font-medium"
             >
-              WhatsApp Us
-            </Button>
-            <Button
-              color="primary"
-              variant="bordered"
-              size="lg"
-              startContent={<Mail className="w-4 h-4" />}
-              onPress={() => navigate('/contact')}
-              className="font-semibold"
-            >
-              Contact Page
-            </Button>
+              <Mail className="w-4 h-4" />
+              Or use the Contact Page
+            </button>
           </div>
         </div>
       </div>
