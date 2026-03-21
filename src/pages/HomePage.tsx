@@ -182,220 +182,273 @@ export default function HomePage() {
     <div className="min-h-screen">
 
       {/* ════════════════════ HERO ════════════════════ */}
-      <section className="relative overflow-hidden bg-slate-950 pt-16 pb-0">
+      <section className="relative overflow-hidden pt-16 pb-0" style={{ background: '#03060f', minHeight: '100vh' }}>
 
-        {/* Rising canvas particles */}
         <HeroParticles />
 
-        {/* Background depth layers */}
+        {/* ── Hard visible background glows ── */}
         <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-          <div className="absolute inset-0 bg-dot-pattern bg-dot-sm opacity-[0.04]" />
-
-          {/* Left ambient orb */}
-          <motion.div
-            className="absolute top-1/4 -left-56 w-[700px] h-[700px] bg-accent-500/10 rounded-full blur-3xl"
-            animate={orbFloat.animate}
-          />
-          {/* Right ambient orb */}
-          <motion.div
-            className="absolute bottom-1/3 -right-56 w-[700px] h-[700px] bg-brand-500/10 rounded-full blur-3xl"
-            animate={orbFloat2.animate}
-          />
-          {/* Center radial — illuminates headline from above */}
+          {/* Strong top-center burst */}
           <div style={{
-            position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
-            width: '80vw', height: '65vh',
-            background: 'radial-gradient(ellipse at 50% 0%, rgba(34,211,238,0.065) 0%, transparent 65%)',
+            position: 'absolute', top: '-10%', left: '50%', transform: 'translateX(-50%)',
+            width: '100vw', height: '80vh',
+            background: 'radial-gradient(ellipse at 50% 0%, rgba(34,211,238,0.18) 0%, rgba(34,211,238,0.04) 45%, transparent 70%)',
+          }} />
+          {/* Bottom-left indigo pool */}
+          <div style={{
+            position: 'absolute', bottom: '10%', left: '-5%',
+            width: '55vw', height: '55vw', maxWidth: 700,
+            background: 'radial-gradient(circle, rgba(99,102,241,0.14) 0%, transparent 65%)',
+            borderRadius: '50%', filter: 'blur(10px)',
+          }} />
+          {/* Top-right accent */}
+          <div style={{
+            position: 'absolute', top: '5%', right: '5%',
+            width: '30vw', height: '30vw', maxWidth: 400,
+            background: 'radial-gradient(circle, rgba(34,211,238,0.1) 0%, transparent 70%)',
+            borderRadius: '50%', filter: 'blur(8px)',
+          }} />
+          {/* Horizontal glow line across mid */}
+          <div style={{
+            position: 'absolute', top: '42%', left: 0, right: 0, height: 1,
+            background: 'linear-gradient(90deg, transparent 0%, rgba(34,211,238,0.12) 30%, rgba(34,211,238,0.22) 50%, rgba(34,211,238,0.12) 70%, transparent 100%)',
           }} />
         </div>
 
-        {/* Right-side depth orb cluster */}
-        <div
-          aria-hidden="true"
-          style={{
-            position: 'absolute',
-            right: 'clamp(1%, 4%, 7%)',
-            top: '50%', transform: 'translateY(-52%)',
-            width: 'clamp(180px, 22vw, 360px)',
-            height: 'clamp(180px, 22vw, 360px)',
-            pointerEvents: 'none', zIndex: 0,
-          }}
-        >
-          <motion.div
-            animate={{ y: [0, -20, 0] }}
-            transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
-            style={{ position: 'absolute', inset: 0 }}
-          >
-            <div style={{
-              position: 'absolute', inset: '10%', borderRadius: '50%',
-              background: 'radial-gradient(circle at 38% 35%, rgba(34,211,238,0.14) 0%, rgba(6,182,212,0.05) 45%, transparent 70%)',
-              border: '1px solid rgba(34,211,238,0.07)', filter: 'blur(1px)',
-            }} />
-            <div style={{
-              position: 'absolute', inset: '32%', borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(34,211,238,0.26) 0%, transparent 70%)',
-              filter: 'blur(20px)',
-            }} />
-          </motion.div>
-          <motion.div
-            animate={{ y: [0, 12, 0] }}
-            transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut', delay: 2.5 }}
-            style={{ position: 'absolute', top: '-18%', right: '-12%', width: '50%', height: '50%' }}
-          >
-            <div style={{
-              width: '100%', height: '100%', borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(99,102,241,0.18) 0%, transparent 70%)',
-              filter: 'blur(20px)',
-            }} />
-          </motion.div>
-          <motion.div
-            animate={{ y: [0, -8, 0] }}
-            transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut', delay: 5 }}
-            style={{ position: 'absolute', bottom: '-10%', left: '-5%', width: '38%', height: '38%' }}
-          >
-            <div style={{
-              width: '100%', height: '100%', borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(34,211,238,0.16) 0%, transparent 70%)',
-              filter: 'blur(14px)',
-            }} />
-          </motion.div>
-        </div>
+        {/* ── SPLIT LAYOUT: left text · right card ── */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative" style={{ zIndex: 1 }}>
+          <div className="flex flex-col lg:flex-row lg:items-center lg:gap-16 min-h-[calc(100vh-64px)] py-16">
 
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative text-center" style={{ zIndex: 1 }}>
+            {/* ── LEFT: headline + copy + CTAs ── */}
+            <div className="flex-1 min-w-0">
+              <motion.div initial="hidden" animate="visible" variants={DRIFT}>
 
-          {/* ── Hero content — DRIFT stagger container ── */}
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={DRIFT}
-          >
+                {/* Trustpilot eyebrow */}
+                <AnimatedSection variants={fadeDown} className="mb-8">
+                  <a
+                    href="https://www.trustpilot.com/review/retralabs.in"
+                    target="_blank" rel="noopener noreferrer"
+                    className="inline-block"
+                  >
+                    <motion.div
+                      className="inline-flex items-center gap-2.5 backdrop-blur-sm rounded-full px-4 py-2"
+                      style={{ background: 'rgba(34,211,238,0.08)', border: '1px solid rgba(34,211,238,0.2)' }}
+                      whileHover={{ scale: 1.04, backgroundColor: 'rgba(34,211,238,0.13)' }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <div className="flex gap-0.5">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
+                        ))}
+                      </div>
+                      <span style={{ width: 1, height: 14, background: 'rgba(34,211,238,0.25)', display: 'inline-block' }} />
+                      <span className="text-cyan-300 text-sm font-medium">
+                        Verified on Trustpilot · See real reviews →
+                      </span>
+                    </motion.div>
+                  </a>
+                </AnimatedSection>
 
-          {/* Trustpilot badge */}
-          <AnimatedSection variants={fadeDown} className="flex justify-center mb-10">
-            <a
-              href="https://www.trustpilot.com/review/retralabs.in"
-              target="_blank" rel="noopener noreferrer"
-              className="inline-block"
-            >
-              <motion.div
-                className="inline-flex items-center gap-2.5 bg-white/5 border border-white/10 backdrop-blur-sm rounded-full px-5 py-2.5"
-                whileHover={{ scale: 1.04, backgroundColor: 'rgba(255,255,255,0.09)' }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="flex gap-0.5">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
-                  ))}
-                </div>
-                <span className="text-white/30 text-xs">|</span>
-                <span className="text-cyan-300 text-sm font-medium">
-                  Verified on Trustpilot · See real reviews →
-                </span>
+                {/* Rotating headline */}
+                <AnimatedSection variants={RISE} delay={0.1}>
+                  <div className="mb-2" style={{ minHeight: 'clamp(220px, 30vw, 380px)', display: 'flex', alignItems: 'center' }}>
+                    <AnimatePresence mode="wait">
+                      <motion.h1
+                        key={heroIndex}
+                        initial={{ opacity: 0, y: 40, scale: 0.95, filter: 'blur(12px)' }}
+                        animate={{ opacity: 1, y: 0,  scale: 1,    filter: 'blur(0px)',
+                          transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] } }}
+                        exit={{   opacity: 0, y: -30, scale: 0.97, filter: 'blur(8px)',
+                          transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1] } }}
+                        style={{ fontSize: 'clamp(3rem, 7vw, 5.5rem)', fontWeight: 900, lineHeight: 1.0, letterSpacing: '-0.02em', color: '#fff' }}
+                      >
+                        {HERO_HEADLINES[heroIndex].jsx}
+                      </motion.h1>
+                    </AnimatePresence>
+                  </div>
+
+                  {/* Dots */}
+                  <div className="flex gap-2 mb-8">
+                    {HERO_HEADLINES.map((_, i) => (
+                      <motion.button
+                        key={i}
+                        onClick={() => setHeroIndex(i)}
+                        animate={{
+                          width:           i === heroIndex ? 32 : 6,
+                          backgroundColor: i === heroIndex ? 'rgb(34,211,238)' : 'rgba(255,255,255,0.18)',
+                          boxShadow:       i === heroIndex ? '0 0 16px rgba(34,211,238,0.8)' : 'none',
+                        }}
+                        style={{ height: 5, borderRadius: 9999, border: 'none', cursor: 'pointer', padding: 0 }}
+                        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                        aria-label={`Headline ${i + 1}`}
+                      />
+                    ))}
+                  </div>
+                </AnimatedSection>
+
+                {/* Sub-copy */}
+                <AnimatedSection variants={RISE} delay={0.22}>
+                  <p style={{ color: 'rgba(148,163,184,1)', fontSize: '1.1rem', lineHeight: 1.75, maxWidth: 520, marginBottom: '0.75rem' }}>
+                    Fake vials. Useless compounds. Thousands wasted. We couldn't find a single
+                    legitimate peptide supplier in India, so we went directly to GMP manufacturers,
+                    got HPLC testing done, and made it accessible to everyone.
+                  </p>
+                  <p style={{ color: 'rgba(100,116,139,1)', fontSize: '0.875rem', fontStyle: 'italic', marginBottom: '2.5rem' }}>
+                    That's the whole story. Everything else is just good products at honest prices.
+                  </p>
+                </AnimatedSection>
+
+                {/* CTAs */}
+                <AnimatedSection variants={RISE} delay={0.34}>
+                  <div className="flex flex-wrap gap-3">
+                    <MagneticButton strength={24} glowColor="rgba(34,211,238,0.5)">
+                      <motion.button
+                        type="button"
+                        onClick={() => navigate('/catalogue')}
+                        style={{
+                          display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                          padding: '1rem 2.25rem',
+                          background: 'rgb(34,211,238)',
+                          color: '#03060f', fontWeight: 800, fontSize: '0.95rem', letterSpacing: '-0.01em',
+                          border: 'none', borderRadius: '9999px', cursor: 'pointer',
+                          boxShadow: '0 0 28px rgba(34,211,238,0.45), 0 4px 20px rgba(0,0,0,0.5)',
+                        }}
+                        whileHover={{
+                          scale: 1.05,
+                          boxShadow: '0 0 0 4px rgba(34,211,238,0.25), 0 0 48px rgba(34,211,238,0.65)',
+                          backgroundColor: 'rgb(103,232,249)',
+                        }}
+                        whileTap={{ scale: 0.96 }}
+                        transition={{ duration: DUR.fast, ease: EASE_OUT }}
+                      >
+                        Shop the Real Stuff
+                        <motion.span
+                          animate={{ x: [0, 5, 0] }}
+                          transition={{ repeat: Infinity, duration: 1.6, ease: EASE_SPRING }}
+                        >
+                          <ArrowRight className="w-4 h-4" />
+                        </motion.span>
+                      </motion.button>
+                    </MagneticButton>
+
+                    <motion.button
+                      type="button"
+                      onClick={() => navigate('/about')}
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                        padding: '1rem 2rem',
+                        background: 'rgba(255,255,255,0.05)',
+                        color: 'rgba(255,255,255,0.8)', fontWeight: 500, fontSize: '0.95rem',
+                        border: '1px solid rgba(255,255,255,0.14)', borderRadius: '9999px', cursor: 'pointer',
+                      }}
+                      whileHover={{ scale: 1.03, backgroundColor: 'rgba(255,255,255,0.1)', borderColor: 'rgba(255,255,255,0.28)' }}
+                      whileTap={{ scale: 0.97 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      Read Our Story
+                    </motion.button>
+                  </div>
+                </AnimatedSection>
+
               </motion.div>
-            </a>
-          </AnimatedSection>
-
-          {/* Rotating headline — cinematic AnimatePresence */}
-          <AnimatedSection variants={RISE} delay={0.1}>
-            <div className="min-h-[220px] md:min-h-[310px] flex items-center justify-center mb-5">
-              <AnimatePresence mode="wait">
-                <motion.h1
-                  key={heroIndex}
-                  initial={{ opacity: 0, y: 36, scale: 0.96, filter: 'blur(10px)' }}
-                  animate={{ opacity: 1, y: 0,  scale: 1,    filter: 'blur(0px)',
-                    transition: { duration: 0.62, ease: [0.22, 1, 0.36, 1] } }}
-                  exit={{   opacity: 0, y: -28, scale: 0.97, filter: 'blur(6px)',
-                    transition: { duration: 0.3,  ease: [0.22, 1, 0.36, 1] } }}
-                  className="text-6xl md:text-7xl lg:text-8xl font-bold text-white tracking-tight leading-[1.02] text-center"
-                >
-                  {HERO_HEADLINES[heroIndex].jsx}
-                </motion.h1>
-              </AnimatePresence>
             </div>
 
-            {/* Dot indicators — glow on active */}
-            <div className="flex justify-center gap-2 mb-6">
-              {HERO_HEADLINES.map((_, i) => (
-                <motion.button
-                  key={i}
-                  onClick={() => setHeroIndex(i)}
-                  animate={{
-                    width:           i === heroIndex ? 28 : 6,
-                    backgroundColor: i === heroIndex ? 'rgb(34,211,238)' : 'rgba(255,255,255,0.2)',
-                    boxShadow:       i === heroIndex ? '0 0 14px rgba(34,211,238,0.72)' : 'none',
-                  }}
-                  style={{ height: 6, borderRadius: 9999, border: 'none', cursor: 'pointer', padding: 0 }}
-                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                  aria-label={`Headline ${i + 1}`}
-                />
-              ))}
-            </div>
-          </AnimatedSection>
-
-          {/* Sub-copy */}
-          <AnimatedSection variants={RISE} delay={0.22}>
-            <p className="text-lg md:text-xl text-slate-400 mb-4 leading-relaxed max-w-2xl mx-auto">
-              Fake vials. Useless compounds. Thousands wasted. We couldn't find a single
-              legitimate peptide supplier in India, so we went directly to GMP manufacturers,
-              got HPLC testing done, and made it accessible to everyone.
-            </p>
-            <p className="text-slate-500 text-sm italic mb-10">
-              That's the whole story. Everything else is just good products at honest prices.
-            </p>
-          </AnimatedSection>
-
-          {/* CTAs */}
-          <AnimatedSection
-            variants={RISE}
-            delay={0.34}
-            className="flex flex-col sm:flex-row gap-3 justify-center mb-16"
-          >
-            {/* Primary — magnetic pull + glow ring on hover */}
-            <MagneticButton strength={24} glowColor="rgba(34,211,238,0.4)">
-              <motion.button
-                type="button"
-                onClick={() => navigate('/catalogue')}
-                className="inline-flex items-center justify-center gap-2 bg-cyan-400 text-slate-900 font-extrabold text-base px-8 py-3.5 rounded-2xl shadow-lg shadow-cyan-400/20"
-                whileHover={{
-                  scale: 1.04,
-                  boxShadow: '0 0 0 3px rgba(34,211,238,0.28), 0 16px 48px rgba(34,211,238,0.55)',
-                  backgroundColor: 'rgb(103,232,249)',
-                }}
-                whileTap={{ scale: 0.96 }}
-                transition={{ duration: DUR.fast, ease: EASE_OUT }}
+            {/* ── RIGHT: floating stats card ── */}
+            <AnimatedSection variants={EMERGE} delay={0.3} className="hidden lg:block flex-shrink-0 w-80 xl:w-96">
+              <motion.div
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
               >
-                Shop the Real Stuff
-                <motion.span
-                  animate={{ x: [0, 5, 0] }}
-                  transition={{ repeat: Infinity, duration: 1.6, ease: EASE_SPRING }}
-                >
-                  <ArrowRight className="w-4 h-4" />
-                </motion.span>
-              </motion.button>
-            </MagneticButton>
+                <div style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(34,211,238,0.18)',
+                  borderRadius: '1.5rem',
+                  padding: '1.75rem',
+                  backdropFilter: 'blur(20px)',
+                  boxShadow: '0 0 60px rgba(34,211,238,0.07), 0 32px 64px rgba(0,0,0,0.5)',
+                }}>
+                  {/* Card header */}
+                  <div className="flex items-center gap-3 mb-5">
+                    <div style={{
+                      width: 40, height: 40, borderRadius: '0.75rem',
+                      background: 'rgba(34,211,238,0.15)', border: '1px solid rgba(34,211,238,0.25)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <FlaskConical className="w-5 h-5 text-cyan-400" />
+                    </div>
+                    <div>
+                      <p style={{ color: '#fff', fontWeight: 700, fontSize: '0.95rem', lineHeight: 1.2 }}>
+                        Retatrutide 10mg
+                      </p>
+                      <p style={{ color: 'rgba(34,211,238,0.8)', fontSize: '0.75rem', marginTop: 2 }}>
+                        Latest batch · COA included
+                      </p>
+                    </div>
+                    <div style={{
+                      marginLeft: 'auto', padding: '0.25rem 0.75rem',
+                      background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)',
+                      borderRadius: '9999px', fontSize: '0.7rem', fontWeight: 700,
+                      color: 'rgb(134,239,172)', letterSpacing: '0.05em',
+                    }}>
+                      IN STOCK
+                    </div>
+                  </div>
 
-            {/* Secondary */}
-            <motion.button
-              type="button"
-              onClick={() => navigate('/about')}
-              className="inline-flex items-center justify-center gap-2 bg-white/8 border border-white/15 text-white font-semibold text-base px-8 py-3.5 rounded-2xl backdrop-blur-sm"
-              whileHover={{ scale: 1.03, backgroundColor: 'rgba(255,255,255,0.13)', borderColor: 'rgba(255,255,255,0.3)' }}
-              whileTap={{ scale: 0.97 }}
-              transition={{ duration: 0.2 }}
-            >
-              Read Our Story
-            </motion.button>
-          </AnimatedSection>
+                  {/* Divider */}
+                  <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', marginBottom: '1.25rem' }} />
 
-          {/* close DRIFT container */}
-          </motion.div>
+                  {/* Stats grid */}
+                  <div className="grid grid-cols-2 gap-3 mb-5">
+                    {[
+                      { label: 'HPLC Purity', value: '99.2%', color: 'rgba(34,211,238,1)' },
+                      { label: 'Starter Vial', value: '₹3,500', color: '#fff' },
+                      { label: 'Orders Shipped', value: '2,400+', color: '#fff' },
+                      { label: 'Avg Dispatch', value: '48h', color: 'rgba(34,211,238,1)' },
+                    ].map(stat => (
+                      <div key={stat.label} style={{
+                        background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)',
+                        borderRadius: '0.875rem', padding: '0.875rem',
+                      }}>
+                        <p style={{ color: stat.color, fontWeight: 800, fontSize: '1.25rem', lineHeight: 1 }}>
+                          {stat.value}
+                        </p>
+                        <p style={{ color: 'rgba(100,116,139,1)', fontSize: '0.68rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 4 }}>
+                          {stat.label}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
 
+                  {/* Purity bar */}
+                  <div>
+                    <div className="flex justify-between mb-1.5">
+                      <span style={{ color: 'rgba(100,116,139,1)', fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Purity Score</span>
+                      <span style={{ color: 'rgba(34,211,238,1)', fontSize: '0.72rem', fontWeight: 700 }}>99.2 / 100</span>
+                    </div>
+                    <div style={{ height: 6, background: 'rgba(255,255,255,0.07)', borderRadius: 9999, overflow: 'hidden' }}>
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: '99.2%' }}
+                        transition={{ duration: 1.4, delay: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                        style={{
+                          height: '100%', borderRadius: 9999,
+                          background: 'linear-gradient(90deg, rgba(34,211,238,0.8), rgba(34,211,238,1))',
+                          boxShadow: '0 0 10px rgba(34,211,238,0.6)',
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatedSection>
+
+          </div>
         </div>
 
         {/* ── Stats marquee ── */}
-        <div className="relative mt-10 overflow-hidden py-6">
-          <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-slate-950 to-transparent z-10 pointer-events-none" />
-          <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-slate-950 to-transparent z-10 pointer-events-none" />
+        <div className="relative overflow-hidden py-5" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+          <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#03060f] to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#03060f] to-transparent z-10 pointer-events-none" />
           <div className="flex" style={{ animation: 'marquee-scroll 28s linear infinite' }}>
             {[0, 1].map(set => (
               <div key={set} className="flex items-center flex-shrink-0">
