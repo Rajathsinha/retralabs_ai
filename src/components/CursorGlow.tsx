@@ -1,86 +1,83 @@
 /**
- * Subtle cursor-following radial glow effect.
- * Uses lerp (linear interpolation) for smooth lag — creates the "light follows" feel.
- * GPU-composited via will-change: transform, renders on top of everything via z-50.
+ * Lerp-ring cursor — RetraLabs redesign.
  *
- * Only renders on desktop (pointer: fine) — no effect on touch screens.
- * Automatically hidden on reduced-motion preference.
+ * A small dot snaps exactly to the mouse.
+ * A larger ring lags behind with linear interpolation (speed = 0.11).
+ * Both elements are CSS-only divs (#retra-cursor, #retra-cursor-ring)
+ * and are hidden on touch/reduced-motion devices.
  */
-import { useEffect, useRef } from 'react';
-import { useReducedMotion } from '../hooks/useReducedMotion';
-
-const LERP_SPEED = 0.075; // lower = more lag (more dreamy), higher = tighter follow
-const GLOW_SIZE  = 420;   // px diameter
+import { useEffect } from 'react';
 
 export default function CursorGlow() {
-  const glowRef = useRef<HTMLDivElement>(null);
-  const reduced = useReducedMotion();
-
   useEffect(() => {
-    if (reduced) return;
-    const glow = glowRef.current;
-    if (!glow) return;
-
-    // Only activate on pointer devices (not touch)
+    // Only activate on true pointer devices
     const isPointer = window.matchMedia('(pointer: fine)').matches;
-    if (!isPointer) return;
+    const isReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!isPointer || isReduced) return;
 
-    let mouseX = window.innerWidth  / 2;
-    let mouseY = window.innerHeight / 2;
-    let glowX  = mouseX;
-    let glowY  = mouseY;
+    const dot  = document.getElementById('retra-cursor');
+    const ring = document.getElementById('retra-cursor-ring');
+    if (!dot || !ring) return;
+
+    // Show elements
+    dot.style.display  = 'block';
+    ring.style.display = 'block';
+
+    let cx = window.innerWidth / 2;
+    let cy = window.innerHeight / 2;
+    let rx = cx;
+    let ry = cy;
     let rafId: number;
-    const half = GLOW_SIZE / 2;
 
     const onMouseMove = (e: MouseEvent) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
+      cx = e.clientX;
+      cy = e.clientY;
+      dot.style.left = cx + 'px';
+      dot.style.top  = cy + 'px';
     };
 
-    const animate = () => {
-      // Lerp toward cursor — produces the smooth lag
-      glowX += (mouseX - glowX) * LERP_SPEED;
-      glowY += (mouseY - glowY) * LERP_SPEED;
-      // translate so the glow is centered on the cursor
-      glow.style.transform = `translate3d(${glowX - half}px,${glowY - half}px,0)`;
-      rafId = requestAnimationFrame(animate);
-    };
+    function lerpRing() {
+      rx += (cx - rx) * 0.11;
+      ry += (cy - ry) * 0.11;
+      ring.style.left = rx + 'px';
+      ring.style.top  = ry + 'px';
+      rafId = requestAnimationFrame(lerpRing);
+    }
 
-    glow.style.opacity = '1';
+    lerpRing();
     window.addEventListener('mousemove', onMouseMove, { passive: true });
-    animate();
+
+    // Hover state — expand ring + tint dot
+    const hoverTargets = 'button, a, .tilt-card-wrapper, [role="button"], input, select, textarea, label';
+    function addHover() { document.body.classList.add('cursor-hovering'); }
+    function removeHover() { document.body.classList.remove('cursor-hovering'); }
+
+    document.querySelectorAll(hoverTargets).forEach(el => {
+      el.addEventListener('mouseenter', addHover);
+      el.addEventListener('mouseleave', removeHover);
+    });
+
+    // Also handle dynamically added elements via delegation
+    document.addEventListener('mouseenter', (e) => {
+      if ((e.target as Element)?.matches?.(hoverTargets)) addHover();
+    }, true);
+    document.addEventListener('mouseleave', (e) => {
+      if ((e.target as Element)?.matches?.(hoverTargets)) removeHover();
+    }, true);
 
     return () => {
-      window.removeEventListener('mousemove', onMouseMove);
       cancelAnimationFrame(rafId);
+      window.removeEventListener('mousemove', onMouseMove);
+      document.body.classList.remove('cursor-hovering');
+      if (dot)  dot.style.display  = 'none';
+      if (ring) ring.style.display = 'none';
     };
-  }, [reduced]);
-
-  if (reduced) return null;
+  }, []);
 
   return (
-    <div
-      ref={glowRef}
-      aria-hidden="true"
-      style={{
-        position: 'fixed',
-        top:    0,
-        left:   0,
-        zIndex: 9999,
-        width:  GLOW_SIZE,
-        height: GLOW_SIZE,
-        borderRadius: '50%',
-        pointerEvents: 'none',
-        opacity:  0,   // starts hidden, JS fades it in after first mousemove
-        willChange: 'transform',
-        background: `radial-gradient(
-          circle at center,
-          rgba(34,211,238,0.13) 0%,
-          rgba(34,211,238,0.04) 40%,
-          transparent 70%
-        )`,
-        transition: 'opacity 0.4s ease',
-      }}
-    />
+    <>
+      <div id="retra-cursor"      aria-hidden="true" style={{ display: 'none' }} />
+      <div id="retra-cursor-ring" aria-hidden="true" style={{ display: 'none' }} />
+    </>
   );
 }
