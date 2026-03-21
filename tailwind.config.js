@@ -10,8 +10,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans:  ['Plus Jakarta Sans', 'system-ui', '-apple-system', 'sans-serif'],
-        serif: ['Cormorant Garamond', 'Georgia', 'serif'],
+        sans:  ['Space Grotesk', 'system-ui', '-apple-system', 'sans-serif'],
+        serif: ['Space Grotesk', 'system-ui', 'sans-serif'],
       },
       colors: {
         brand: {
