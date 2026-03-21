@@ -195,9 +195,10 @@ export default function HomePage() {
                 transition={{ duration: 0.2 }}
               >
                 <div className="flex gap-0.5">
-                  {[...Array(5)].map((_, i) => (
+                  {[...Array(4)].map((_, i) => (
                     <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
                   ))}
+                  <Star className="w-3 h-3 fill-amber-400/40 text-amber-400/40" />
                 </div>
                 <span className="text-white/30 text-xs">|</span>
                 <span className="text-cyan-300 text-sm font-medium">
@@ -306,7 +307,7 @@ export default function HomePage() {
                 {[
                   { value: '2,400+', label: 'Orders Shipped' },
                   { value: '99%+',   label: 'Purity Guaranteed' },
-                  { value: '★ 4.9',  label: 'On Trustpilot' },
+                  { value: '★ 4.1',  label: 'On Trustpilot' },
                   { value: '48h',    label: 'Avg Dispatch' },
                   { value: 'GMP',    label: 'Certified Source' },
                   { value: '100%',   label: 'HPLC-Tested' },

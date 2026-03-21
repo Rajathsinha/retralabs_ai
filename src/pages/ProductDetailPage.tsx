@@ -50,7 +50,7 @@ const DEMO_PRODUCTS: ProductWithVariants[] = [
     created_at: new Date().toISOString(),
     variants: [
       { id: '1s', product_id: '1', dosage_mg: 10, price_inr: 3500, in_stock: true, vial_configuration: 'Starter vial', created_at: new Date().toISOString() },
-      { id: '1a', product_id: '1', dosage_mg: 20, price_inr: 6000, in_stock: true, vial_configuration: 'Single vial', created_at: new Date().toISOString() },
+      { id: '1a', product_id: '1', dosage_mg: 20, price_inr: 6000, in_stock: true, vial_configuration: '10mg × 2', created_at: new Date().toISOString() },
       { id: '1b', product_id: '1', dosage_mg: 50, price_inr: 13000, in_stock: true, vial_configuration: '10mg x 5 vials', created_at: new Date().toISOString() },
       { id: '1c', product_id: '1', dosage_mg: 100, price_inr: 21000, in_stock: true, vial_configuration: '10mg x 10 vials / 20mg x 5 vials', created_at: new Date().toISOString() },
     ],
@@ -767,9 +767,11 @@ export default function ProductDetailPage() {
                           {format(variant.price_inr)}
                         </p>
                         <p className="text-sm text-slate-500 font-medium">
-                          {isBacWater ? `${variant.dosage_mg}ML` : `${variant.dosage_mg}mg`}
+                          {variant.vial_configuration?.includes('×')
+                            ? variant.vial_configuration
+                            : isBacWater ? `${variant.dosage_mg}ML` : `${variant.dosage_mg}mg`}
                         </p>
-                        {variant.vial_configuration && (
+                        {variant.vial_configuration && !variant.vial_configuration.includes('×') && (
                           <p className="text-xs text-slate-400 mt-1">{variant.vial_configuration}</p>
                         )}
                         {isSelected && (
