@@ -13,26 +13,21 @@ export default function Logo({ size = 'md', variant = 'dark' }: LogoProps) {
     lg: { container: 'w-12 h-12', icon: 'w-6 h-6', text: 'text-2xl', dot: 'w-2 h-2' },
   };
 
-  const { container, text, dot } = sizes[size];
+  const { container, icon, text, dot } = sizes[size];
   const isLight = variant === 'light';
-  const textColor = isLight ? 'text-white/70' : 'text-white';
+  const boxBg = isLight ? 'bg-white/10' : 'bg-slate-100';
+  const iconColor = 'text-cyan-400';
+  const textColor = isLight ? 'text-white' : 'text-slate-900';
+  const dotColor = 'bg-cyan-400';
 
   return (
     <div className="flex items-center gap-2.5">
-      {/* Icon box — always dark, like an app icon */}
-      <div
-        className={`${container} rounded-xl flex items-center justify-center flex-shrink-0`}
-        style={{
-          background: '#0d1117',
-          border: '1px solid rgba(255,255,255,0.1)',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
-        }}
-      >
-        <Box className="w-4 h-4 text-white" strokeWidth={2} />
+      <div className={`${container} ${boxBg} rounded-xl flex items-center justify-center flex-shrink-0`}>
+        <Box className={`w-4 h-4 ${iconColor}`} strokeWidth={2.5} />
       </div>
       <div className="flex items-baseline gap-1">
-        <span className={`${text} font-bold tracking-tight text-white`}>RetraLabs</span>
-        <span className={`${dot} bg-cyan-400 rounded-full flex-shrink-0 mb-0.5`} />
+        <span className={`${text} font-bold tracking-tight ${textColor}`}>RetraLabs</span>
+        <span className={`${dot} ${dotColor} rounded-full flex-shrink-0 mb-0.5`} />
       </div>
     </div>
   );
