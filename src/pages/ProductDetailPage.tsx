@@ -691,18 +691,16 @@ export default function ProductDetailPage() {
               </div>
 
               {/* WhatsApp support */}
-              <a
-                href={`https://wa.me/918217824384?text=${encodeURIComponent(`Hi! I'd like to know more about ${product.name} before ordering. Can you help?`)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-3 p-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition-colors"
+              <button
+                onClick={() => openWithReferral(`https://wa.me/918217824384?text=${encodeURIComponent(`Hi! I'd like to know more about ${product.name} before ordering. Can you help?`)}`)}
+                className="flex items-center gap-3 p-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition-colors w-full text-left"
               >
                 <MessageCircle className="w-5 h-5 flex-shrink-0" />
                 <div className="flex-1">
                   <p className="font-bold text-sm">Ask on WhatsApp</p>
                   <p className="text-xs text-emerald-100">Get answers before you order</p>
                 </div>
-              </a>
+              </button>
             </div>
           </div>
 
