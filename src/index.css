@@ -123,6 +123,9 @@
   }
   .scrollbar-hide::-webkit-scrollbar { display: none; }
 
+  /* ── Search modal input placeholder ─────────────────────────────────── */
+  .search-modal-input::placeholder { color: rgba(255,255,255,0.25); }
+
   /* ── Text gradient ──────────────────────────────────────────────────── */
   .text-gradient {
     @apply bg-clip-text text-transparent;
