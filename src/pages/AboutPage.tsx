@@ -13,6 +13,7 @@ import {
   Microscope, Award, Heart, Lightbulb, Target,
 } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
+import { useSEO } from '../hooks/useSEO';
 
 const STATS = [
   { value: '2,400+', label: 'Orders Shipped', icon: Truck, colorClass: 'text-brand-600 bg-brand-50' },
@@ -78,6 +79,13 @@ const QUALITY_STEPS = [
 
 export default function AboutPage() {
   const navigate = useNavigate();
+
+  useSEO({
+    title: 'About RetraLabs | India\'s Trusted Research Peptide Supplier',
+    description: 'RetraLabs is India\'s most trusted research peptide supplier. Founded by researchers, for researchers. HPLC-verified compounds, COA with every order, 2,400+ orders shipped across India.',
+    keywords: 'retralabs about, research peptide supplier india, who is retralabs, retralabs india',
+    canonical: 'https://retralabs.in/about',
+  });
 
   return (
     <div className="min-h-screen bg-white">

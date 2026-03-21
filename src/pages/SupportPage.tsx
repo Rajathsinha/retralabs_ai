@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSEO } from '../hooks/useSEO';
 import {
   Accordion,
   AccordionItem,
@@ -102,6 +103,13 @@ const REFERRAL_SOURCES = ['YouTube', 'Instagram', 'Reddit', 'Friend', 'Google', 
 
 export default function SupportPage() {
   const navigate = useNavigate();
+
+  useSEO({
+    title: 'Support | RetraLabs Research Peptides India',
+    description: 'Get help with your RetraLabs order. FAQs on peptide storage, shipping, COA, and research use. Contact us via WhatsApp (Mon–Sat 9AM–6PM IST) or email.',
+    keywords: 'retralabs support, peptide supplier support india, retatrutide order help, research peptide faq india',
+    canonical: 'https://retralabs.in/support',
+  });
 
   const [referralSource, setReferralSource] = useState('');
   const [friendName, setFriendName] = useState('');

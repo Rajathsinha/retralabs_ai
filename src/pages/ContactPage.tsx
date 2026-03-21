@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSEO } from '../hooks/useSEO';
 import {
   Button,
   Card,
@@ -11,6 +12,13 @@ import {
 import { Mail, MessageSquare, Clock, AlertTriangle, Send } from 'lucide-react';
 
 export default function ContactPage() {
+  useSEO({
+    title: 'Contact RetraLabs | Research Peptide Supplier India',
+    description: 'Contact RetraLabs for research peptide enquiries in India. WhatsApp support Mon–Sat 9AM–6PM IST. Email: support@retralabs.in. Fast responses guaranteed.',
+    keywords: 'contact retralabs, retralabs email, research peptide support india, retralabs whatsapp',
+    canonical: 'https://retralabs.in/contact',
+  });
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [subject, setSubject] = useState('');

@@ -25,6 +25,7 @@ import {
 import HeroParticles from '../components/HeroParticles';
 import AnimatedSection from '../components/AnimatedSection';
 import MagneticButton from '../components/MagneticButton';
+import SEO from '../components/SEO';
 import {
   fadeUp, fadeDown, scaleIn, staggerMedium, staggerFast,
   orbFloat, orbFloat2,
@@ -159,6 +160,36 @@ export default function HomePage() {
   }, []);
 
   return (
+    <>
+    <SEO
+      title="Retatrutide Peptide Supplier in India | 99%+ Purity Research Grade | RetraLabs"
+      description="India's most trusted research peptide supplier. Buy Retatrutide, Tirzepatide, GHK-Cu, BPC-157 with 99%+ HPLC-verified purity & COA. Starter vial from ₹3,500. Fast India-wide shipping."
+      canonical="/"
+      schema={[
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "RetraLabs",
+          "url": "https://retralabs.in",
+          "logo": "https://retralabs.in/favicon.png",
+          "description": "India's trusted research peptide supplier. HPLC-verified, COA-backed compounds for laboratory research.",
+          "email": "support@retralabs.in",
+          "areaServed": "IN",
+          "contactPoint": { "@type": "ContactPoint", "contactType": "Customer Support", "email": "support@retralabs.in" }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            { "@type": "Question", "name": "Where can I buy Retatrutide in India?", "acceptedAnswer": { "@type": "Answer", "text": "RetraLabs (retralabs.in) is India's trusted source for research-grade Retatrutide. 99.2% HPLC-verified purity, COA with every order, starter vial from ₹3,500." } },
+            { "@type": "Question", "name": "What is the price of Retatrutide in India?", "acceptedAnswer": { "@type": "Answer", "text": "At RetraLabs: 10mg starter vial ₹3,500 · 20mg ₹6,000 · 50mg ₹13,000 · 100mg ₹21,000. All include COA and HPLC report." } },
+            { "@type": "Question", "name": "Is Retatrutide available in India?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Retatrutide is available in India for laboratory research through RetraLabs at retralabs.in. GMP-certified source, HPLC-tested, COA included, India-wide shipping." } },
+            { "@type": "Question", "name": "Where to buy Tirzepatide in India?", "acceptedAnswer": { "@type": "Answer", "text": "Tirzepatide for research is available at RetraLabs.in. 99.4% HPLC purity, COA included. From ₹2,500 for 10mg, India-wide shipping." } },
+            { "@type": "Question", "name": "Are research peptides legal in India?", "acceptedAnswer": { "@type": "Answer", "text": "Research peptides like Retatrutide and Tirzepatide are supplied in India strictly for laboratory and analytical research purposes by RetraLabs. Not for human consumption." } }
+          ]
+        }
+      ]}
+    />
     <div className="min-h-screen">
 
       {/* ════════════════════ HERO ════════════════════ */}
@@ -551,5 +582,6 @@ export default function HomePage() {
       </section>
 
     </div>
+    </>
   );
 }
