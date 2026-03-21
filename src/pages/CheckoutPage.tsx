@@ -785,40 +785,47 @@ export default function CheckoutPage() {
                 </div>
 
                 {/* ── How did you find us? (mandatory) ── */}
-                <div id="referral-section">
-                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                    How did you find us? <span className="text-red-500">*</span>
-                  </label>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {['YouTube', 'Instagram', 'Reddit', 'Friend', 'Google', 'Twitter / X', 'TikTok'].map((src) => (
-                      <button
-                        key={src}
-                        type="button"
-                        onClick={() => setFormData({ ...formData, referral_source: src, referral_friend_name: src !== 'Friend' ? '' : formData.referral_friend_name })}
-                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border-2 transition-all ${
-                          formData.referral_source === src
-                            ? 'bg-slate-900 border-slate-900 text-white'
-                            : 'bg-white border-slate-200 text-slate-600 hover:border-slate-400'
-                        }`}
-                      >
-                        {src}
-                      </button>
-                    ))}
+                <div id="referral-section" className="rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                  {/* Card header */}
+                  <div className="bg-gradient-to-r from-slate-900 to-slate-800 px-5 py-3.5 flex items-center gap-2.5">
+                    <span className="text-base">🔍</span>
+                    <p className="font-semibold text-white flex-1">How did you find us?</p>
+                    <span className="text-red-400 font-bold">*</span>
                   </div>
-                  {formData.referral_source === 'Friend' && (
-                    <div className="mt-2">
+                  {/* Card body */}
+                  <div className="bg-white px-5 py-4 space-y-3">
+                    <p className="text-xs text-slate-400">Required before placing your order</p>
+                    <div className="flex flex-wrap gap-2">
+                      {['YouTube', 'Instagram', 'Reddit', 'Friend', 'Google', 'Twitter / X', 'TikTok'].map((src) => (
+                        <button
+                          key={src}
+                          type="button"
+                          onClick={() => setFormData({ ...formData, referral_source: src, referral_friend_name: src !== 'Friend' ? '' : formData.referral_friend_name })}
+                          className={`px-4 py-2 rounded-xl text-sm font-semibold border transition-all duration-150 ${
+                            formData.referral_source === src
+                              ? 'bg-slate-900 border-slate-900 text-white shadow-sm'
+                              : 'bg-white border-slate-200 text-slate-600 hover:border-slate-700 hover:bg-slate-50'
+                          }`}
+                        >
+                          {src}
+                        </button>
+                      ))}
+                    </div>
+                    {formData.referral_source === 'Friend' && (
                       <input
                         type="text"
-                        placeholder="Friend's name (may qualify for an extra discount)"
+                        placeholder="Friend's name (may qualify for an extra discount 🎉)"
                         value={formData.referral_friend_name}
                         onChange={(e) => setFormData({ ...formData, referral_friend_name: e.target.value })}
-                        className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-xl focus:border-slate-900 focus:outline-none transition-colors"
+                        className="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:border-slate-900 focus:outline-none transition-colors"
                       />
-                    </div>
-                  )}
-                  {!formData.referral_source && (
-                    <p className="text-xs text-red-500 mt-1">Please select how you found us to continue.</p>
-                  )}
+                    )}
+                    {!formData.referral_source && (
+                      <p className="text-sm text-red-500 flex items-center gap-1.5">
+                        <span>⚠</span> Please select how you found us to continue.
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 {/* ── Compliance checkboxes ── */}

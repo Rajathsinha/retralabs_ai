@@ -1,16 +1,18 @@
 /**
- * Scroll-triggered animated section.
- * Uses Framer Motion's whileInView — no layout shifts, GPU-accelerated.
- * Automatically degrades to instant-visible on reduced-motion devices.
+ * AnimatedSection — scroll-triggered animation wrapper. v2.
+ *
+ * Defaults upgraded from basic fadeUp to multi-property RISE.
+ * Supports perspective for 3D depth on child elements.
+ * GPU-accelerated, reduced-motion safe.
  *
  * Usage:
- *   <AnimatedSection variants={fadeUp} delay={0.1}>
- *     <YourContent />
- *   </AnimatedSection>
+ *   <AnimatedSection>content</AnimatedSection>
+ *   <AnimatedSection variants={SURFACE} delay={0.1}>card</AnimatedSection>
+ *   <AnimatedSection perspective>3D content</AnimatedSection>
  */
 import { motion, Variants } from 'framer-motion';
 import { ReactNode } from 'react';
-import { fadeUp } from '../animations/variants';
+import { RISE } from '../animations/variants';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 
 interface AnimatedSectionProps {
@@ -18,11 +20,14 @@ interface AnimatedSectionProps {
   variants?: Variants;
   delay?: number;
   className?: string;
-  /** Trigger viewport margin (default: 80px from bottom) */
+  /** Viewport margin — how early to trigger (default: 80px from bottom) */
   margin?: string;
-  /** Only animate once (default: true) */
+  /** Animate only once (default: true) */
   once?: boolean;
-  as?: 'div' | 'section' | 'article' | 'li';
+  /** Semantic tag */
+  as?: 'div' | 'section' | 'article' | 'li' | 'span';
+  /** Add CSS perspective for 3D child animations */
+  perspective?: boolean;
 }
 
 export default function AnimatedSection({
@@ -33,32 +38,23 @@ export default function AnimatedSection({
   margin = '0px 0px -80px 0px',
   once = true,
   as = 'div',
+  perspective = false,
 }: AnimatedSectionProps) {
   const reduced = useReducedMotion();
   const MotionTag = motion[as];
 
-  // Build variant with delay injected at the transition level
-  const appliedVariants: Variants = variants
-    ? {
-        hidden: variants.hidden,
-        visible: {
-          ...(variants.visible as object),
-          transition: {
-            ...((variants.visible as { transition?: object }).transition ?? {}),
-            delay,
-          },
-        },
-      }
-    : {
-        hidden: fadeUp.hidden,
-        visible: {
-          ...(fadeUp.visible as object),
-          transition: {
-            ...((fadeUp.visible as { transition?: object }).transition ?? {}),
-            delay,
-          },
-        },
-      };
+  const base = variants ?? RISE;
+
+  const appliedVariants: Variants = {
+    hidden: base.hidden,
+    visible: {
+      ...(base.visible as object),
+      transition: {
+        ...((base.visible as { transition?: object }).transition ?? {}),
+        delay,
+      },
+    },
+  };
 
   if (reduced) {
     const Tag = as as keyof JSX.IntrinsicElements;
@@ -68,6 +64,7 @@ export default function AnimatedSection({
   return (
     <MotionTag
       className={className}
+      style={perspective ? { perspective: '1200px' } : undefined}
       initial="hidden"
       whileInView="visible"
       viewport={{ once, margin }}

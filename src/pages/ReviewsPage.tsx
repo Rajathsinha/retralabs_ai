@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+import { useSEO } from '../hooks/useSEO';
 import {
   Card,
   CardBody,
@@ -89,6 +91,13 @@ function CommunityReviewCard({ review }: { review: typeof communityReviews[0] })
 }
 
 export default function ReviewsPage() {
+  useSEO({
+    title: 'Reviews | RetraLabs — Verified Customer Reviews India',
+    description: 'Read verified reviews from RetraLabs customers. India\'s most trusted research peptide supplier with Trustpilot-verified ratings. 2,400+ orders shipped.',
+    keywords: 'retralabs reviews, research peptide supplier reviews india, retatrutide supplier reviews, buy peptides india reviews',
+    canonical: 'https://retralabs.in/reviews',
+  });
+
   return (
     <div className="min-h-screen bg-white">
 
