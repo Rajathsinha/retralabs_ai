@@ -107,10 +107,12 @@ export default function Header() {
           position: 'sticky',
           top: 0,
           zIndex: 50,
-          background: 'var(--white)',
-          borderBottom: '1px solid var(--border)',
-          transition: 'box-shadow 0.3s',
-          boxShadow: scrolled ? '0 4px 24px rgba(0,0,0,0.07)' : 'none',
+          background: scrolled ? 'rgba(3,6,15,0.97)' : 'rgba(3,6,15,0.85)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          borderBottom: '1px solid rgba(255,255,255,0.07)',
+          transition: 'background 0.3s, box-shadow 0.3s',
+          boxShadow: scrolled ? '0 4px 32px rgba(0,0,0,0.4)' : 'none',
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -139,12 +141,12 @@ export default function Header() {
                     fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
                     fontWeight: 400,
                     letterSpacing: '0.04em',
-                    color: active(path) ? 'var(--accent)' : 'var(--text-muted)',
+                    color: active(path) ? 'rgb(34,211,238)' : 'rgba(255,255,255,0.55)',
                     textDecoration: 'none',
                     transition: 'color 0.2s',
                   }}
-                  onMouseEnter={e => { if (!active(path)) (e.currentTarget as HTMLElement).style.color = 'var(--text)'; }}
-                  onMouseLeave={e => { if (!active(path)) (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'; }}
+                  onMouseEnter={e => { if (!active(path)) (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.9)'; }}
+                  onMouseLeave={e => { if (!active(path)) (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.55)'; }}
                 >
                   {label}
                   {/* Active underline */}
@@ -157,7 +159,7 @@ export default function Header() {
                         transform: 'translateX(-50%)',
                         width: '1.2rem',
                         height: '1.5px',
-                        background: 'var(--accent)',
+                        background: 'rgb(34,211,238)',
                         borderRadius: 9999,
                       }}
                     />
@@ -174,14 +176,14 @@ export default function Header() {
                   fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
                   fontWeight: 400,
                   letterSpacing: '0.04em',
-                  color: 'var(--text-muted)',
+                  color: 'rgba(255,255,255,0.55)',
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
                   transition: 'color 0.2s',
                 }}
-                onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
-                onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
+                onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.9)')}
+                onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.55)')}
               >
                 Calculator
               </button>
@@ -198,20 +200,22 @@ export default function Header() {
                   display: 'flex', alignItems: 'center', gap: '0.5rem',
                   padding: '0.35rem 0.75rem',
                   borderRadius: 8,
-                  border: '1px solid var(--border)',
-                  background: 'transparent',
-                  color: 'var(--text-muted)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  background: 'rgba(255,255,255,0.05)',
+                  color: 'rgba(255,255,255,0.5)',
                   fontSize: '0.8rem',
                   cursor: 'pointer',
-                  transition: 'border-color 0.2s, color 0.2s',
+                  transition: 'border-color 0.2s, color 0.2s, background 0.2s',
                 }}
                 onMouseEnter={e => {
-                  (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-strong)';
-                  (e.currentTarget as HTMLElement).style.color = 'var(--text)';
+                  (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.25)';
+                  (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.85)';
+                  (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.08)';
                 }}
                 onMouseLeave={e => {
-                  (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)';
-                  (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)';
+                  (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.12)';
+                  (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.5)';
+                  (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)';
                 }}
               >
                 <Search size={15} />
@@ -221,12 +225,12 @@ export default function Header() {
                     style={{
                       marginLeft: '0.4rem',
                       padding: '0.1rem 0.35rem',
-                      background: 'var(--off-white)',
-                      border: '1px solid var(--border)',
+                      background: 'rgba(255,255,255,0.07)',
+                      border: '1px solid rgba(255,255,255,0.12)',
                       borderRadius: 4,
                       fontSize: '0.68rem',
                       fontFamily: 'monospace',
-                      color: 'var(--text-light)',
+                      color: 'rgba(255,255,255,0.35)',
                     }}
                   >
                     {isMac ? '⌘' : 'Ctrl'} K
