@@ -369,6 +369,14 @@ export default function ProductDetailPage() {
 
   const [cartAdded, setCartAdded] = useState(false);
 
+  // Referral state for "Ask on WhatsApp" widget
+  const [pdpReferralSource, setPdpReferralSource] = useState('');
+  const [pdpFriendName, setPdpFriendName] = useState('');
+  const [pdpReferralError, setPdpReferralError] = useState(false);
+  const [pdpReferralOpen, setPdpReferralOpen] = useState(false);
+
+  const REFERRAL_SOURCES = ['YouTube', 'Instagram', 'Reddit', 'Friend', 'Google', 'Twitter / X', 'TikTok'];
+
   const handleAddToCart = () => {
     if (!product || !selectedVariant) return;
     for (let i = 0; i < quantity; i++) {
@@ -664,19 +672,97 @@ export default function ProductDetailPage() {
                 ))}
               </div>
 
-              {/* WhatsApp support */}
-              <a
-                href={`https://wa.me/918217824384?text=${encodeURIComponent(`Hi! I'd like to know more about ${product.name} before ordering. Can you help?`)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-3 p-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition-colors"
-              >
-                <MessageCircle className="w-5 h-5 flex-shrink-0" />
-                <div className="flex-1">
-                  <p className="font-bold text-sm">Ask on WhatsApp</p>
-                  <p className="text-xs text-emerald-100">Get answers before you order</p>
+              {/* WhatsApp support widget */}
+              {!pdpReferralOpen ? (
+                <button
+                  type="button"
+                  onClick={() => setPdpReferralOpen(true)}
+                  className="w-full flex items-center gap-3 p-4 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white rounded-xl transition-colors"
+                >
+                  <MessageCircle className="w-5 h-5 flex-shrink-0" />
+                  <div className="flex-1 text-left">
+                    <p className="font-bold text-sm">Ask on WhatsApp</p>
+                    <p className="text-xs text-emerald-100">Get answers before you order</p>
+                  </div>
+                </button>
+              ) : (
+                <div className="rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                  {/* Header */}
+                  <div className="bg-gradient-to-r from-slate-900 to-slate-800 px-4 py-3 flex items-center gap-2">
+                    <MessageCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                    <p className="text-sm font-semibold text-white flex-1">Before we chat — how did you find us?</p>
+                    <span className="text-red-400 text-sm font-bold">*</span>
+                  </div>
+
+                  {/* Body */}
+                  <div className="bg-white p-4 space-y-3">
+                    <p className="text-xs text-slate-400">Select one to unlock WhatsApp</p>
+                    <div className="flex flex-wrap gap-2">
+                      {REFERRAL_SOURCES.map((src) => (
+                        <button
+                          key={src}
+                          type="button"
+                          onClick={() => {
+                            setPdpReferralSource(src);
+                            setPdpReferralError(false);
+                            if (src !== 'Friend') setPdpFriendName('');
+                          }}
+                          className={`px-4 py-2 rounded-xl text-sm font-semibold border transition-all duration-150 ${
+                            pdpReferralSource === src
+                              ? 'bg-slate-900 border-slate-900 text-white shadow-sm'
+                              : 'bg-white border-slate-200 text-slate-600 hover:border-slate-700 hover:bg-slate-50'
+                          }`}
+                        >
+                          {src}
+                        </button>
+                      ))}
+                    </div>
+
+                    {pdpReferralSource === 'Friend' && (
+                      <input
+                        type="text"
+                        placeholder="Friend's name (may qualify for a discount 🎉)"
+                        value={pdpFriendName}
+                        onChange={(e) => setPdpFriendName(e.target.value)}
+                        className="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:border-slate-900 focus:outline-none transition-colors"
+                      />
+                    )}
+
+                    {pdpReferralError && (
+                      <p className="text-xs text-red-500 flex items-center gap-1">
+                        <span>⚠</span> Please select how you found us first.
+                      </p>
+                    )}
+
+                    <a
+                      href={
+                        pdpReferralSource
+                          ? `https://wa.me/918217824384?text=${encodeURIComponent(
+                              `Hi! I'd like to know more about ${product.name} before ordering. Can you help?\n\nI found you via: ${pdpReferralSource}${pdpReferralSource === 'Friend' && pdpFriendName ? ` (referred by ${pdpFriendName})` : ''}`
+                            )}`
+                          : '#'
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => {
+                        if (!pdpReferralSource) {
+                          e.preventDefault();
+                          setPdpReferralError(true);
+                        }
+                      }}
+                      className={`flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl text-sm font-bold transition-all duration-150 ${
+                        pdpReferralSource
+                          ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm'
+                          : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                      }`}
+                      style={{ textDecoration: 'none' }}
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      Open WhatsApp
+                    </a>
+                  </div>
                 </div>
-              </a>
+              )}
             </div>
           </div>
 
