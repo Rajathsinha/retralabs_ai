@@ -369,6 +369,31 @@ export default function ProductDetailPage() {
 
   const [cartAdded, setCartAdded] = useState(false);
 
+  // ── Referral popup ────────────────────────────────────────────────────────
+  const [referralOpen, setReferralOpen] = useState(false);
+  const [referralSource, setReferralSource] = useState('');
+  const [friendName, setFriendName] = useState('');
+  const [pendingWhatsAppUrl, setPendingWhatsAppUrl] = useState('');
+
+  const REFERRAL_OPTIONS = ['Reddit', 'Google', 'Friend', 'Instagram', 'YouTube', 'Other'];
+
+  const openWithReferral = (baseUrl: string) => {
+    setPendingWhatsAppUrl(baseUrl);
+    setReferralSource('');
+    setFriendName('');
+    setReferralOpen(true);
+  };
+
+  const submitReferral = () => {
+    if (!referralSource) return;
+    const referralLine = referralSource === 'Friend' && friendName
+      ? `%0A%0AFound you via: Friend (referred by ${encodeURIComponent(friendName)})`
+      : `%0A%0AFound you via: ${encodeURIComponent(referralSource)}`;
+    const finalUrl = pendingWhatsAppUrl + referralLine;
+    window.open(finalUrl, '_blank', 'noopener,noreferrer');
+    setReferralOpen(false);
+  };
+
   const handleAddToCart = () => {
     if (!product || !selectedVariant) return;
     for (let i = 0; i < quantity; i++) {
@@ -476,6 +501,7 @@ export default function ProductDetailPage() {
   );
 
   return (
+    <>
     <div className="min-h-screen bg-slate-50 pb-24 lg:pb-0">
 
       {/* ── Hero / Breadcrumb ─────────────────────────────────────────────── */}
@@ -945,16 +971,14 @@ export default function ProductDetailPage() {
                 </div>
 
                 {/* ── Student discount notice ── */}
-                <a
-                  href={`https://wa.me/918217824384?text=${encodeURIComponent('Hi, I\'m a student and would like to enquire about the student discount.')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  onClick={() => openWithReferral(`https://wa.me/918217824384?text=${encodeURIComponent("Hi, I'm a student and would like to enquire about the student discount.")}`)}
                   className="flex items-center gap-2 w-full bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 hover:border-indigo-300 transition-colors rounded-xl px-4 py-2.5 group"
                 >
                   <GraduationCap className="w-4 h-4 text-indigo-500 flex-shrink-0" />
                   <span className="text-xs font-semibold text-indigo-700">Student discount available</span>
                   <span className="ml-auto text-[10px] text-indigo-400 group-hover:text-indigo-600 font-medium transition-colors">Ask on WhatsApp →</span>
-                </a>
+                </button>
 
                 {/* ── CTAs ── */}
                 {/* Order Now */}
@@ -981,15 +1005,13 @@ export default function ProductDetailPage() {
                     {cartAdded ? <Check className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
                     {cartAdded ? 'Added!' : 'Add to Cart'}
                   </button>
-                  <a
-                    href={`https://wa.me/918217824384?text=${whatsappMsg}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    onClick={() => openWithReferral(`https://wa.me/918217824384?text=${whatsappMsg}`)}
                     className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl border-2 border-emerald-200 bg-emerald-50 hover:bg-emerald-100 hover:border-emerald-400 text-emerald-700 font-semibold text-sm transition-all"
                   >
                     <MessageCircle className="w-4 h-4" />
                     WhatsApp
-                  </a>
+                  </button>
                 </div>
               </CardBody>
             </Card>
@@ -1087,5 +1109,62 @@ export default function ProductDetailPage() {
       </div>
 
     </div>
+
+      {/* ── Referral popup ────────────────────────────────────────────────── */}
+      {referralOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)' }}
+          onClick={e => { if (e.target === e.currentTarget) setReferralOpen(false); }}
+        >
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">Before we chat</p>
+                <h3 className="text-lg font-bold text-slate-900">How did you find us? <span className="text-red-500">*</span></h3>
+              </div>
+              <button onClick={() => setReferralOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors mt-0.5">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              {REFERRAL_OPTIONS.map(src => (
+                <button
+                  key={src}
+                  onClick={() => setReferralSource(src)}
+                  className={`px-3 py-2.5 rounded-xl text-sm font-medium border-2 transition-all ${
+                    referralSource === src
+                      ? 'border-slate-900 bg-slate-900 text-white'
+                      : 'border-slate-200 bg-white text-slate-700 hover:border-slate-400'
+                  }`}
+                >
+                  {src}
+                </button>
+              ))}
+            </div>
+
+            {referralSource === 'Friend' && (
+              <input
+                type="text"
+                placeholder="Friend's name (optional)"
+                value={friendName}
+                onChange={e => setFriendName(e.target.value)}
+                className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm mb-4 focus:outline-none focus:border-slate-400"
+              />
+            )}
+
+            <button
+              onClick={submitReferral}
+              disabled={!referralSource}
+              className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
+            >
+              <MessageCircle className="w-4 h-4" />
+              Continue to WhatsApp
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

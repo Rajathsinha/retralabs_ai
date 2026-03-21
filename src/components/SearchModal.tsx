@@ -13,13 +13,13 @@ const DEMO: ProductWithVariants[] = [
     id: '1', name: 'Retatrutide', category: 'research-peptide',
     description: 'Triple agonist peptide targeting GLP-1, GIP, and glucagon receptors.',
     image_url: '/Retatrutide.png', created_at: '',
-    variants: [{ id: '1a', product_id: '1', dosage_mg: 20, price_inr: 7000, in_stock: true, created_at: '' }],
+    variants: [{ id: '1s', product_id: '1', dosage_mg: 10, price_inr: 3500, in_stock: true, created_at: '' }],
   },
   {
     id: '2', name: 'Tirzepatide', category: 'research-peptide',
     description: 'Dual GIP and GLP-1 receptor agonist for metabolic research.',
     image_url: '/TIRZEPATIDE.png', created_at: '',
-    variants: [{ id: '2a', product_id: '2', dosage_mg: 20, price_inr: 6000, in_stock: true, created_at: '' }],
+    variants: [{ id: '2x', product_id: '2', dosage_mg: 10, price_inr: 2500, in_stock: true, created_at: '' }],
   },
   {
     id: '3', name: 'GHK-Cu', category: 'research-peptide',
