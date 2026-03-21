@@ -374,6 +374,7 @@ export default function ProductDetailPage() {
   const [pdpFriendName, setPdpFriendName] = useState('');
   const [pdpReferralError, setPdpReferralError] = useState(false);
   const [pdpReferralOpen, setPdpReferralOpen] = useState(false);
+  const [pdpStudentOpen, setPdpStudentOpen] = useState(false);
 
   const REFERRAL_SOURCES = ['YouTube', 'Instagram', 'Reddit', 'Friend', 'Google', 'Twitter / X', 'TikTok'];
 
@@ -1031,16 +1032,93 @@ export default function ProductDetailPage() {
                 </div>
 
                 {/* ── Student discount notice ── */}
-                <a
-                  href={`https://wa.me/918217824384?text=${encodeURIComponent('Hi, I\'m a student and would like to enquire about the student discount.')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 w-full bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 hover:border-indigo-300 transition-colors rounded-xl px-4 py-2.5 group"
-                >
-                  <GraduationCap className="w-4 h-4 text-indigo-500 flex-shrink-0" />
-                  <span className="text-xs font-semibold text-indigo-700">Student discount available</span>
-                  <span className="ml-auto text-[10px] text-indigo-400 group-hover:text-indigo-600 font-medium transition-colors">Ask on WhatsApp →</span>
-                </a>
+                {!pdpStudentOpen ? (
+                  <button
+                    type="button"
+                    onClick={() => setPdpStudentOpen(true)}
+                    className="flex items-center gap-2 w-full bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 hover:border-indigo-300 transition-colors rounded-xl px-4 py-2.5 group"
+                  >
+                    <GraduationCap className="w-4 h-4 text-indigo-500 flex-shrink-0" />
+                    <span className="text-xs font-semibold text-indigo-700">Student discount available</span>
+                    <span className="ml-auto text-[10px] text-indigo-400 group-hover:text-indigo-600 font-medium transition-colors">Ask on WhatsApp →</span>
+                  </button>
+                ) : (
+                  <div className="rounded-2xl border border-indigo-200 overflow-hidden shadow-sm">
+                    {/* Header */}
+                    <div className="bg-gradient-to-r from-indigo-900 to-indigo-800 px-4 py-3 flex items-center gap-2">
+                      <GraduationCap className="w-4 h-4 text-indigo-300 flex-shrink-0" />
+                      <p className="text-sm font-semibold text-white flex-1">Before we chat — how did you find us?</p>
+                      <span className="text-red-400 text-sm font-bold">*</span>
+                    </div>
+                    {/* Body */}
+                    <div className="bg-white p-4 space-y-3">
+                      <p className="text-xs text-slate-400">Select one to unlock WhatsApp</p>
+                      <div className="flex flex-wrap gap-2">
+                        {REFERRAL_SOURCES.map((src) => (
+                          <button
+                            key={src}
+                            type="button"
+                            onClick={() => {
+                              setPdpReferralSource(src);
+                              setPdpReferralError(false);
+                              if (src !== 'Friend') setPdpFriendName('');
+                            }}
+                            className={`px-4 py-2 rounded-xl text-sm font-semibold border transition-all duration-150 ${
+                              pdpReferralSource === src
+                                ? 'bg-indigo-900 border-indigo-900 text-white shadow-sm'
+                                : 'bg-white border-slate-200 text-slate-600 hover:border-indigo-400 hover:bg-indigo-50'
+                            }`}
+                          >
+                            {src}
+                          </button>
+                        ))}
+                      </div>
+
+                      {pdpReferralSource === 'Friend' && (
+                        <input
+                          type="text"
+                          placeholder="Friend's name (may qualify for a discount 🎉)"
+                          value={pdpFriendName}
+                          onChange={(e) => setPdpFriendName(e.target.value)}
+                          className="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:border-indigo-400 focus:outline-none transition-colors"
+                        />
+                      )}
+
+                      {pdpReferralError && (
+                        <p className="text-xs text-red-500 flex items-center gap-1">
+                          <span>⚠</span> Please select how you found us first.
+                        </p>
+                      )}
+
+                      <a
+                        href={
+                          pdpReferralSource
+                            ? `https://wa.me/918217824384?text=${encodeURIComponent(
+                                `Hi, I'm a student and would like to enquire about the student discount.\n\nI found you via: ${pdpReferralSource}${pdpReferralSource === 'Friend' && pdpFriendName ? ` (referred by ${pdpFriendName})` : ''}`
+                              )}`
+                            : '#'
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => {
+                          if (!pdpReferralSource) {
+                            e.preventDefault();
+                            setPdpReferralError(true);
+                          }
+                        }}
+                        className={`flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl text-sm font-bold transition-all duration-150 ${
+                          pdpReferralSource
+                            ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm'
+                            : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                        }`}
+                        style={{ textDecoration: 'none' }}
+                      >
+                        <GraduationCap className="w-4 h-4" />
+                        Ask about Student Discount
+                      </a>
+                    </div>
+                  </div>
+                )}
 
                 {/* ── CTAs ── */}
                 {/* Order Now */}
