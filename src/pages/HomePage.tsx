@@ -15,7 +15,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, useInView, useMotionValue, useSpring } from 'framer-motion';
-import { Chip } from '@heroui/react';
+import { Chip, Button } from '@heroui/react';
 import {
   FlaskConical, ShieldCheck, ArrowRight, Star,
   CheckCircle2, MessageCircle,
