@@ -187,20 +187,81 @@ export default function HomePage() {
         {/* Rising canvas particles */}
         <HeroParticles />
 
-        {/* Framer Motion floating orbs */}
+        {/* Background depth layers */}
         <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
           <div className="absolute inset-0 bg-dot-pattern bg-dot-sm opacity-[0.04]" />
+
+          {/* Left ambient orb */}
           <motion.div
-            className="absolute top-1/4 -left-56 w-[600px] h-[600px] bg-accent-500/10 rounded-full blur-3xl"
+            className="absolute top-1/4 -left-56 w-[700px] h-[700px] bg-accent-500/10 rounded-full blur-3xl"
             animate={orbFloat.animate}
           />
+          {/* Right ambient orb */}
           <motion.div
-            className="absolute bottom-1/3 -right-56 w-[600px] h-[600px] bg-brand-500/10 rounded-full blur-3xl"
+            className="absolute bottom-1/3 -right-56 w-[700px] h-[700px] bg-brand-500/10 rounded-full blur-3xl"
             animate={orbFloat2.animate}
           />
+          {/* Center radial — illuminates headline from above */}
+          <div style={{
+            position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
+            width: '80vw', height: '65vh',
+            background: 'radial-gradient(ellipse at 50% 0%, rgba(34,211,238,0.065) 0%, transparent 65%)',
+          }} />
         </div>
 
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative text-center">
+        {/* Right-side depth orb cluster */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            right: 'clamp(1%, 4%, 7%)',
+            top: '50%', transform: 'translateY(-52%)',
+            width: 'clamp(180px, 22vw, 360px)',
+            height: 'clamp(180px, 22vw, 360px)',
+            pointerEvents: 'none', zIndex: 0,
+          }}
+        >
+          <motion.div
+            animate={{ y: [0, -20, 0] }}
+            transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ position: 'absolute', inset: 0 }}
+          >
+            <div style={{
+              position: 'absolute', inset: '10%', borderRadius: '50%',
+              background: 'radial-gradient(circle at 38% 35%, rgba(34,211,238,0.14) 0%, rgba(6,182,212,0.05) 45%, transparent 70%)',
+              border: '1px solid rgba(34,211,238,0.07)', filter: 'blur(1px)',
+            }} />
+            <div style={{
+              position: 'absolute', inset: '32%', borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(34,211,238,0.26) 0%, transparent 70%)',
+              filter: 'blur(20px)',
+            }} />
+          </motion.div>
+          <motion.div
+            animate={{ y: [0, 12, 0] }}
+            transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut', delay: 2.5 }}
+            style={{ position: 'absolute', top: '-18%', right: '-12%', width: '50%', height: '50%' }}
+          >
+            <div style={{
+              width: '100%', height: '100%', borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(99,102,241,0.18) 0%, transparent 70%)',
+              filter: 'blur(20px)',
+            }} />
+          </motion.div>
+          <motion.div
+            animate={{ y: [0, -8, 0] }}
+            transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut', delay: 5 }}
+            style={{ position: 'absolute', bottom: '-10%', left: '-5%', width: '38%', height: '38%' }}
+          >
+            <div style={{
+              width: '100%', height: '100%', borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(34,211,238,0.16) 0%, transparent 70%)',
+              filter: 'blur(14px)',
+            }} />
+          </motion.div>
+        </div>
+
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative text-center" style={{ zIndex: 1 }}>
 
           {/* ── Hero content — DRIFT stagger container ── */}
           <motion.div
@@ -234,36 +295,37 @@ export default function HomePage() {
             </a>
           </AnimatedSection>
 
-          {/* Rotating headline — AnimatePresence cross-fades with blur */}
+          {/* Rotating headline — cinematic AnimatePresence */}
           <AnimatedSection variants={RISE} delay={0.1}>
-            <div className="min-h-[200px] md:min-h-[280px] flex items-center justify-center mb-4">
+            <div className="min-h-[220px] md:min-h-[310px] flex items-center justify-center mb-5">
               <AnimatePresence mode="wait">
                 <motion.h1
                   key={heroIndex}
-                  initial={{ opacity: 0, y: 22, filter: 'blur(6px)' }}
-                  animate={{ opacity: 1, y: 0,  filter: 'blur(0px)',
-                    transition: { duration: 0.58, ease: [0.16, 1, 0.3, 1] } }}
-                  exit={{   opacity: 0, y: -18, filter: 'blur(4px)',
-                    transition: { duration: 0.28, ease: 'easeIn' } }}
-                  className="text-5xl md:text-7xl font-bold text-white tracking-tight leading-[1.05] text-center"
+                  initial={{ opacity: 0, y: 36, scale: 0.96, filter: 'blur(10px)' }}
+                  animate={{ opacity: 1, y: 0,  scale: 1,    filter: 'blur(0px)',
+                    transition: { duration: 0.62, ease: [0.22, 1, 0.36, 1] } }}
+                  exit={{   opacity: 0, y: -28, scale: 0.97, filter: 'blur(6px)',
+                    transition: { duration: 0.3,  ease: [0.22, 1, 0.36, 1] } }}
+                  className="text-6xl md:text-7xl lg:text-8xl font-bold text-white tracking-tight leading-[1.02] text-center"
                 >
                   {HERO_HEADLINES[heroIndex].jsx}
                 </motion.h1>
               </AnimatePresence>
             </div>
 
-            {/* Dot indicators — animated width/color */}
+            {/* Dot indicators — glow on active */}
             <div className="flex justify-center gap-2 mb-6">
               {HERO_HEADLINES.map((_, i) => (
                 <motion.button
                   key={i}
                   onClick={() => setHeroIndex(i)}
                   animate={{
-                    width:           i === heroIndex ? 24 : 6,
-                    backgroundColor: i === heroIndex ? 'rgb(34,211,238)' : 'rgba(255,255,255,0.25)',
+                    width:           i === heroIndex ? 28 : 6,
+                    backgroundColor: i === heroIndex ? 'rgb(34,211,238)' : 'rgba(255,255,255,0.2)',
+                    boxShadow:       i === heroIndex ? '0 0 14px rgba(34,211,238,0.72)' : 'none',
                   }}
-                  style={{ height: 6, borderRadius: 9999, border: 'none' }}
-                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                  style={{ height: 6, borderRadius: 9999, border: 'none', cursor: 'pointer', padding: 0 }}
+                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                   aria-label={`Headline ${i + 1}`}
                 />
               ))}
@@ -288,7 +350,7 @@ export default function HomePage() {
             delay={0.34}
             className="flex flex-col sm:flex-row gap-3 justify-center mb-16"
           >
-            {/* Primary — magnetic pull toward cursor */}
+            {/* Primary — magnetic pull + glow ring on hover */}
             <MagneticButton strength={24} glowColor="rgba(34,211,238,0.4)">
               <motion.button
                 type="button"
@@ -296,7 +358,7 @@ export default function HomePage() {
                 className="inline-flex items-center justify-center gap-2 bg-cyan-400 text-slate-900 font-extrabold text-base px-8 py-3.5 rounded-2xl shadow-lg shadow-cyan-400/20"
                 whileHover={{
                   scale: 1.04,
-                  boxShadow: '0 12px 40px rgba(34,211,238,0.5)',
+                  boxShadow: '0 0 0 3px rgba(34,211,238,0.28), 0 16px 48px rgba(34,211,238,0.55)',
                   backgroundColor: 'rgb(103,232,249)',
                 }}
                 whileTap={{ scale: 0.96 }}
