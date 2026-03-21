@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import {
   Accordion,
   AccordionItem,
-  Button,
   Card,
   CardBody,
   Chip,
@@ -101,6 +100,8 @@ const SUPPORT_CHANNELS = [
   },
 ];
 
+const REFERRAL_SOURCES = ['YouTube', 'Instagram', 'Reddit', 'Friend', 'Google', 'Twitter / X', 'TikTok'];
+
 export default function SupportPage() {
   const navigate = useNavigate();
   const [referralSource,  setReferralSource]  = useState('');
@@ -118,6 +119,25 @@ export default function SupportPage() {
   const handleWhatsApp = () => {
     if (!referralSource) { setShowReferralErr(true); return; }
     window.open(buildWhatsAppUrl(), '_blank');
+  };
+
+  const [referralSource, setReferralSource] = useState('');
+  const [friendName, setFriendName] = useState('');
+  const [showReferralError, setShowReferralError] = useState(false);
+
+  const buildWhatsAppUrl = () => {
+    const referralLine = referralSource
+      ? `%0A%0AFound you via: ${encodeURIComponent(referralSource)}${referralSource === 'Friend' && friendName ? ` (referred by ${encodeURIComponent(friendName)})` : ''}`
+      : '';
+    return `https://wa.me/918217824384?text=Hello%2C%20I%20need%20support%20with%20RetraLabs${referralLine}`;
+  };
+
+  const handleWhatsAppClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!referralSource) {
+      e.preventDefault();
+      setShowReferralError(true);
+      document.getElementById('support-referral-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   };
 
   return (
@@ -158,18 +178,23 @@ export default function SupportPage() {
                     {channel.chip.label}
                   </Chip>
                 </div>
-                <Button
-                  as="a"
+                <a
                   href={channel.href}
                   target={channel.href.startsWith('http') ? '_blank' : undefined}
                   rel={channel.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                  color={channel.btnColor}
-                  variant="flat"
-                  size="sm"
-                  className="w-full font-medium"
+                  className={`w-full text-center text-sm font-medium py-2 px-3 rounded-xl transition-colors ${
+                    channel.btnColor === 'success'
+                      ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                      : channel.btnColor === 'primary'
+                      ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                      : channel.btnColor === 'secondary'
+                      ? 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
+                  style={{ textDecoration: 'none' }}
                 >
                   {channel.btnLabel}
-                </Button>
+                </a>
               </CardBody>
             </Card>
           ))}

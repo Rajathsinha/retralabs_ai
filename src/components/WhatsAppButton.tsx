@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { Button, Card, CardHeader, CardBody } from '@heroui/react';
-import { MessageCircle, X } from 'lucide-react';
+import { Button, Card, CardHeader, CardBody, Input } from '@heroui/react';
+import { MessageCircle, X, ArrowLeft } from 'lucide-react';
 
 const PHONE = '918217824384';
+
+const REFERRAL_SOURCES = ['YouTube', 'Instagram', 'Reddit', 'Friend', 'Google', 'Twitter / X', 'TikTok'];
 
 const QUICK_MESSAGES = [
   {
@@ -20,17 +22,33 @@ const QUICK_MESSAGES = [
 ];
 
 export default function WhatsAppButton() {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded]           = useState(false);
+  const [referralSource, setReferralSource] = useState<string | null>(null);
+  const [friendName, setFriendName]       = useState('');
+
+  const handleClose = () => {
+    setExpanded(false);
+    setReferralSource(null);
+    setFriendName('');
+  };
+
+  const handleSelectSource = (src: string) => {
+    if (src !== 'Friend') setFriendName('');
+    setReferralSource(src);
+  };
 
   const openChat = (message: string) => {
-    window.open(`https://wa.me/${PHONE}?text=${encodeURIComponent(message)}`, '_blank');
-    setExpanded(false);
+    const sourceLine = referralSource
+      ? `\n\n(Found RetraLabs via: ${referralSource}${referralSource === 'Friend' && friendName ? ` — referred by ${friendName}` : ''})`
+      : '';
+    window.open(`https://wa.me/${PHONE}?text=${encodeURIComponent(message + sourceLine)}`, '_blank');
+    handleClose();
   };
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
 
-      {/* Quick message panel */}
+      {/* Panel */}
       {expanded && (
         <Card
           className="w-72 shadow-2xl border border-white/10 bg-slate-900 animate-in fade-in slide-in-from-bottom-4 duration-200"
@@ -38,25 +56,28 @@ export default function WhatsAppButton() {
         >
           <CardHeader className="bg-emerald-600 rounded-t-xl px-4 py-3 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2.5 min-w-0">
+              {referralSource && (
+                <Button
+                  isIconOnly variant="light" size="sm" radius="full"
+                  className="text-white/70 hover:text-white hover:bg-white/10 flex-shrink-0 -ml-1"
+                  onPress={() => { setReferralSource(null); setFriendName(''); }}
+                  aria-label="Back"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </Button>
+              )}
               <div className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
                 <MessageCircle className="w-4 h-4 text-white" />
               </div>
               <div className="min-w-0">
-                <p className="font-bold text-white text-sm leading-tight truncate">
-                  RetraLabs Support
-                </p>
-                <p className="text-emerald-100 text-xs truncate">
-                  Typically replies within minutes
-                </p>
+                <p className="font-bold text-white text-sm leading-tight truncate">RetraLabs Support</p>
+                <p className="text-emerald-100 text-xs truncate">Typically replies within minutes</p>
               </div>
             </div>
             <Button
-              isIconOnly
-              variant="light"
-              size="sm"
-              radius="full"
+              isIconOnly variant="light" size="sm" radius="full"
               className="text-white/70 hover:text-white hover:bg-white/10 flex-shrink-0"
-              onPress={() => setExpanded(false)}
+              onPress={handleClose}
               aria-label="Close chat"
             >
               <X className="w-4 h-4" />
@@ -64,29 +85,75 @@ export default function WhatsAppButton() {
           </CardHeader>
 
           <CardBody className="p-3 bg-slate-900/50">
-            <p className="text-xs text-slate-400 mb-3 px-1">How can we help?</p>
-            <div className="flex flex-col gap-2">
-              {QUICK_MESSAGES.map((msg) => (
-                <Button
-                  key={msg.label}
-                  variant="flat"
-                  color="success"
-                  size="sm"
-                  radius="lg"
-                  className="justify-start text-left h-auto py-3 px-4 text-sm font-medium bg-emerald-950/60 text-emerald-200 hover:bg-emerald-900/60 hover:text-emerald-100 border border-emerald-800/50 hover:border-emerald-600/60 transition-all duration-200"
-                  onPress={() => openChat(msg.text)}
-                >
-                  {msg.label}
-                </Button>
-              ))}
-            </div>
+            {!referralSource ? (
+              /* ── Step 1: How did you find us? ── */
+              <>
+                <p className="text-xs text-slate-400 mb-3 px-1">
+                  Before we chat — how did you find us? <span className="text-emerald-400 font-semibold">*</span>
+                </p>
+                <div className="flex flex-col gap-2">
+                  {REFERRAL_SOURCES.map((src) => (
+                    <Button
+                      key={src}
+                      variant="flat"
+                      color="success"
+                      size="sm"
+                      radius="lg"
+                      className="justify-start text-left h-auto py-3 px-4 text-sm font-medium bg-emerald-950/60 text-emerald-200 hover:bg-emerald-900/60 hover:text-emerald-100 border border-emerald-800/50 hover:border-emerald-600/60 transition-all duration-200"
+                      onPress={() => handleSelectSource(src)}
+                    >
+                      {src}
+                    </Button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              /* ── Step 2: Topic selection (+ friend name if applicable) ── */
+              <>
+                {referralSource === 'Friend' && (
+                  <div className="mb-3">
+                    <Input
+                      size="sm"
+                      placeholder="Friend's name (optional)"
+                      value={friendName}
+                      onValueChange={setFriendName}
+                      variant="bordered"
+                      classNames={{
+                        input: 'text-white text-sm',
+                        inputWrapper: 'bg-slate-800 border-slate-700 hover:border-emerald-600 focus-within:border-emerald-500',
+                      }}
+                    />
+                  </div>
+                )}
+                <div className="mb-3 px-1 py-2 bg-amber-950/40 border border-amber-700/40 rounded-lg">
+                  <p className="text-xs text-amber-300 font-semibold leading-snug">
+                    ⚠️ No dosage or medical guidance. All products are strictly for research use only.
+                  </p>
+                </div>
+                <p className="text-xs text-slate-400 mb-3 px-1">How can we help?</p>
+                <div className="flex flex-col gap-2">
+                  {QUICK_MESSAGES.map((msg) => (
+                    <Button
+                      key={msg.label}
+                      variant="flat"
+                      color="success"
+                      size="sm"
+                      radius="lg"
+                      className="justify-start text-left h-auto py-3 px-4 text-sm font-medium bg-emerald-950/60 text-emerald-200 hover:bg-emerald-900/60 hover:text-emerald-100 border border-emerald-800/50 hover:border-emerald-600/60 transition-all duration-200"
+                      onPress={() => openChat(msg.text)}
+                    >
+                      {msg.label}
+                    </Button>
+                  ))}
+                </div>
+              </>
+            )}
           </CardBody>
         </Card>
       )}
 
       {/* Floating Action Button */}
       <div className="relative">
-        {/* Pulse ring — only shown when collapsed */}
         {!expanded && (
           <span className="absolute inset-0 rounded-full animate-ping bg-emerald-400 opacity-20 pointer-events-none" />
         )}

@@ -61,10 +61,11 @@ const DEMO_PRODUCTS: ProductWithVariants[] = [
     image_url: '/GHKCU.png',
     created_at: new Date().toISOString(),
     variants: [
-      { id: '3a', product_id: '3', dosage_mg: 100, price_inr: 4000, in_stock: true, vial_configuration: '2×50mg', created_at: new Date().toISOString() },
-      { id: '3b', product_id: '3', dosage_mg: 150, price_inr: 3500, in_stock: true, vial_configuration: '3×50mg', created_at: new Date().toISOString() },
-      { id: '3c', product_id: '3', dosage_mg: 200, price_inr: 6500, in_stock: true, vial_configuration: '4×50mg', created_at: new Date().toISOString() },
-      { id: '3d', product_id: '3', dosage_mg: 250, price_inr: 9000, in_stock: true, vial_configuration: '5×50mg', created_at: new Date().toISOString() },
+      { id: '3a', product_id: '3', dosage_mg: 100,  price_inr: 4000,  in_stock: true, vial_configuration: '1×100mg',        created_at: new Date().toISOString() },
+      { id: '3b', product_id: '3', dosage_mg: 200,  price_inr: 6000,  in_stock: true, vial_configuration: '2×100mg',        created_at: new Date().toISOString() },
+      { id: '3c', product_id: '3', dosage_mg: 300,  price_inr: 8000,  in_stock: true, vial_configuration: '3×100mg',        created_at: new Date().toISOString() },
+      { id: '3d', product_id: '3', dosage_mg: 500,  price_inr: 11000, in_stock: true, vial_configuration: '5×100mg',        created_at: new Date().toISOString() },
+      { id: '3e', product_id: '3', dosage_mg: 1000, price_inr: 20000, in_stock: true, vial_configuration: 'Full Kit 10×100mg', created_at: new Date().toISOString() },
     ],
   },
   {

@@ -47,6 +47,7 @@ export default function CheckoutPage() {
     age_confirmed: false,
     no_dosing_accepted: false,
     referral_source: '',
+    referral_friend_name: '',
     delivery_option: 'normal',
   });
 
@@ -89,6 +90,10 @@ export default function CheckoutPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (cart.length === 0) return;
+    if (!formData.referral_source) {
+      document.getElementById('referral-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
 
     const lines = cart.map(
       (item) =>
@@ -106,7 +111,7 @@ export default function CheckoutPage() {
       : '';
 
     const referralLine = formData.referral_source
-      ? `\nFound us via: ${formData.referral_source}`
+      ? `\nFound us via: ${formData.referral_source}${formData.referral_source === 'Friend' && formData.referral_friend_name ? ` (referred by ${formData.referral_friend_name})` : ''}`
       : '';
 
     const deliveryLine = formData.delivery_option === 'fast'
@@ -132,7 +137,7 @@ export default function CheckoutPage() {
     setOrderReady(true);
   };
 
-  /** Step 2 → 3: open WhatsApp immediately, then save order to Supabase */
+  /** Step 2 → 3: side-effects after the <a> tag natively opens WhatsApp */
   const handleSendOnWhatsApp = async () => {
     if (orderSaving.current) return;
     orderSaving.current = true;
@@ -140,8 +145,7 @@ export default function CheckoutPage() {
     // Snapshot cart before clearing (needed for Supabase insert below)
     const cartSnapshot = cart.map(item => ({ ...item }));
 
-    // ── Open WhatsApp FIRST (must be synchronous — popup blockers kill window.open after any await) ──
-    window.open(whatsappUrl, '_blank');
+    // WhatsApp is opened by the native <a href> — never blocked by popup blockers.
     clearCart();
     setOrderSent(true);
     setTimeout(() => navigate('/'), 6000);
@@ -386,14 +390,18 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* THE button */}
-          <button
+          {/* THE button — native <a> avoids popup blockers on all browsers/iOS */}
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             onClick={handleSendOnWhatsApp}
             className="w-full flex items-center justify-center gap-3 bg-green-500 hover:bg-green-400 active:bg-green-600 text-white font-bold text-lg py-4 rounded-2xl transition-all duration-200 shadow-lg shadow-green-500/30 hover:shadow-green-500/50 hover:-translate-y-0.5"
+            style={{ textDecoration: 'none' }}
           >
             <MessageCircle className="w-6 h-6" />
             Send Order on WhatsApp
-          </button>
+          </a>
 
           {/* 💳 UPI QR button — commented out, re-enable when QR payment goes live
           <button
@@ -776,17 +784,17 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                {/* ── How did you find us? ── */}
-                <div>
+                {/* ── How did you find us? (mandatory) ── */}
+                <div id="referral-section">
                   <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                    How did you find us? <span className="text-slate-400 font-normal">(optional)</span>
+                    How did you find us? <span className="text-red-500">*</span>
                   </label>
-                  <div className="flex flex-wrap gap-2">
-                    {['YouTube', 'Instagram', 'Reddit', 'Friends & Family', 'Google', 'Twitter / X', 'TikTok', 'Other', 'Prefer not to say'].map((src) => (
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {['YouTube', 'Instagram', 'Reddit', 'Friend', 'Google', 'Twitter / X', 'TikTok'].map((src) => (
                       <button
                         key={src}
                         type="button"
-                        onClick={() => setFormData({ ...formData, referral_source: formData.referral_source === src ? '' : src })}
+                        onClick={() => setFormData({ ...formData, referral_source: src, referral_friend_name: src !== 'Friend' ? '' : formData.referral_friend_name })}
                         className={`px-3 py-1.5 rounded-full text-xs font-semibold border-2 transition-all ${
                           formData.referral_source === src
                             ? 'bg-slate-900 border-slate-900 text-white'
@@ -797,6 +805,20 @@ export default function CheckoutPage() {
                       </button>
                     ))}
                   </div>
+                  {formData.referral_source === 'Friend' && (
+                    <div className="mt-2">
+                      <input
+                        type="text"
+                        placeholder="Friend's name (may qualify for an extra discount)"
+                        value={formData.referral_friend_name}
+                        onChange={(e) => setFormData({ ...formData, referral_friend_name: e.target.value })}
+                        className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-xl focus:border-slate-900 focus:outline-none transition-colors"
+                      />
+                    </div>
+                  )}
+                  {!formData.referral_source && (
+                    <p className="text-xs text-red-500 mt-1">Please select how you found us to continue.</p>
+                  )}
                 </div>
 
                 {/* ── Compliance checkboxes ── */}
