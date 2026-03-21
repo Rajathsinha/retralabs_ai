@@ -476,28 +476,34 @@ export default function ProductDetailPage() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-24 lg:pb-0">
+    <div className="min-h-screen pb-24 lg:pb-0" style={{ background: 'var(--off-white)' }}>
 
       {/* ── Hero / Breadcrumb ─────────────────────────────────────────────── */}
-      <div className="bg-slate-900 text-white">
+      <div style={{ background: 'var(--cream)', borderBottom: '1px solid var(--border)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
           {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-sm text-slate-400 mb-4">
+          <div className="flex items-center gap-2 text-sm mb-4" style={{ color: 'var(--text-muted)' }}>
             <button
               onClick={() => navigate('/catalogue')}
-              className="flex items-center gap-1 hover:text-white transition-colors font-medium"
+              className="flex items-center gap-1 transition-colors font-medium"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0 }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
             >
               <ChevronLeft className="w-4 h-4" />
               Back to Catalogue
             </button>
-            <span className="text-slate-600">/</span>
-            <span className="text-slate-300 truncate">{product.name}</span>
+            <span style={{ color: 'var(--border-strong)' }}>/</span>
+            <span style={{ color: 'var(--text)' }} className="truncate">{product.name}</span>
           </div>
 
           {/* Product name + badges */}
           <div className="flex flex-wrap items-start gap-3">
             <div className="flex-1 min-w-0">
-              <h1 className="text-3xl lg:text-4xl font-bold text-white tracking-tight mb-3">
+              <h1
+                className="section-heading"
+                style={{ fontSize: 'clamp(2rem, 5vw, 3.2rem)', marginBottom: '0.75rem', color: 'var(--text)' }}
+              >
                 {product.name}
               </h1>
               <div className="flex flex-wrap gap-2">
@@ -574,8 +580,8 @@ export default function ProductDetailPage() {
             <div className="sticky top-24 space-y-4">
 
               {/* Product image */}
-              <div className="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
-                <div className="aspect-square relative p-8 bg-gradient-to-br from-slate-50 to-white">
+              <div style={{ background: 'var(--white)', borderRadius: '1rem', overflow: 'hidden', border: '1px solid var(--border)' }}>
+                <div className="aspect-square relative p-8" style={{ background: 'var(--off-white)' }}>
                   <img
                     src={getProductImageUrl(product.image_url, product.name)}
                     alt={`${product.name} research peptide${isBacWater ? '' : ' vial India'}`}
@@ -655,12 +661,19 @@ export default function ProductDetailPage() {
                   { value: '2K+', label: 'Orders' },
                   { value: `${purity}%`, label: 'Purity' },
                 ].map((stat) => (
-                  <Card key={stat.label} className="border border-slate-200 shadow-none">
-                    <CardBody className="p-3 text-center gap-0">
-                      <p className="text-lg font-bold text-slate-900">{stat.value}</p>
-                      <p className="text-xs text-slate-500">{stat.label}</p>
-                    </CardBody>
-                  </Card>
+                  <div
+                    key={stat.label}
+                    style={{
+                      border: '1px solid var(--border)',
+                      borderRadius: '0.75rem',
+                      padding: '0.75rem',
+                      textAlign: 'center',
+                      background: 'var(--white)',
+                    }}
+                  >
+                    <p style={{ fontSize: '1.1rem', fontWeight: 500, color: 'var(--text)' }}>{stat.value}</p>
+                    <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.1rem' }}>{stat.label}</p>
+                  </div>
                 ))}
               </div>
 
@@ -690,7 +703,7 @@ export default function ProductDetailPage() {
                   {product.category}
                 </Chip>
               )}
-              <p className="text-lg text-slate-600 leading-relaxed">{product.description}</p>
+              <p style={{ fontSize: '1rem', color: 'var(--text-muted)', lineHeight: 1.75 }}>{product.description}</p>
             </div>
 
             {/* Research use warning */}
@@ -704,11 +717,10 @@ export default function ProductDetailPage() {
             </div>
 
             {/* ── Variant selector ─────────────────────────────────────── */}
-            <Card className="border border-slate-200 shadow-none">
-              <CardBody className="p-6">
-                <div className="flex items-center gap-2 mb-5">
-                  <Package className="w-5 h-5 text-slate-600" />
-                  <h3 className="text-lg font-bold text-slate-900">Choose Your Variant</h3>
+            <div style={{ border: '1px solid var(--border)', borderRadius: '1rem', background: 'var(--white)', padding: '1.5rem' }}>
+              <div className="flex items-center gap-2 mb-5">
+                  <Package style={{ width: 18, height: 18, color: 'var(--text-muted)' }} />
+                  <h3 style={{ fontSize: '1rem', fontWeight: 500, color: 'var(--text)' }}>Choose Your Variant</h3>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {product.variants.map((variant) => {
@@ -758,15 +770,13 @@ export default function ProductDetailPage() {
                     );
                   })}
                 </div>
-              </CardBody>
-            </Card>
+              </div>
 
             {/* ── Quantity selector ─────────────────────────────────────── */}
-            <Card className="border border-slate-200 shadow-none">
-              <CardBody className="p-6">
+            <div style={{ border: '1px solid var(--border)', borderRadius: '1rem', background: 'var(--white)', padding: '1.5rem' }}>
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold text-slate-900">Quantity</h3>
-                  <span className="text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full">Per Kit</span>
+                  <h3 style={{ fontSize: '1rem', fontWeight: 500, color: 'var(--text)' }}>Quantity</h3>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', background: 'var(--off-white)', padding: '0.2rem 0.75rem', borderRadius: 9999 }}>Per Kit</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <ButtonGroup>
@@ -813,26 +823,24 @@ export default function ProductDetailPage() {
                     </span>
                   </div>
                 )}
-              </CardBody>
-            </Card>
+              </div>
 
             {/* ── Bundle / Frequently bought together ──────────────────── */}
             {!isBacWater && bacWater && (
-              <Card className="border border-slate-200 shadow-none">
-                <CardBody className="p-6">
+              <div style={{ border: '1px solid var(--border)', borderRadius: '1rem', background: 'var(--white)', padding: '1.5rem' }}>
                   <div className="flex items-center gap-2 mb-4">
-                    <BadgeCheck className="w-5 h-5 text-blue-600" />
-                    <h3 className="text-lg font-bold text-slate-900">Frequently Bought Together</h3>
+                    <BadgeCheck style={{ width: 18, height: 18, color: 'var(--accent)' }} />
+                    <h3 style={{ fontSize: '1rem', fontWeight: 500, color: 'var(--text)' }}>Frequently Bought Together</h3>
                   </div>
-                  <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200 mb-4">
-                    <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center border border-slate-200 flex-shrink-0">
-                      <Package className="w-7 h-7 text-slate-400" />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', background: 'var(--off-white)', borderRadius: '0.75rem', border: '1px solid var(--border)', marginBottom: '1rem' }}>
+                    <div style={{ width: 56, height: 56, background: 'var(--white)', borderRadius: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', flexShrink: 0 }}>
+                      <Package style={{ width: 28, height: 28, color: 'var(--text-light)' }} />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-slate-900">Bacteriostatic Water</p>
-                      <p className="text-sm text-slate-500">50ML — Pharma Grade · Required for reconstitution</p>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontWeight: 500, color: 'var(--text)', fontSize: '0.9rem' }}>Bacteriostatic Water</p>
+                      <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>50ML — Pharma Grade · Required for reconstitution</p>
                     </div>
-                    <p className="font-bold text-slate-900 flex-shrink-0">{format(bacWaterPrice)}</p>
+                    <p style={{ fontWeight: 500, color: 'var(--text)', flexShrink: 0 }}>{format(bacWaterPrice)}</p>
                   </div>
                   <Button
                     fullWidth
@@ -841,44 +849,39 @@ export default function ProductDetailPage() {
                     isDisabled={!selectedVariant}
                     onPress={() => setBundleAdded(!bundleAdded)}
                     startContent={bundleAdded ? <Check className="w-4 h-4" /> : null}
-                    endContent={bundleAdded ? <X className="w-3.5 h-3.5 opacity-80" /> : null}
-                    className={bundleAdded
-                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white font-semibold'
-                      : 'bg-slate-100 border border-slate-200 text-slate-700 font-semibold hover:bg-slate-200'}
+                    className={bundleAdded ? 'text-white font-medium' : 'font-medium'}
                   >
                     {bundleAdded ? 'Bac Water Added — Remove' : 'Add Bacteriostatic Water to Bundle'}
                   </Button>
-                </CardBody>
-              </Card>
+              </div>
             )}
 
             {/* ── Order summary ─────────────────────────────────────────── */}
-            <Card className="border border-slate-200 shadow-none">
-              <CardBody className="p-6">
-                <h3 className="text-lg font-bold text-slate-900 mb-5">Order Summary</h3>
+            <div style={{ border: '1px solid var(--border)', borderRadius: '1rem', background: 'var(--white)', padding: '1.5rem' }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: 500, color: 'var(--text)', marginBottom: '1.25rem' }}>Order Summary</h3>
 
-                <div className="space-y-3 mb-4">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-slate-600">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>
                       {product.name} ({selectedVariant?.dosage_mg}{isBacWater ? 'ML' : 'mg'}) × {quantity}
                     </span>
-                    <span className="font-medium text-slate-900">{format(basePrice)}</span>
+                    <span style={{ fontWeight: 400, color: 'var(--text)' }}>{format(basePrice)}</span>
                   </div>
                   {bundleAdded && (
                     <>
                       <Divider />
-                      <div className="flex justify-between text-sm">
-                        <span className="text-slate-600">Bacteriostatic Water (50ML)</span>
-                        <span className="font-medium text-slate-900">{format(bacWaterPrice)}</span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                        <span style={{ color: 'var(--text-muted)' }}>Bacteriostatic Water (50ML)</span>
+                        <span style={{ fontWeight: 400, color: 'var(--text)' }}>{format(bacWaterPrice)}</span>
                       </div>
                     </>
                   )}
                   {discountPercent > 0 && (
                     <>
                       <Divider />
-                      <div className="flex justify-between text-sm text-emerald-600">
-                        <span className="font-medium">Volume Discount ({discountPercent}%)</span>
-                        <span className="font-semibold">−{format(discountAmount)}</span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--accent)' }}>
+                        <span>Volume Discount ({discountPercent}%)</span>
+                        <span>−{format(discountAmount)}</span>
                       </div>
                     </>
                   )}
@@ -886,59 +889,47 @@ export default function ProductDetailPage() {
 
                 <Divider className="my-4" />
 
-                <div className="flex items-baseline justify-between mb-5">
-                  <span className="text-slate-700 font-medium">Total</span>
-                  <div className="text-right">
+                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+                  <span style={{ color: 'var(--text-muted)', fontWeight: 300 }}>Total</span>
+                  <div style={{ textAlign: 'right' }}>
                     {discountPercent > 0 && (
-                      <span className="text-sm text-slate-400 line-through mr-2">{format(subtotal)}</span>
+                      <span style={{ fontSize: '0.85rem', color: 'var(--text-light)', textDecoration: 'line-through', marginRight: '0.5rem' }}>{format(subtotal)}</span>
                     )}
-                    <span className="text-3xl font-bold text-slate-900">{format(totalPrice)}</span>
+                    <span className="section-heading" style={{ fontSize: '2rem', color: 'var(--text)' }}>{format(totalPrice)}</span>
                   </div>
                 </div>
 
                 {discountPercent > 0 && (
-                  <div className="mb-5 p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2">
-                    <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                    <span className="text-sm font-medium text-emerald-800">
+                  <div style={{ marginBottom: '1.25rem', padding: '0.75rem', background: 'var(--accent-light)', border: '1px solid rgba(26,107,74,0.2)', borderRadius: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Check style={{ width: 14, height: 14, color: 'var(--accent)', flexShrink: 0 }} />
+                    <span style={{ fontSize: '0.82rem', color: 'var(--accent)' }}>
                       You save {format(discountAmount)} with {discountPercent}% volume discount
                     </span>
                   </div>
                 )}
 
-                {/* Shipping cards */}
-                <div className="space-y-3 mb-6">
-                  <Card className="border border-blue-200 bg-blue-50 shadow-none">
-                    <CardBody className="p-3 flex-row items-start gap-3">
-                      <MapPin className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-sm font-semibold text-blue-900">Free Shipping Across India</p>
-                        <p className="text-xs text-blue-700 mt-0.5">Standard 3–4 days (free) · Fast 1-day (+₹800) · Temperature-controlled packaging</p>
-                      </div>
-                    </CardBody>
-                  </Card>
-                  <Card className="border border-slate-200 bg-slate-50 shadow-none">
-                    <CardBody className="p-3 flex-row items-center gap-3">
-                      <Clock className="w-5 h-5 text-slate-500 flex-shrink-0" />
-                      <p className="text-sm text-slate-600">
-                        <strong>Avg dispatch:</strong> 48 hours after order confirmation
-                      </p>
-                    </CardBody>
-                  </Card>
-                  <Card className="border border-slate-200 bg-slate-50 shadow-none">
-                    <CardBody className="p-3 flex-row items-center gap-3">
-                      <Phone className="w-5 h-5 text-slate-500 flex-shrink-0" />
-                      <p className="text-sm text-slate-600">
-                        <strong>International:</strong> Contact support for availability and shipping rates
-                      </p>
-                    </CardBody>
-                  </Card>
-                  <div className="flex gap-4 px-1">
-                    <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                      <Shield className="w-3.5 h-3.5 text-emerald-500" />
+                {/* Shipping info */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.25rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', padding: '0.75rem', background: 'rgba(219,234,254,0.4)', border: '1px solid rgba(147,197,253,0.5)', borderRadius: '0.75rem' }}>
+                    <MapPin style={{ width: 16, height: 16, color: '#2563eb', flexShrink: 0, marginTop: 2 }} />
+                    <div>
+                      <p style={{ fontSize: '0.82rem', fontWeight: 500, color: '#1e3a5f' }}>Free Shipping Across India</p>
+                      <p style={{ fontSize: '0.72rem', color: '#1d4ed8', marginTop: '0.15rem' }}>Standard 3–4 days (free) · Fast 1-day (+₹800) · Temperature-controlled packaging</p>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.65rem 0.75rem', background: 'var(--off-white)', border: '1px solid var(--border)', borderRadius: '0.75rem' }}>
+                    <Clock style={{ width: 15, height: 15, color: 'var(--text-muted)', flexShrink: 0 }} />
+                    <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                      <strong style={{ color: 'var(--text)', fontWeight: 500 }}>Avg dispatch:</strong> 48 hours after order confirmation
+                    </p>
+                  </div>
+                  <div style={{ display: 'flex', gap: '1rem', padding: '0 0.25rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                      <Shield style={{ width: 12, height: 12, color: 'var(--accent)' }} />
                       Temperature Controlled
                     </div>
-                    <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                      <Truck className="w-3.5 h-3.5 text-emerald-500" />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                      <Truck style={{ width: 12, height: 12, color: 'var(--accent)' }} />
                       Express Processing
                     </div>
                   </div>
@@ -949,11 +940,13 @@ export default function ProductDetailPage() {
                   href={`https://wa.me/918217824384?text=${encodeURIComponent('Hi, I\'m a student and would like to enquire about the student discount.')}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 w-full bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 hover:border-indigo-300 transition-colors rounded-xl px-4 py-2.5 group"
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', background: 'var(--accent-light)', border: '1px solid rgba(26,107,74,0.2)', borderRadius: '0.75rem', padding: '0.625rem 1rem', marginBottom: '1rem', textDecoration: 'none', transition: 'opacity 0.2s' }}
+                  onMouseEnter={e => (e.currentTarget.style.opacity = '0.8')}
+                  onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
                 >
-                  <GraduationCap className="w-4 h-4 text-indigo-500 flex-shrink-0" />
-                  <span className="text-xs font-semibold text-indigo-700">Student discount available</span>
-                  <span className="ml-auto text-[10px] text-indigo-400 group-hover:text-indigo-600 font-medium transition-colors">Ask on WhatsApp →</span>
+                  <GraduationCap style={{ width: 15, height: 15, color: 'var(--accent)', flexShrink: 0 }} />
+                  <span style={{ fontSize: '0.78rem', fontWeight: 500, color: 'var(--accent)' }}>Student discount available</span>
+                  <span style={{ marginLeft: 'auto', fontSize: '0.7rem', color: 'var(--accent)', opacity: 0.7 }}>Ask on WhatsApp →</span>
                 </a>
 
                 {/* ── CTAs ── */}
@@ -961,53 +954,67 @@ export default function ProductDetailPage() {
                 <button
                   disabled={!selectedVariant}
                   onClick={handleOrderNow}
-                  className="w-full flex items-center justify-center gap-2.5 bg-slate-900 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-base py-4 rounded-xl transition-colors"
+                  className="btn-dark"
+                  style={{ width: '100%', justifyContent: 'center', fontSize: '0.95rem', padding: '1rem', borderRadius: '0.75rem', marginBottom: '0.75rem', opacity: !selectedVariant ? 0.4 : 1, cursor: !selectedVariant ? 'not-allowed' : 'pointer' }}
                 >
-                  <ShoppingCart className="w-5 h-5" />
+                  <ShoppingCart style={{ width: 18, height: 18 }} />
                   Order Now
                 </button>
 
                 {/* Add to Cart + WhatsApp side by side */}
-                <div className="flex gap-3">
+                <div style={{ display: 'flex', gap: '0.75rem' }}>
                   <button
                     disabled={!selectedVariant}
                     onClick={handleAddToCart}
-                    className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl border-2 font-semibold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
-                      cartAdded
-                        ? 'bg-emerald-50 border-emerald-400 text-emerald-700'
-                        : 'bg-white border-slate-200 hover:border-slate-900 text-slate-800'
-                    }`}
+                    style={{
+                      flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                      padding: '0.875rem',
+                      borderRadius: '0.75rem',
+                      border: `2px solid ${cartAdded ? 'var(--accent)' : 'var(--border-strong)'}`,
+                      background: cartAdded ? 'var(--accent-light)' : 'var(--white)',
+                      color: cartAdded ? 'var(--accent)' : 'var(--text)',
+                      fontSize: '0.82rem', fontWeight: 500, cursor: !selectedVariant ? 'not-allowed' : 'pointer',
+                      opacity: !selectedVariant ? 0.4 : 1, transition: 'all 0.2s',
+                    }}
                   >
-                    {cartAdded ? <Check className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
+                    {cartAdded ? <Check style={{ width: 15, height: 15 }} /> : <ShoppingCart style={{ width: 15, height: 15 }} />}
                     {cartAdded ? 'Added!' : 'Add to Cart'}
                   </button>
                   <a
                     href={`https://wa.me/918217824384?text=${whatsappMsg}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl border-2 border-emerald-200 bg-emerald-50 hover:bg-emerald-100 hover:border-emerald-400 text-emerald-700 font-semibold text-sm transition-all"
+                    style={{
+                      flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                      padding: '0.875rem',
+                      borderRadius: '0.75rem',
+                      border: '2px solid rgba(16,185,129,0.3)',
+                      background: 'rgba(16,185,129,0.08)',
+                      color: 'var(--accent)',
+                      fontSize: '0.82rem', fontWeight: 500, textDecoration: 'none', transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(16,185,129,0.15)'; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(16,185,129,0.08)'; }}
                   >
-                    <MessageCircle className="w-4 h-4" />
+                    <MessageCircle style={{ width: 15, height: 15 }} />
                     WhatsApp
                   </a>
                 </div>
-              </CardBody>
-            </Card>
+              </div>
 
             {/* ── FAQ section ──────────────────────────────────────────── */}
-            <Card className="border border-slate-200 shadow-none">
-              <CardBody className="p-6">
-                <h3 className="text-lg font-bold text-slate-900 mb-5">Frequently Asked Questions</h3>
+            <div style={{ border: '1px solid var(--border)', borderRadius: '1rem', background: 'var(--white)', padding: '1.5rem' }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: 500, color: 'var(--text)', marginBottom: '1.25rem' }}>Frequently Asked Questions</h3>
                 <Accordion
                   variant="splitted"
                   selectionMode="multiple"
                   className="px-0 gap-3"
                   itemClasses={{
-                    base: 'border border-slate-200 rounded-xl shadow-none bg-white',
-                    title: 'font-semibold text-slate-900 text-sm',
-                    content: 'text-slate-600 text-sm leading-relaxed pb-4',
-                    trigger: 'px-5 py-4 hover:bg-slate-50 rounded-xl',
-                    indicator: 'text-slate-400',
+                    base: 'border border-[rgba(0,0,0,0.08)] rounded-xl shadow-none bg-white',
+                    title: 'font-medium text-sm',
+                    content: 'text-sm leading-relaxed pb-4',
+                    trigger: 'px-5 py-4 rounded-xl',
+                    indicator: '',
                   }}
                 >
                   {faqs.map((faq) => (
@@ -1020,21 +1027,20 @@ export default function ProductDetailPage() {
                     </AccordionItem>
                   ))}
                 </Accordion>
-              </CardBody>
-            </Card>
+            </div>
 
             {/* ── Why RetraLabs ─────────────────────────────────────────── */}
-            <div className="bg-slate-900 rounded-2xl p-6">
-              <h3 className="text-white font-bold mb-4">Why Buy from RetraLabs?</h3>
+            <div style={{ background: 'var(--text)', borderRadius: '1rem', padding: '1.5rem' }}>
+              <h3 style={{ color: 'var(--white)', fontWeight: 400, marginBottom: '1rem', fontSize: '1rem' }}>Why Buy from RetraLabs?</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
-                  { icon: ShieldCheck, label: 'COA with every order', color: 'text-emerald-400' },
-                  { icon: FlaskConical, label: '99%+ HPLC verified purity', color: 'text-blue-400' },
-                  { icon: Truck, label: 'Pan-India free shipping', color: 'text-amber-400' },
-                  { icon: MessageCircle, label: 'WhatsApp support always on', color: 'text-green-400' },
+                  { icon: ShieldCheck, label: 'COA with every order', color: '#34d399' },
+                  { icon: FlaskConical, label: '99%+ HPLC verified purity', color: '#93c5fd' },
+                  { icon: Truck, label: 'Pan-India free shipping', color: '#fbbf24' },
+                  { icon: MessageCircle, label: 'WhatsApp support always on', color: '#6ee7b7' },
                 ].map((item) => (
-                  <div key={item.label} className="flex items-center gap-3 text-sm text-slate-300">
-                    <item.icon className={`w-4 h-4 ${item.color} flex-shrink-0`} />
+                  <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.82rem', color: 'rgba(255,255,255,0.7)' }}>
+                    <item.icon style={{ width: 15, height: 15, color: item.color, flexShrink: 0 }} />
                     {item.label}
                   </div>
                 ))}
@@ -1046,19 +1052,18 @@ export default function ProductDetailPage() {
       </div>
 
       {/* ── Mobile sticky bottom bar ──────────────────────────────────────── */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 shadow-[0_-4px_20px_rgba(0,0,0,0.10)] rounded-t-2xl">
-        <Card className="rounded-none rounded-t-2xl bg-white shadow-none border-none">
-          <CardBody className="px-4 py-3 flex-row items-center gap-4">
-            <div className="flex-1">
-              <p className="text-xs text-slate-500 mb-0.5">Total</p>
-              <div className="flex items-baseline gap-2">
+      <div className="lg:hidden" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 40, background: 'var(--white)', borderTop: '1px solid var(--border)', boxShadow: '0 -4px 20px rgba(0,0,0,0.08)', borderRadius: '1.25rem 1.25rem 0 0' }}>
+        <div style={{ padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ flex: 1 }}>
+              <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginBottom: '0.15rem' }}>Total</p>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
                 {discountPercent > 0 && (
-                  <span className="text-xs text-slate-400 line-through">{format(subtotal)}</span>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', textDecoration: 'line-through' }}>{format(subtotal)}</span>
                 )}
-                <span className="text-xl font-bold text-slate-900">{format(totalPrice)}</span>
+                <span style={{ fontSize: '1.25rem', fontWeight: 500, color: 'var(--text)' }}>{format(totalPrice)}</span>
               </div>
               {discountPercent > 0 && (
-                <span className="text-xs text-emerald-600 font-semibold">{discountPercent}% OFF applied</span>
+                <span style={{ fontSize: '0.7rem', color: 'var(--accent)', fontWeight: 500 }}>{discountPercent}% OFF applied</span>
               )}
             </div>
             {/* Add to Cart — icon only */}
@@ -1066,24 +1071,28 @@ export default function ProductDetailPage() {
               disabled={!selectedVariant}
               onClick={handleAddToCart}
               aria-label="Add to cart"
-              className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center flex-shrink-0 transition-all disabled:opacity-40 ${
-                cartAdded
-                  ? 'bg-emerald-50 border-emerald-400 text-emerald-700'
-                  : 'bg-white border-slate-200 text-slate-700 hover:border-slate-900'
-              }`}
+              style={{
+                width: 48, height: 48, borderRadius: '0.75rem', flexShrink: 0,
+                border: `2px solid ${cartAdded ? 'var(--accent)' : 'var(--border-strong)'}`,
+                background: cartAdded ? 'var(--accent-light)' : 'var(--white)',
+                color: cartAdded ? 'var(--accent)' : 'var(--text)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                opacity: !selectedVariant ? 0.4 : 1, cursor: !selectedVariant ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s',
+              }}
             >
-              {cartAdded ? <Check className="w-5 h-5" /> : <ShoppingCart className="w-5 h-5" />}
+              {cartAdded ? <Check style={{ width: 18, height: 18 }} /> : <ShoppingCart style={{ width: 18, height: 18 }} />}
             </button>
             {/* Order Now */}
             <button
               disabled={!selectedVariant}
               onClick={handleOrderNow}
-              className="flex-1 flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-700 disabled:opacity-40 text-white font-bold py-3 rounded-xl transition-colors"
+              className="btn-dark"
+              style={{ flex: 1, justifyContent: 'center', padding: '0.75rem', borderRadius: '0.75rem', opacity: !selectedVariant ? 0.4 : 1, cursor: !selectedVariant ? 'not-allowed' : 'pointer' }}
             >
               Order Now
             </button>
-          </CardBody>
-        </Card>
+        </div>
       </div>
 
     </div>

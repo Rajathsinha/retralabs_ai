@@ -44,9 +44,9 @@ export default function Header() {
 
   const { isOpen: calcOpen, onOpen: openCalc, onClose: closeCalc } = useDisclosure();
 
-  /* ── Scroll blur ── */
+  /* ── Scroll shadow ── */
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
+    const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
@@ -103,38 +103,64 @@ export default function Header() {
 
       {/* ── Header shell ── */}
       <header
-        className={`sticky top-0 z-50 border-b transition-all duration-300 ${
-          scrolled
-            ? 'bg-slate-950/95 backdrop-blur-md border-white/8 shadow-[0_2px_20px_rgba(0,0,0,0.5)]'
-            : 'bg-slate-950 border-white/[0.06]'
-        }`}
+        style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 50,
+          background: 'var(--white)',
+          borderBottom: '1px solid var(--border)',
+          transition: 'box-shadow 0.3s',
+          boxShadow: scrolled ? '0 4px 24px rgba(0,0,0,0.07)' : 'none',
+        }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
           {/* ── Header row ── */}
-          <div className="flex items-center justify-between h-14">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 60 }}>
 
             {/* LEFT — Logo */}
-            <RouterLink to="/" className="hover:opacity-75 transition-opacity flex-shrink-0">
-              <Logo size="md" variant="light" />
+            <RouterLink to="/" style={{ display: 'flex', flexShrink: 0, opacity: 1, transition: 'opacity 0.2s' }}
+              onMouseEnter={e => (e.currentTarget.style.opacity = '0.75')}
+              onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+            >
+              <Logo size="md" variant="dark" />
             </RouterLink>
 
             {/* CENTER — Desktop nav */}
-            <nav className="hidden md:flex flex-1 items-center justify-center gap-0.5">
-              {NAV_ITEMS.map(({ path, label, icon: Icon }) => (
+            <nav className="hidden md:flex flex-1 items-center justify-center gap-1">
+              {NAV_ITEMS.map(({ path, label }) => (
                 <RouterLink
                   key={path}
                   to={path}
-                  className={`relative flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium tracking-wide transition-all duration-200 rounded-lg ${
-                    active(path)
-                      ? 'text-white'
-                      : 'text-white/45 hover:text-white/80 hover:bg-white/5'
-                  }`}
+                  style={{
+                    position: 'relative',
+                    padding: '0.35rem 0.9rem',
+                    fontSize: '0.82rem',
+                    fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+                    fontWeight: 400,
+                    letterSpacing: '0.04em',
+                    color: active(path) ? 'var(--accent)' : 'var(--text-muted)',
+                    textDecoration: 'none',
+                    transition: 'color 0.2s',
+                  }}
+                  onMouseEnter={e => { if (!active(path)) (e.currentTarget as HTMLElement).style.color = 'var(--text)'; }}
+                  onMouseLeave={e => { if (!active(path)) (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'; }}
                 >
-                  <Icon className={`w-3.5 h-3.5 flex-shrink-0 ${active(path) ? 'text-cyan-400' : 'text-white/30'}`} />
                   {label}
+                  {/* Active underline */}
                   {active(path) && (
-                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-0.5 bg-cyan-400 rounded-full" />
+                    <span
+                      style={{
+                        position: 'absolute',
+                        bottom: 0,
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        width: '1.2rem',
+                        height: '1.5px',
+                        background: 'var(--accent)',
+                        borderRadius: 9999,
+                      }}
+                    />
                   )}
                 </RouterLink>
               ))}
@@ -142,62 +168,146 @@ export default function Header() {
               {/* Calculator */}
               <button
                 onClick={openCalc}
-                className="flex items-center gap-1.5 px-3.5 py-2 ml-1 rounded-lg text-sm font-medium text-white/45 hover:text-white/80 hover:bg-white/5 transition-all duration-200"
+                style={{
+                  padding: '0.35rem 0.9rem',
+                  fontSize: '0.82rem',
+                  fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+                  fontWeight: 400,
+                  letterSpacing: '0.04em',
+                  color: 'var(--text-muted)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'color 0.2s',
+                }}
+                onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
+                onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
               >
-                <Calculator className="w-3.5 h-3.5 text-white/30" />
                 Calculator
               </button>
             </nav>
 
-            {/* RIGHT — Search | Currency | Cart | Hamburger */}
-            <div className="flex items-center gap-1.5">
+            {/* RIGHT */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
 
-              {/* Search button — desktop: pill with shortcut hint, mobile: icon */}
+              {/* Search button */}
               <button
                 onClick={() => setSearchOpen(true)}
                 aria-label="Search products"
-                className="flex items-center gap-2 rounded-lg text-white/50 hover:text-white/80 transition-all duration-200
-                           px-2 py-2
-                           md:px-3 md:py-1.5 md:border md:border-white/10 md:hover:border-white/20 md:hover:bg-white/5 md:text-sm"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '0.5rem',
+                  padding: '0.35rem 0.75rem',
+                  borderRadius: 8,
+                  border: '1px solid var(--border)',
+                  background: 'transparent',
+                  color: 'var(--text-muted)',
+                  fontSize: '0.8rem',
+                  cursor: 'pointer',
+                  transition: 'border-color 0.2s, color 0.2s',
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-strong)';
+                  (e.currentTarget as HTMLElement).style.color = 'var(--text)';
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)';
+                  (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)';
+                }}
               >
-                <Search className="w-4 h-4 flex-shrink-0" />
-                <span className="hidden md:flex items-center gap-2 text-sm text-white/35">
-                  Search products…
-                  <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-white/8 border border-white/10 text-[11px] font-mono text-white/30">
-                    {isMac ? '⌘' : 'ctrl'} K
+                <Search size={15} />
+                <span className="hidden md:inline" style={{ fontSize: '0.78rem' }}>
+                  Search…
+                  <span
+                    style={{
+                      marginLeft: '0.4rem',
+                      padding: '0.1rem 0.35rem',
+                      background: 'var(--off-white)',
+                      border: '1px solid var(--border)',
+                      borderRadius: 4,
+                      fontSize: '0.68rem',
+                      fontFamily: 'monospace',
+                      color: 'var(--text-light)',
+                    }}
+                  >
+                    {isMac ? '⌘' : 'Ctrl'} K
                   </span>
                 </span>
               </button>
 
               {/* Currency picker */}
-              <div className="relative" ref={currencyRef}>
+              <div className="relative hidden md:block" ref={currencyRef}>
                 <button
                   onClick={() => setCurrencyOpen(o => !o)}
-                  className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-white/50 hover:text-white/80 border border-white/10 hover:border-white/20 hover:bg-white/5 transition-all duration-200"
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '0.3rem',
+                    padding: '0.35rem 0.6rem',
+                    borderRadius: 8,
+                    border: '1px solid var(--border)',
+                    background: 'transparent',
+                    color: 'var(--text-muted)',
+                    fontSize: '0.78rem',
+                    cursor: 'pointer',
+                    transition: 'border-color 0.2s',
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--border-strong)')}
+                  onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border)')}
                 >
-                  <span className="text-base leading-none">{currency.flag}</span>
+                  <span>{currency.flag}</span>
                   <span>{currency.code}</span>
-                  <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${currencyOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown size={12} style={{ transform: currencyOpen ? 'rotate(180deg)' : '', transition: 'transform 0.2s' }} />
                 </button>
 
-                {/* Dropdown */}
                 {currencyOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-52 bg-slate-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
-                    <p className="px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-white/25 border-b border-white/8">
+                  <div
+                    style={{
+                      position: 'absolute',
+                      right: 0,
+                      top: 'calc(100% + 8px)',
+                      width: 200,
+                      background: 'var(--white)',
+                      border: '1px solid var(--border)',
+                      borderRadius: 12,
+                      boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+                      overflow: 'hidden',
+                      zIndex: 100,
+                    }}
+                  >
+                    <p
+                      style={{
+                        padding: '0.5rem 0.75rem',
+                        fontSize: '0.65rem',
+                        fontWeight: 500,
+                        letterSpacing: '0.15em',
+                        textTransform: 'uppercase',
+                        color: 'var(--text-light)',
+                        borderBottom: '1px solid var(--border)',
+                      }}
+                    >
                       Currency
                     </p>
                     {Object.values(CURRENCIES).map(c => (
                       <button
                         key={c.code}
                         onClick={() => { setCurrencyCode(c.code); setCurrencyOpen(false); }}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-left hover:bg-white/6 transition-colors"
+                        style={{
+                          width: '100%',
+                          display: 'flex', alignItems: 'center', gap: '0.6rem',
+                          padding: '0.6rem 0.75rem',
+                          fontSize: '0.82rem',
+                          color: 'var(--text)',
+                          background: 'transparent',
+                          border: 'none',
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                          transition: 'background 0.15s',
+                        }}
+                        onMouseEnter={e => (e.currentTarget.style.background = 'var(--off-white)')}
+                        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                       >
-                        <span className="text-base leading-none w-5">{c.flag}</span>
-                        <span className="flex-1 text-white/80">{c.name}</span>
-                        <span className="text-white/40 text-xs font-mono">{c.symbol}</span>
-                        {c.code === currency.code && (
-                          <Check className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />
-                        )}
+                        <span style={{ fontSize: '1rem', width: 20 }}>{c.flag}</span>
+                        <span style={{ flex: 1 }}>{c.name}</span>
+                        <span style={{ color: 'var(--text-light)', fontSize: '0.72rem', fontFamily: 'monospace' }}>{c.symbol}</span>
+                        {c.code === currency.code && <Check size={13} color="var(--accent)" />}
                       </button>
                     ))}
                   </div>
@@ -207,57 +317,99 @@ export default function Header() {
               {/* Sign In / Avatar */}
               {user ? (
                 <div className="relative" ref={avatarRef}>
-                  {/* Mobile: tap → go straight to /account */}
                   <button
                     onClick={() => navigate('/account')}
+                    className="md:hidden"
                     aria-label="My Account"
-                    className="md:hidden w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-cyan-600 flex items-center justify-center text-white text-xs font-extrabold hover:opacity-90 transition-opacity"
+                    style={{
+                      width: 32, height: 32, borderRadius: '50%',
+                      background: 'var(--accent)',
+                      color: 'white', fontSize: '0.75rem', fontWeight: 500,
+                      border: 'none', cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}
                   >
                     {initials}
                   </button>
-                  {/* Desktop: tap → dropdown */}
                   <button
                     onClick={() => setAvatarOpen(o => !o)}
-                    className="hidden md:flex w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-cyan-600 items-center justify-center text-white text-xs font-extrabold hover:opacity-90 transition-opacity"
+                    className="hidden md:flex"
                     aria-label="Account menu"
+                    style={{
+                      width: 32, height: 32, borderRadius: '50%',
+                      background: 'var(--accent)',
+                      color: 'white', fontSize: '0.75rem', fontWeight: 500,
+                      border: 'none', cursor: 'pointer',
+                      alignItems: 'center', justifyContent: 'center',
+                    }}
                   >
                     {initials}
                   </button>
                   {avatarOpen && (
-                    <div className="absolute right-0 top-full mt-2 w-44 bg-slate-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
-                      <div className="px-3 py-2.5 border-b border-white/8">
-                        <p className="text-xs font-bold text-white/80 truncate">{user.user_metadata?.name || 'Account'}</p>
-                        <p className="text-[10px] text-white/40 truncate">{user.email}</p>
+                    <div
+                      style={{
+                        position: 'absolute', right: 0, top: 'calc(100% + 8px)',
+                        width: 180,
+                        background: 'var(--white)',
+                        border: '1px solid var(--border)',
+                        borderRadius: 12,
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+                        overflow: 'hidden',
+                        zIndex: 100,
+                      }}
+                    >
+                      <div style={{ padding: '0.6rem 0.75rem', borderBottom: '1px solid var(--border)' }}>
+                        <p style={{ fontSize: '0.78rem', fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {user.user_metadata?.name || 'Account'}
+                        </p>
+                        <p style={{ fontSize: '0.68rem', color: 'var(--text-light)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {user.email}
+                        </p>
                       </div>
                       <button
                         onClick={() => { setAvatarOpen(false); navigate('/account'); }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/6 transition-colors text-left"
+                        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 0.75rem', fontSize: '0.82rem', color: 'var(--text)', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'background 0.15s' }}
+                        onMouseEnter={e => (e.currentTarget.style.background = 'var(--off-white)')}
+                        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                       >
-                        <UserCircle2 className="w-4 h-4" /> My Account
+                        <UserCircle2 size={14} /> My Account
                       </button>
                       <button
                         onClick={async () => { setAvatarOpen(false); await signOut(); navigate('/'); }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors text-left"
+                        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 0.75rem', fontSize: '0.82rem', color: '#dc2626', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'background 0.15s' }}
+                        onMouseEnter={e => (e.currentTarget.style.background = '#fef2f2')}
+                        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                       >
-                        <LogOut className="w-4 h-4" /> Sign Out
+                        <LogOut size={14} /> Sign Out
                       </button>
                     </div>
                   )}
                 </div>
               ) : (
                 <>
-                  {/* Mobile: icon-only button */}
                   <button
                     onClick={() => navigate('/signin')}
+                    className="md:hidden"
                     aria-label="Sign in"
-                    className="md:hidden p-2 rounded-lg text-white/50 hover:text-white hover:bg-white/8 transition-all duration-200"
+                    style={{ padding: '0.4rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
                   >
-                    <UserCircle2 className="w-5 h-5" />
+                    <UserCircle2 size={20} />
                   </button>
-                  {/* Desktop: pill with text */}
                   <button
                     onClick={() => navigate('/signin')}
-                    className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-white/60 hover:text-white border border-white/10 hover:border-white/25 hover:bg-white/5 transition-all duration-200"
+                    className="hidden md:flex"
+                    style={{
+                      padding: '0.35rem 0.75rem',
+                      borderRadius: 8,
+                      border: '1px solid var(--border)',
+                      background: 'transparent',
+                      color: 'var(--text-muted)',
+                      fontSize: '0.78rem',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--accent)'; (e.currentTarget as HTMLElement).style.color = 'var(--accent)'; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'; }}
                   >
                     Sign In
                   </button>
@@ -268,12 +420,43 @@ export default function Header() {
               <button
                 onClick={() => navigate('/checkout')}
                 aria-label="View cart"
-                className="relative flex items-center gap-2 p-2 md:px-4 md:py-1.5 rounded-lg text-sm font-medium text-white/60 hover:text-white border border-transparent md:border-white/10 md:hover:border-white/25 hover:bg-white/8 transition-all duration-200"
+                style={{
+                  position: 'relative',
+                  display: 'flex', alignItems: 'center', gap: '0.35rem',
+                  padding: '0.35rem 0.75rem',
+                  borderRadius: 8,
+                  border: '1px solid var(--border)',
+                  background: cartCount > 0 ? 'var(--accent-light)' : 'transparent',
+                  borderColor: cartCount > 0 ? 'var(--accent)' : 'var(--border)',
+                  color: cartCount > 0 ? 'var(--accent)' : 'var(--text-muted)',
+                  fontSize: '0.78rem',
+                  cursor: 'pointer',
+                  fontWeight: cartCount > 0 ? 500 : 300,
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--accent)'; (e.currentTarget as HTMLElement).style.color = 'var(--accent)'; }}
+                onMouseLeave={e => {
+                  if (cartCount === 0) {
+                    (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)';
+                    (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)';
+                  }
+                }}
               >
-                <ShoppingCart className="w-5 h-5 md:w-4 md:h-4" />
+                <ShoppingCart size={15} />
                 <span className="hidden md:inline">Cart</span>
                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 md:static md:top-auto md:right-auto bg-cyan-500 text-white text-[10px] font-bold min-w-[16px] h-4 px-0.5 rounded-full flex items-center justify-center leading-none">
+                  <span
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                      minWidth: 18, height: 18,
+                      background: 'var(--accent)',
+                      color: 'white',
+                      borderRadius: 9999,
+                      fontSize: '0.65rem',
+                      fontWeight: 600,
+                      padding: '0 0.3rem',
+                    }}
+                  >
                     {cartCount}
                   </span>
                 )}
@@ -283,9 +466,10 @@ export default function Header() {
               <button
                 onClick={() => setOpen(!open)}
                 aria-label={open ? 'Close menu' : 'Open menu'}
-                className="md:hidden p-2 rounded-lg text-white/60 hover:text-white hover:bg-white/8 transition-all duration-200"
+                className="md:hidden"
+                style={{ padding: '0.4rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
               >
-                {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                {open ? <X size={20} /> : <Menu size={20} />}
               </button>
             </div>
           </div>
@@ -293,20 +477,30 @@ export default function Header() {
 
         {/* ── Mobile drawer ── */}
         <div
-          className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-            open ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'
-          }`}
+          className="md:hidden overflow-hidden transition-all duration-300 ease-in-out"
+          style={{ maxHeight: open ? 600 : 0, opacity: open ? 1 : 0 }}
         >
-          <div className="border-t border-white/10 bg-slate-950/98 backdrop-blur-md">
+          <div style={{ borderTop: '1px solid var(--border)', background: 'var(--white)' }}>
             <nav className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-1">
 
               {/* Mobile search */}
               <button
                 onClick={() => { setOpen(false); setTimeout(() => setSearchOpen(true), 200); }}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-white/55 hover:text-white hover:bg-white/6 transition-all duration-200"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '0.75rem',
+                  padding: '0.75rem 1rem',
+                  borderRadius: 12,
+                  border: '1px solid var(--border)',
+                  background: 'var(--off-white)',
+                  color: 'var(--text-muted)',
+                  fontSize: '0.9rem',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  width: '100%',
+                  marginBottom: '0.5rem',
+                }}
               >
-                <Search className="w-4 h-4 flex-shrink-0 text-white/40" />
-                Search products…
+                <Search size={16} /> Search products…
               </button>
 
               {/* Nav links */}
@@ -314,41 +508,65 @@ export default function Header() {
                 <RouterLink
                   key={path}
                   to={path}
-                  style={{ transitionDelay: open ? `${i * 40}ms` : '0ms' }}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all duration-200 ${
-                    active(path)
-                      ? 'text-white bg-white/10 border border-white/10'
-                      : 'text-white/55 hover:text-white hover:bg-white/6'
-                  }`}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '0.75rem',
+                    padding: '0.75rem 1rem',
+                    borderRadius: 10,
+                    textDecoration: 'none',
+                    fontSize: '0.9rem',
+                    color: active(path) ? 'var(--accent)' : 'var(--text)',
+                    background: active(path) ? 'var(--accent-light)' : 'transparent',
+                    fontWeight: active(path) ? 500 : 300,
+                    transition: 'all 0.15s',
+                    transitionDelay: open ? `${i * 30}ms` : '0ms',
+                  }}
                 >
-                  <Icon className={`w-4 h-4 flex-shrink-0 ${active(path) ? 'text-cyan-400' : 'text-white/40'}`} />
+                  <Icon size={16} color={active(path) ? 'var(--accent)' : 'var(--text-muted)'} />
                   {label}
-                  {active(path) && <span className="ml-auto w-1.5 h-1.5 bg-cyan-400 rounded-full flex-shrink-0" />}
                 </RouterLink>
               ))}
 
               {/* Calculator */}
               <button
                 onClick={() => { setOpen(false); setTimeout(openCalc, 300); }}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-white/55 hover:text-white hover:bg-white/6 transition-all duration-200 text-left"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '0.75rem',
+                  padding: '0.75rem 1rem',
+                  borderRadius: 10,
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text)',
+                  fontSize: '0.9rem',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  width: '100%',
+                }}
               >
-                <Calculator className="w-4 h-4 text-white/40" />
-                Reconstitution Calculator
+                <Calculator size={16} color="var(--text-muted)" /> Reconstitution Calculator
               </button>
 
-              {/* Mobile currency row */}
-              <div className="px-4 py-2">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-white/25 mb-2">Currency</p>
-                <div className="flex flex-wrap gap-2">
+              {/* Currency row */}
+              <div style={{ padding: '0.5rem 1rem' }}>
+                <p style={{ fontSize: '0.65rem', fontWeight: 500, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--text-light)', marginBottom: '0.5rem' }}>
+                  Currency
+                </p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
                   {Object.values(CURRENCIES).map(c => (
                     <button
                       key={c.code}
                       onClick={() => setCurrencyCode(c.code)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-all duration-200 ${
-                        c.code === currency.code
-                          ? 'bg-cyan-500/15 border-cyan-500/30 text-cyan-300'
-                          : 'border-white/10 text-white/50 hover:border-white/20 hover:text-white/70'
-                      }`}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '0.35rem',
+                        padding: '0.3rem 0.6rem',
+                        borderRadius: 8,
+                        fontSize: '0.78rem',
+                        fontWeight: 400,
+                        border: `1px solid ${c.code === currency.code ? 'var(--accent)' : 'var(--border)'}`,
+                        background: c.code === currency.code ? 'var(--accent-light)' : 'transparent',
+                        color: c.code === currency.code ? 'var(--accent)' : 'var(--text-muted)',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s',
+                      }}
                     >
                       <span>{c.flag}</span>
                       <span>{c.code}</span>
@@ -357,42 +575,50 @@ export default function Header() {
                 </div>
               </div>
 
-              {/* Cart CTA */}
-              <div className="mt-2 pt-3 border-t border-white/10 flex flex-col gap-2">
+              {/* Cart + auth row */}
+              <div style={{ marginTop: '0.5rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 <button
                   onClick={() => { setOpen(false); navigate('/checkout'); }}
-                  className="w-full flex items-center justify-center gap-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 text-cyan-300 font-semibold px-4 py-3.5 rounded-xl transition-all duration-200"
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                    padding: '0.85rem',
+                    borderRadius: 12,
+                    border: `1px solid ${cartCount > 0 ? 'var(--accent)' : 'var(--border)'}`,
+                    background: cartCount > 0 ? 'var(--accent-light)' : 'var(--off-white)',
+                    color: cartCount > 0 ? 'var(--accent)' : 'var(--text)',
+                    fontSize: '0.9rem',
+                    fontWeight: cartCount > 0 ? 500 : 300,
+                    cursor: 'pointer',
+                  }}
                 >
-                  <ShoppingCart className="w-4 h-4" />
+                  <ShoppingCart size={16} />
                   View Cart
                   {cartCount > 0 && (
-                    <span className="bg-cyan-500 text-white text-xs font-bold px-2 py-0.5 rounded-full ml-1">
+                    <span style={{ background: 'var(--accent)', color: 'white', fontSize: '0.72rem', fontWeight: 600, padding: '0.15rem 0.4rem', borderRadius: 9999, marginLeft: 4 }}>
                       {cartCount}
                     </span>
                   )}
                 </button>
 
-                {/* Auth row */}
                 {user ? (
-                  <div className="flex gap-2">
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
                     <button
                       onClick={() => { setOpen(false); navigate('/account'); }}
-                      className="flex-1 flex items-center justify-center gap-2 border border-white/10 text-white/60 hover:text-white hover:bg-white/6 font-semibold px-4 py-3 rounded-xl transition-all duration-200 text-sm"
+                      style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', padding: '0.75rem', borderRadius: 10, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text)', fontSize: '0.85rem', cursor: 'pointer' }}
                     >
-                      <UserCircle2 className="w-4 h-4" />
-                      My Account
+                      <UserCircle2 size={15} /> My Account
                     </button>
                     <button
                       onClick={async () => { setOpen(false); await signOut(); navigate('/'); }}
-                      className="flex items-center gap-1.5 border border-red-500/20 text-red-400 hover:bg-red-500/10 px-4 py-3 rounded-xl transition-all duration-200 text-sm font-semibold"
+                      style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.75rem', borderRadius: 10, border: '1px solid #fca5a5', background: 'transparent', color: '#dc2626', fontSize: '0.85rem', cursor: 'pointer' }}
                     >
-                      <LogOut className="w-4 h-4" />
+                      <LogOut size={15} />
                     </button>
                   </div>
                 ) : (
                   <button
                     onClick={() => { setOpen(false); navigate('/signin'); }}
-                    className="w-full flex items-center justify-center gap-2 border border-white/10 text-white/60 hover:text-white hover:bg-white/6 font-semibold px-4 py-3 rounded-xl transition-all duration-200 text-sm"
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', padding: '0.75rem', borderRadius: 10, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text)', fontSize: '0.85rem', cursor: 'pointer' }}
                   >
                     Sign In / Register
                   </button>

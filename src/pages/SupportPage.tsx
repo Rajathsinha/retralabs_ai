@@ -18,6 +18,8 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 
+const REFERRAL_OPTIONS = ['YouTube', 'Instagram', 'Reddit', 'Friend', 'Google', 'Twitter / X', 'TikTok'];
+
 const FAQS = [
   {
     question: 'What are the shipping timelines?',
@@ -102,6 +104,22 @@ const REFERRAL_SOURCES = ['YouTube', 'Instagram', 'Reddit', 'Friend', 'Google', 
 
 export default function SupportPage() {
   const navigate = useNavigate();
+  const [referralSource,  setReferralSource]  = useState('');
+  const [friendName,      setFriendName]      = useState('');
+  const [showReferralErr, setShowReferralErr] = useState(false);
+
+  const buildWhatsAppUrl = () => {
+    const base = 'https://wa.me/918217824384?text=';
+    const suffix = referralSource
+      ? `${encodeURIComponent(`\n\nFound you via: ${referralSource}${referralSource === 'Friend' && friendName ? ` (referred by ${friendName})` : ''}`)}`
+      : '';
+    return `${base}${encodeURIComponent('Hello, I need support with RetraLabs')}${suffix}`;
+  };
+
+  const handleWhatsApp = () => {
+    if (!referralSource) { setShowReferralErr(true); return; }
+    window.open(buildWhatsAppUrl(), '_blank');
+  };
 
   const [referralSource, setReferralSource] = useState('');
   const [friendName, setFriendName] = useState('');
@@ -123,7 +141,7 @@ export default function SupportPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen" style={{ background: 'var(--off-white)' }}>
       {/* Hero heading */}
       <div className="bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
@@ -244,81 +262,106 @@ export default function SupportPage() {
           </CardBody>
         </Card>
 
-        {/* Contact CTA with mandatory referral */}
-        <div className="mt-12 max-w-xl mx-auto">
-          <div className="text-center mb-8">
-            <h3 className="text-xl font-bold text-slate-900 mb-2">Still have questions?</h3>
-            <p className="text-slate-500">
-              Our team is happy to help — reach out via WhatsApp for a quick response.
-            </p>
-            <p className="text-xs text-rose-600 font-semibold mt-1">
-              ⚠ No dosage or guidance provided. Strictly for research use only.
-            </p>
-          </div>
+        {/* ── How did you find us? + Contact CTA ── */}
+        <div className="mt-12 max-w-2xl mx-auto">
 
-          {/* How did you find us — mandatory */}
-          <div id="support-referral-section" className="bg-white rounded-2xl border border-slate-200 p-5 mb-4">
-            <p className="text-sm font-semibold text-slate-700 mb-1">
-              How did you find us? <span className="text-red-500">*</span>
-            </p>
-            <p className="text-xs text-slate-400 mb-3">Required before contacting us</p>
-            <div className="flex flex-wrap gap-2 mb-2">
-              {REFERRAL_SOURCES.map((src) => (
+          {/* Referral source selector */}
+          <div
+            id="support-referral-section"
+            style={{
+              background: 'var(--white)',
+              border: `1px solid ${showReferralErr && !referralSource ? '#fca5a5' : 'var(--border)'}`,
+              borderRadius: '1rem',
+              padding: '1.5rem',
+              marginBottom: '1.5rem',
+            }}
+          >
+            <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 500, color: 'var(--text)', marginBottom: '0.75rem' }}>
+              How did you find us? <span style={{ color: '#dc2626' }}>*</span>
+            </label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
+              {REFERRAL_OPTIONS.map(src => (
                 <button
                   key={src}
                   type="button"
                   onClick={() => {
                     setReferralSource(src);
-                    setShowReferralError(false);
+                    setShowReferralErr(false);
                     if (src !== 'Friend') setFriendName('');
                   }}
-                  className={`px-3 py-1.5 rounded-full text-xs font-semibold border-2 transition-all ${
-                    referralSource === src
-                      ? 'bg-slate-900 border-slate-900 text-white'
-                      : 'bg-white border-slate-200 text-slate-600 hover:border-slate-400'
-                  }`}
+                  style={{
+                    padding: '0.35rem 0.85rem',
+                    borderRadius: 9999,
+                    fontSize: '0.78rem',
+                    fontWeight: referralSource === src ? 500 : 300,
+                    border: `2px solid ${referralSource === src ? 'var(--text)' : 'var(--border)'}`,
+                    background: referralSource === src ? 'var(--text)' : 'transparent',
+                    color: referralSource === src ? 'var(--white)' : 'var(--text-muted)',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s',
+                  }}
                 >
                   {src}
                 </button>
               ))}
             </div>
+
             {referralSource === 'Friend' && (
-              <div className="mt-2">
-                <input
-                  type="text"
-                  placeholder="Friend's name (may qualify for an extra discount 🎉)"
-                  value={friendName}
-                  onChange={(e) => setFriendName(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border-2 border-slate-200 rounded-xl focus:border-slate-900 focus:outline-none transition-colors"
-                />
-              </div>
+              <input
+                type="text"
+                placeholder="Friend's name (may qualify for an extra discount)"
+                value={friendName}
+                onChange={e => setFriendName(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.6rem 0.85rem',
+                  fontSize: '0.82rem',
+                  border: '1px solid var(--border)',
+                  borderRadius: '0.5rem',
+                  color: 'var(--text)',
+                  background: 'var(--white)',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
+                onFocus={e => (e.target.style.borderColor = 'var(--accent)')}
+                onBlur={e => (e.target.style.borderColor = 'var(--border)')}
+              />
             )}
-            {showReferralError && (
-              <p className="text-xs text-red-500 mt-1.5">Please select how you found us to continue.</p>
+
+            {showReferralErr && !referralSource && (
+              <p style={{ fontSize: '0.72rem', color: '#dc2626', marginTop: '0.5rem' }}>
+                Please let us know how you found us before reaching out.
+              </p>
             )}
           </div>
 
-          {/* WhatsApp CTA */}
-          <a
-            href={buildWhatsAppUrl()}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={handleWhatsAppClick}
-            className="w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 active:bg-green-600 text-white font-bold py-4 px-6 rounded-2xl transition-colors text-base shadow-lg shadow-green-500/20"
-            style={{ textDecoration: 'none' }}
-          >
-            <MessageSquare className="w-5 h-5" />
-            WhatsApp Us
-          </a>
+          {/* Research disclaimer note */}
+          <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textAlign: 'center', marginBottom: '1.25rem', lineHeight: 1.6 }}>
+            ⚠️ Strictly no dosage or guidance — products are for in vitro research use only.
+            For any scientific or technical queries, our team will respond within 24 hours.
+          </p>
 
-          <div className="flex justify-center mt-3">
-            <button
-              onClick={() => navigate('/contact')}
-              className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 transition-colors font-medium"
-            >
-              <Mail className="w-4 h-4" />
-              Or use the Contact Page
-            </button>
+          {/* CTA buttons */}
+          <div style={{ textAlign: 'center' }}>
+            <h3 className="section-heading" style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Still have questions?</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.5rem', lineHeight: 1.7 }}>
+              Our team is happy to help. Please select how you found us above, then reach out.
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', justifyContent: 'center' }}>
+              <button
+                onClick={handleWhatsApp}
+                className="btn-dark"
+                style={{ background: referralSource ? 'var(--accent)' : 'var(--text-muted)' }}
+              >
+                <MessageSquare size={16} /> WhatsApp Us
+              </button>
+              <button
+                onClick={() => navigate('/contact')}
+                className="btn-ghost"
+              >
+                <Mail size={16} /> Contact Page
+              </button>
+            </div>
           </div>
         </div>
       </div>
