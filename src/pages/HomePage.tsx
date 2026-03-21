@@ -18,7 +18,7 @@ import { motion, AnimatePresence, useInView, useMotionValue, useSpring } from 'f
 import { Chip, Button } from '@heroui/react';
 import {
   FlaskConical, ShieldCheck, ArrowRight, Star,
-  CheckCircle2, MessageCircle,
+  CheckCircle2, MessageCircle, AlertTriangle,
 } from 'lucide-react';
 import HeroParticles from '../components/HeroParticles';
 import AnimatedSection from '../components/AnimatedSection';
