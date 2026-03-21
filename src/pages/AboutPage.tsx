@@ -80,24 +80,24 @@ export default function AboutPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--white)' }}>
+    <div className="min-h-screen bg-white">
 
       {/* ─── HERO ─── */}
-      <section className="relative overflow-hidden py-20" style={{ background: 'var(--text)' }}>
+      <section className="relative overflow-hidden bg-slate-950 py-20">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute inset-0 bg-dot-pattern bg-dot-sm opacity-[0.04]" />
-          <div className="absolute top-1/4 -left-40 w-96 h-96 rounded-full blur-3xl" style={{ background: 'rgba(26,107,74,0.1)' }} />
-          <div className="absolute bottom-1/4 -right-40 w-96 h-96 rounded-full blur-3xl" style={{ background: 'rgba(26,107,74,0.08)' }} />
+          <div className="absolute top-1/4 -left-40 w-96 h-96 bg-accent-500/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/4 -right-40 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl" />
         </div>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
-          <span className="section-eyebrow" style={{ display: 'inline-block', marginBottom: '1.5rem', opacity: 0.7 }}>
+          <span className="inline-block px-4 py-2 bg-white/5 text-accent-300 text-xs font-bold rounded-full uppercase tracking-wider border border-white/10 mb-6">
             Our Story
           </span>
-          <h1 className="section-heading" style={{ fontSize: 'clamp(2.5rem, 8vw, 5rem)', color: 'var(--white)', marginBottom: '1.5rem' }}>
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight leading-tight">
             We Built RetraLabs<br />
             <span className="text-gradient">Because We Got Scammed</span>
           </h1>
-          <p style={{ fontSize: '1.1rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.75, maxWidth: '40rem', margin: '0 auto' }}>
+          <p className="text-lg text-slate-400 leading-relaxed max-w-2xl mx-auto">
             India's research peptide market is still a mess of counterfeit sellers, fake B2B listings, and zero accountability. We got scammed. Got angry. Built something better. One verified batch at a time.
           </p>
         </div>
@@ -137,7 +137,7 @@ export default function AboutPage() {
                 <span className="inline-block px-4 py-2 bg-slate-100 text-slate-600 text-xs font-bold rounded-full uppercase tracking-wider mb-6">
                   The Origin
                 </span>
-                <h2 className="section-heading" style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', marginBottom: '1.5rem', color: 'var(--text)' }}>
+                <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6 leading-tight">
                   The Scam That<br />Started It All.
                 </h2>
                 <div className="space-y-5 text-slate-600 leading-relaxed">

@@ -68,12 +68,12 @@ export default function ContactPage() {
   ];
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--off-white)' }}>
+    <div className="min-h-screen bg-slate-50">
       {/* Hero section */}
-      <div style={{ background: 'var(--white)', borderBottom: '1px solid var(--border)' }}>
+      <div className="bg-white border-b border-slate-200">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-          <h1 className="section-heading" style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', marginBottom: '0.75rem' }}>Say Something. We're Listening.</h1>
-          <p style={{ fontSize: '1rem', color: 'var(--text-muted)', maxWidth: 480, lineHeight: 1.75 }}>
+          <h1 className="text-4xl font-bold text-slate-900 mb-3">Say Something. We're Listening.</h1>
+          <p className="text-lg text-slate-500 max-w-xl">
             Questions, concerns, or just want to tell us the reta is working? We read everything. Usually within 24 hours.
           </p>
         </div>
@@ -115,7 +115,7 @@ export default function ContactPage() {
         {/* Contact form */}
         <div className="grid md:grid-cols-2 gap-12 items-start">
           <div>
-            <h2 className="section-heading" style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Send Us a Message.</h2>
+            <h2 className="text-2xl font-bold text-slate-900 mb-2">Send Us a Message.</h2>
             <p className="text-slate-500 mb-6 text-sm leading-relaxed">
               Fill in the form and we'll get back to you ASAP. For anything urgent, just WhatsApp us — it's faster and we're actually on it.
             </p>

@@ -10,7 +10,6 @@ import {
   Divider,
 } from '@heroui/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import TiltCard from '../components/TiltCard';
 // Products are static (DEMO_PRODUCTS) — Supabase is used for orders only
 import { getProductImageUrl, BAC_WATER_IMAGE_URL } from '../utils/imageUrl';
 import { ProductWithVariants } from '../types';
@@ -377,23 +376,23 @@ export default function CataloguePage() {
     <motion.button
       whileTap={{ scale: 0.94 }}
       onClick={() => { setFilter(id); setActiveTag('all'); }}
-      style={{
-        position: 'relative',
-        padding: '0.4rem 1rem',
-        borderRadius: 9999,
-        fontSize: '0.78rem',
-        fontWeight: filter === id ? 500 : 300,
-        background: filter === id ? 'var(--text)' : 'transparent',
-        color: filter === id ? 'var(--white)' : 'var(--text-muted)',
-        border: 'none',
-        cursor: 'pointer',
-        transition: 'all 0.2s',
-        outline: 'none',
-        userSelect: 'none',
-      }}
+      className={`relative px-4 py-2 rounded-full text-sm font-semibold transition-colors select-none outline-none ${
+        filter === id
+          ? 'text-slate-900'
+          : 'text-slate-400 hover:text-white'
+      }`}
     >
-      {label}
-      <span style={{ marginLeft: '0.3rem', fontSize: '0.68rem', opacity: 0.65 }}>{count}</span>
+      {filter === id && (
+        <motion.span
+          layoutId="cat-pill-bg"
+          className="absolute inset-0 rounded-full bg-white"
+          transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
+        />
+      )}
+      <span className="relative z-10">{label}</span>
+      <span className={`relative z-10 ml-1.5 text-xs font-bold ${filter === id ? 'text-slate-500' : 'text-slate-600'}`}>
+        {count}
+      </span>
     </motion.button>
   );
 
@@ -404,42 +403,40 @@ export default function CataloguePage() {
       <motion.button
         whileTap={{ scale: 0.94 }}
         onClick={() => setActiveTag(active ? 'all' : tag.key)}
-        style={{
-          display: 'flex', alignItems: 'center', gap: '0.35rem',
-          padding: '0.3rem 0.75rem',
-          borderRadius: 9999,
-          fontSize: '0.72rem',
-          fontWeight: active ? 500 : 300,
-          background: active ? 'var(--accent-light)' : 'transparent',
-          color: active ? 'var(--accent)' : 'var(--text-muted)',
-          border: `1px solid ${active ? 'var(--accent)' : 'var(--border)'}`,
-          cursor: 'pointer',
-          transition: 'all 0.2s',
-          outline: 'none',
-          userSelect: 'none',
-        }}
+        className={`relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors select-none outline-none ${
+          active ? 'text-slate-900' : 'text-slate-400 hover:text-white border border-white/10 hover:border-white/20'
+        }`}
       >
-        <tag.Icon style={{ width: 11, height: 11, color: active ? 'var(--accent)' : 'var(--text-light)' }} />
-        <span>{tag.label}</span>
+        {active && (
+          <motion.span
+            layoutId={`tag-pill-bg-${tag.key}`}
+            className="absolute inset-0 rounded-full bg-white"
+            transition={{ type: 'spring', bounce: 0.2, duration: 0.35 }}
+          />
+        )}
+        <tag.Icon className={`relative z-10 w-3 h-3 ${active ? 'text-slate-600' : ''}`} />
+        <span className="relative z-10">{tag.label}</span>
       </motion.button>
     );
   };
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--white)' }}>
+    <div className="min-h-screen bg-slate-50">
 
       {/* ─── PAGE HEADER ──────────────────────────────────────────────────── */}
-      <section style={{ background: 'var(--off-white)', borderBottom: '1px solid var(--border)', paddingBottom: '2rem' }}>
+      <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 pb-8 border-b border-slate-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12">
 
           {/* Title row */}
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8">
             <div>
-              <p className="section-eyebrow mb-4">Research Catalogue</p>
-              <h1 className="section-heading" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', marginBottom: '0.75rem' }}>
+              <Chip size="sm" variant="flat" className="mb-4 bg-white/10 text-slate-300 uppercase tracking-wider font-bold text-[11px]">
+                Research Catalogue
+              </Chip>
+              <h1 className="text-4xl md:text-5xl font-bold text-white mb-3 tracking-tight">
                 The Real Stuff. All Verified.
               </h1>
-              <p style={{ color: 'var(--text-muted)', maxWidth: 480, lineHeight: 1.75, fontSize: '0.9rem' }}>
+              <p className="text-slate-400 max-w-xl leading-relaxed">
                 No fake B2B listings. No counterfeit labels. Just compounds that pass HPLC every time.
               </p>
             </div>
@@ -455,17 +452,13 @@ export default function CataloguePage() {
             <motion.div
               animate={searchFocus ? { scale: 1.01 } : { scale: 1 }}
               transition={{ duration: 0.2 }}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '0.75rem',
-                padding: '0.75rem 1rem',
-                borderRadius: '0.75rem',
-                border: `1px solid ${searchFocus ? 'var(--border-strong)' : 'var(--border)'}`,
-                background: 'var(--white)',
-                boxShadow: searchFocus ? '0 0 0 3px rgba(26,107,74,0.08)' : 'none',
-                transition: 'all 0.2s',
-              }}
+              className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl border transition-all duration-200 ${
+                searchFocus
+                  ? 'bg-white/14 border-white/40 shadow-[0_0_0_3px_rgba(255,255,255,0.08)]'
+                  : 'bg-white/8 border-white/15 hover:border-white/25 hover:bg-white/10'
+              }`}
             >
-              <Search style={{ flexShrink: 0, color: searchFocus ? 'var(--accent)' : 'var(--text-muted)', width: 16, height: 16 }} />
+              <Search className={`w-4 h-4 shrink-0 transition-colors duration-200 ${searchFocus ? 'text-white' : 'text-slate-500'}`} />
               <input
                 ref={searchRef}
                 type="search"
@@ -474,7 +467,7 @@ export default function CataloguePage() {
                 onFocus={() => setSearchFocus(true)}
                 onBlur={() => setSearchFocus(false)}
                 placeholder="Search peptides — try 'BPC', 'cognitive', 'metabolic'…"
-                style={{ flex: 1, background: 'transparent', color: 'var(--text)', fontSize: '0.85rem', outline: 'none', border: 'none', minWidth: 0 }}
+                className="flex-1 bg-transparent text-white placeholder-slate-500 text-sm outline-none min-w-0"
               />
               <AnimatePresence>
                 {searchQuery && (
@@ -484,15 +477,15 @@ export default function CataloguePage() {
                     exit={{ opacity: 0, scale: 0.7, rotate: 45 }}
                     transition={{ duration: 0.15 }}
                     onClick={() => { setSearchQuery(''); searchRef.current?.focus(); }}
-                    style={{ flexShrink: 0, width: 20, height: 20, borderRadius: '50%', background: 'var(--border)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'background 0.15s' }}
+                    className="shrink-0 w-5 h-5 rounded-full bg-white/15 flex items-center justify-center hover:bg-white/25 transition-colors"
                   >
-                    <X style={{ width: 12, height: 12, color: 'var(--text-muted)' }} />
+                    <X className="w-3 h-3 text-white" />
                   </motion.button>
                 )}
               </AnimatePresence>
               {/* Keyboard hint */}
               {!searchFocus && !searchQuery && (
-                <kbd style={{ padding: '0.1rem 0.4rem', borderRadius: 4, background: 'var(--off-white)', border: '1px solid var(--border)', color: 'var(--text-light)', fontSize: '0.68rem', fontFamily: 'monospace', flexShrink: 0 }}>
+                <kbd className="hidden sm:flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/8 border border-white/12 text-slate-500 text-[11px] font-mono shrink-0">
                   /
                 </kbd>
               )}
@@ -503,14 +496,14 @@ export default function CataloguePage() {
           <div className="flex flex-wrap items-center gap-2 min-h-[38px]">
 
             {/* Category pills */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'var(--cream)', borderRadius: 9999, padding: '0.2rem' }}>
+            <div className="flex items-center gap-1 bg-white/6 rounded-full px-1 py-1">
               <CatPill id="all"      label="All"      count={products.length} />
               <CatPill id="peptide"  label="Peptides" count={peptideCount}    />
               <CatPill id="supplies" label="Supplies" count={suppliesCount}   />
             </div>
 
             {/* Divider */}
-            <div className="hidden sm:block w-px h-5 mx-1" style={{ background: 'var(--border-strong)' }} />
+            <div className="hidden sm:block w-px h-5 bg-white/15 mx-1" />
 
             {/* Research-area tags (only visible for peptide / all) */}
             <AnimatePresence>
@@ -532,18 +525,11 @@ export default function CataloguePage() {
               <motion.button
                 whileTap={{ scale: 0.96 }}
                 onClick={() => setShowSort(s => !s)}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '0.5rem',
-                  padding: '0.4rem 0.875rem',
-                  borderRadius: 9999,
-                  fontSize: '0.75rem',
-                  fontWeight: showSort || sortBy !== 'default' ? 500 : 300,
-                  background: showSort || sortBy !== 'default' ? 'var(--text)' : 'transparent',
-                  color: showSort || sortBy !== 'default' ? 'var(--white)' : 'var(--text-muted)',
-                  border: `1px solid ${showSort || sortBy !== 'default' ? 'var(--text)' : 'var(--border-strong)'}`,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                }}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-semibold transition-all border ${
+                  showSort || sortBy !== 'default'
+                    ? 'bg-white text-slate-900 border-transparent shadow-lg'
+                    : 'bg-white/8 text-slate-400 border-white/12 hover:border-white/25 hover:text-white'
+                }`}
               >
                 <span>{currentSortLabel}</span>
                 <motion.div animate={{ rotate: showSort ? 180 : 0 }} transition={{ duration: 0.2 }}>
@@ -558,26 +544,18 @@ export default function CataloguePage() {
                     animate={{ opacity: 1, y: 0,  scale: 1    }}
                     exit={{ opacity: 0,    y: -6, scale: 0.96 }}
                     transition={{ duration: 0.15, ease: 'easeOut' }}
-                    style={{ position: 'absolute', right: 0, top: 'calc(100% + 8px)', background: 'var(--white)', borderRadius: '1rem', border: '1px solid var(--border)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)', overflow: 'hidden', zIndex: 30, minWidth: 180 }}
+                    className="absolute right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-30 min-w-[180px]"
                   >
                     {SORT_OPTIONS.map(opt => (
                       <button
                         key={opt.key}
                         onClick={() => { setSortBy(opt.key); setShowSort(false); }}
-                        style={{
-                          width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                          padding: '0.625rem 1rem',
-                          fontSize: '0.82rem',
-                          fontWeight: sortBy === opt.key ? 500 : 300,
-                          color: sortBy === opt.key ? 'var(--text)' : 'var(--text-muted)',
-                          background: sortBy === opt.key ? 'var(--off-white)' : 'transparent',
-                          border: 'none', cursor: 'pointer', transition: 'background 0.15s',
-                        }}
-                        onMouseEnter={e => { if (sortBy !== opt.key) (e.currentTarget.style.background = 'var(--off-white)'); }}
-                        onMouseLeave={e => { if (sortBy !== opt.key) (e.currentTarget.style.background = 'transparent'); }}
+                        className={`w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium transition-colors hover:bg-slate-50 ${
+                          sortBy === opt.key ? 'text-slate-900 bg-slate-50' : 'text-slate-600'
+                        }`}
                       >
                         {opt.label}
-                        {sortBy === opt.key && <Check style={{ width: 12, height: 12, color: 'var(--accent)' }} />}
+                        {sortBy === opt.key && <Check className="w-3.5 h-3.5 text-emerald-500" />}
                       </button>
                     ))}
                   </motion.div>
@@ -603,12 +581,12 @@ export default function CataloguePage() {
                 key={filteredProducts.length}
                 initial={{ opacity: 0, y: -6 }}
                 animate={{ opacity: 1,  y: 0  }}
-                style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}
+                className="text-sm text-slate-500"
               >
                 Showing{' '}
-                <span style={{ fontWeight: 500, color: 'var(--text)' }}>{filteredProducts.length}</span>
+                <span className="font-bold text-slate-900">{filteredProducts.length}</span>
                 {' '}of{' '}
-                <span style={{ fontWeight: 400 }}>{products.length}</span> products
+                <span className="font-semibold">{products.length}</span> products
               </motion.p>
 
               {/* Active filter pills */}
@@ -646,10 +624,7 @@ export default function CataloguePage() {
                   animate={{ opacity: 1, x: 0  }}
                   exit={{ opacity: 0,   x: 10  }}
                   onClick={clearAll}
-                  style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'none', border: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
-                  onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
-                  onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
-                  className=""
+                  className="text-xs font-semibold text-slate-400 hover:text-slate-700 transition-colors flex items-center gap-1"
                 >
                   <X className="w-3 h-3" /> Clear all
                 </motion.button>
@@ -680,30 +655,18 @@ export default function CataloguePage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                     exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.18 } }}
+                    className="cursor-pointer group"
+                    onClick={() => navigate(`/product/${product.id}`)}
                   >
-                    <TiltCard className="cursor-pointer group h-full" intensity={8}>
-                      <div
-                        onClick={() => navigate(`/product/${product.id}`)}
-                        style={{
-                          background: 'var(--white)',
-                          border: '1px solid var(--border)',
-                          borderRadius: '1rem',
-                          overflow: 'hidden',
-                          height: '100%',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          transition: 'box-shadow 0.3s',
-                        }}
-                        onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 12px 40px rgba(0,0,0,0.1)')}
-                        onMouseLeave={e => (e.currentTarget.style.boxShadow = 'none')}
-                      >
+                    <Card shadow="sm" className="w-full h-full hover:shadow-xl transition-shadow duration-300">
+                      <CardBody className="p-0 overflow-hidden">
+
                         {/* Image */}
-                        <div style={{ position: 'relative', background: 'var(--off-white)', overflow: 'hidden', aspectRatio: '4/3', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div className="relative aspect-[4/3] bg-slate-100 overflow-hidden">
                           <img
                             src={getProductImageUrl(product.image_url, product.name)}
                             alt={`${product.name} research peptide${isBacWater ? '' : ' vial India'}`}
-                            style={{ height: '75%', width: 'auto', objectFit: 'contain', transition: 'transform 0.6s ease' }}
-                            className="group-hover:scale-105"
+                            className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
                             onError={(e) => {
                               const t = e.target as HTMLImageElement;
                               const n = product.name.toLowerCase();
@@ -723,110 +686,90 @@ export default function CataloguePage() {
 
                           {/* BESTSELLER / POPULAR / NEW badge */}
                           {badge && (
-                            <div style={{ position: 'absolute', top: 12, left: 12, zIndex: 10 }}>
-                              <span
-                                style={{
-                                  display: 'inline-block',
-                                  fontSize: '0.6rem',
-                                  fontWeight: 500,
-                                  letterSpacing: '0.12em',
-                                  textTransform: 'uppercase',
-                                  color: 'var(--accent)',
-                                  background: 'var(--accent-light)',
-                                  padding: '0.2rem 0.5rem',
-                                  borderRadius: 9999,
-                                }}
-                              >
+                            <div className="absolute top-3 left-3 z-10">
+                              <Chip size="sm" color={badge.color} variant="solid" className="font-bold text-[11px] shadow-md">
                                 {badge.label}
+                              </Chip>
+                            </div>
+                          )}
+
+                          {/* Research-area tag badge */}
+                          {PRODUCT_TAG[product.name] && (
+                            <div className="absolute bottom-3 left-3 z-10">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-wide">
+                                {(() => {
+                                  const t = RESEARCH_TAGS.find(r => r.key === PRODUCT_TAG[product.name]);
+                                  return t ? <><t.Icon className="w-2.5 h-2.5" />{t.label}</> : null;
+                                })()}
                               </span>
                             </div>
                           )}
 
                           {/* Purity badge */}
-                          <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 10 }}>
-                            <span
-                              style={{
-                                display: 'inline-flex', alignItems: 'center', gap: '0.25rem',
-                                fontSize: '0.65rem', fontWeight: 500,
-                                color: 'var(--accent)',
-                                background: 'rgba(255,255,255,0.9)',
-                                border: '1px solid var(--border)',
-                                padding: '0.2rem 0.5rem',
-                                borderRadius: 9999,
-                                backdropFilter: 'blur(8px)',
-                              }}
+                          <div className="absolute top-3 right-3 z-10">
+                            <Chip
+                              size="sm" color="success" variant="flat"
+                              startContent={<ShieldCheck className="w-3 h-3" />}
+                              className="font-bold bg-white/90 backdrop-blur-sm shadow-sm"
                             >
-                              <ShieldCheck style={{ width: 10, height: 10 }} />
                               {purity}
-                            </span>
+                            </Chip>
                           </div>
+
+                          {/* Hover overlay */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                         </div>
 
                         {/* Content */}
-                        <div style={{ padding: '1.25rem 1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                          {/* Research tag */}
-                          {PRODUCT_TAG[product.name] && (
-                            <span
-                              style={{
-                                display: 'inline-block',
-                                fontSize: '0.6rem',
-                                fontWeight: 500,
-                                letterSpacing: '0.15em',
-                                textTransform: 'uppercase',
-                                color: 'var(--text-light)',
-                                marginBottom: '0.5rem',
-                              }}
-                            >
-                              {RESEARCH_TAGS.find(r => r.key === PRODUCT_TAG[product.name])?.label}
-                            </span>
-                          )}
-
-                          <h3
-                            className="section-heading group-hover:text-[var(--accent)] transition-colors"
-                            style={{ fontSize: '1.35rem', marginBottom: '0.5rem', color: 'var(--text)' }}
-                          >
+                        <div className="px-5 pt-4 pb-2">
+                          {/* Highlight matching search text in name */}
+                          <h3 className="text-lg font-bold text-slate-900 mb-1.5 group-hover:text-primary-600 transition-colors duration-200">
                             {product.name}
                           </h3>
-                          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.7, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', marginBottom: '1rem', flex: 1 }}>
+                          <p className="text-sm text-slate-500 leading-relaxed line-clamp-2 mb-3">
                             {product.description}
                           </p>
-
-                          <div style={{ borderTop: '1px solid var(--border)', paddingTop: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <div>
-                              {startingPrice && (
-                                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                                  From <strong style={{ color: 'var(--text)', fontSize: '1rem', fontWeight: 400 }}>{format(startingPrice)}</strong>
-                                </div>
-                              )}
-                              <div style={{ fontSize: '0.68rem', color: 'var(--text-light)', marginTop: '0.15rem' }}>
-                                {product.variants.length} variant{product.variants.length !== 1 ? 's' : ''}
-                              </div>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={e => { e.stopPropagation(); navigate(`/product/${product.id}`); }}
-                              style={{
-                                display: 'flex', alignItems: 'center', gap: '0.3rem',
-                                padding: '0.45rem 0.9rem',
-                                borderRadius: 9999,
-                                border: '1px solid var(--text)',
-                                background: 'var(--text)',
-                                color: 'var(--white)',
-                                fontSize: '0.75rem',
-                                fontWeight: 400,
-                                cursor: 'pointer',
-                                transition: 'all 0.2s',
-                                flexShrink: 0,
-                              }}
-                              onMouseEnter={e => { (e.currentTarget.style.background = 'var(--accent)'); (e.currentTarget.style.borderColor = 'var(--accent)'); }}
-                              onMouseLeave={e => { (e.currentTarget.style.background = 'var(--text)'); (e.currentTarget.style.borderColor = 'var(--text)'); }}
-                            >
-                              View <ArrowRight style={{ width: 12, height: 12 }} />
-                            </button>
+                          <div className="flex flex-wrap gap-1.5 mb-3">
+                            <Chip size="sm" variant="flat" color="success"  className="text-[11px] font-medium">
+                              <ShieldCheck className="w-3 h-3 mr-1 inline" />Lab verified
+                            </Chip>
+                            <Chip size="sm" variant="flat" color="primary"  className="text-[11px] font-medium">
+                              <Microscope className="w-3 h-3 mr-1 inline" />HPLC tested
+                            </Chip>
+                            {!isBacWater && (
+                              <Chip size="sm" variant="flat" color="warning" className="text-[11px] font-medium">
+                                <FileCheck className="w-3 h-3 mr-1 inline" />COA included
+                              </Chip>
+                            )}
                           </div>
+                          <Divider className="my-2" />
                         </div>
-                      </div>
-                    </TiltCard>
+                      </CardBody>
+
+                      <CardFooter className="px-5 pb-4 pt-2 flex items-center justify-between gap-3">
+                        <div>
+                          {startingPrice && (
+                            <div className="flex items-baseline gap-1">
+                              <span className="text-xs text-slate-400 font-medium">From</span>
+                              <span className="text-xl font-bold text-slate-900">{format(startingPrice)}</span>
+                            </div>
+                          )}
+                          <span className="text-xs text-slate-400">
+                            {product.variants.length} variant{product.variants.length !== 1 ? 's' : ''} available
+                          </span>
+                          <span className="flex items-center gap-1 mt-1 text-[10px] font-semibold text-indigo-500">
+                            <GraduationCap className="w-3 h-3" />Student discount available
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={e => { e.stopPropagation(); navigate(`/product/${product.id}`); }}
+                          className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-700 active:bg-slate-800 text-white text-sm font-bold px-4 py-2 rounded-xl transition-colors shrink-0"
+                        >
+                          Order <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      </CardFooter>
+                    </Card>
                   </motion.div>
                 );
               })}
@@ -844,10 +787,10 @@ export default function CataloguePage() {
               animate={{ rotate: [0, -8, 8, -4, 4, 0] }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              <Search className="w-14 h-14 mx-auto mb-5" style={{ color: 'var(--border-strong)' }} />
+              <Search className="w-14 h-14 text-slate-200 mx-auto mb-5" />
             </motion.div>
-            <p style={{ color: 'var(--text)', fontWeight: 500, fontSize: '1.1rem', marginBottom: '0.5rem' }}>No results found</p>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '0.5rem', maxWidth: '20rem', margin: '0 auto 0.5rem' }}>
+            <p className="text-slate-800 font-bold text-lg mb-2">No results found</p>
+            <p className="text-slate-400 text-sm mb-2 max-w-xs mx-auto">
               {searchQuery
                 ? `Nothing matches "${searchQuery}". Try a different keyword.`
                 : 'No products match the selected filters.'}
@@ -865,42 +808,37 @@ export default function CataloguePage() {
 
         {/* ─── BUNDLE DEAL PANEL ───────────────────────────────────────────── */}
         {!loading && (
-          <div
-            style={{
-              marginTop: '3.5rem',
-              background: 'var(--text)',
-              borderRadius: '1.25rem',
-              overflow: 'hidden',
-              padding: '2.5rem',
-            }}
-          >
-            <div className="flex flex-col md:flex-row items-center gap-8">
-              <div className="flex-1">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                  <Sparkles style={{ width: 18, height: 18, color: '#f59e0b' }} />
-                  <span className="section-eyebrow" style={{ color: '#f59e0b' }}>Bundle Deal</span>
+          <Card shadow="none" className="mt-14 bg-gradient-to-br from-slate-900 to-slate-800 border-0 overflow-hidden">
+            <CardBody className="p-8 md:p-10">
+              <div className="flex flex-col md:flex-row items-center gap-8">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Sparkles className="w-5 h-5 text-amber-400" />
+                    <span className="text-amber-400 text-sm font-bold uppercase tracking-wider">Bundle Deal</span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-3">Order More of the Same. Pay Less.</h3>
+                  <p className="text-slate-400 leading-relaxed mb-5">
+                    Buy the same peptide twice and get 10% off it. Buy three and get 20% off. Per peptide, not per cart.
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <Chip size="sm" variant="flat" color="success" className="font-semibold bg-white/10 text-emerald-300">Same peptide ×2 = 10% off</Chip>
+                    <Chip size="sm" variant="flat" color="success" className="font-semibold bg-white/10 text-emerald-300">Same peptide ×3 = 20% off</Chip>
+                    <Chip size="sm" variant="flat" color="warning" className="font-semibold bg-white/10 text-amber-300">Auto-applied at checkout</Chip>
+                  </div>
                 </div>
-                <h3 className="section-heading" style={{ fontSize: '1.75rem', color: 'var(--white)', marginBottom: '0.75rem' }}>Order More of the Same. Pay Less.</h3>
-                <p style={{ color: 'rgba(255,255,255,0.55)', lineHeight: 1.75, marginBottom: '1.25rem', fontSize: '0.88rem' }}>
-                  Buy the same peptide twice and get 10% off it. Buy three and get 20% off. Per peptide, not per cart.
-                </p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  <Chip size="sm" variant="flat" color="success" className="font-semibold bg-white/10 text-emerald-300">Same peptide ×2 = 10% off</Chip>
-                  <Chip size="sm" variant="flat" color="success" className="font-semibold bg-white/10 text-emerald-300">Same peptide ×3 = 20% off</Chip>
-                  <Chip size="sm" variant="flat" color="warning" className="font-semibold bg-white/10 text-amber-300">Auto-applied at checkout</Chip>
-                </div>
+                <Button
+                  size="lg" variant="solid"
+                  className="shrink-0 bg-white text-slate-900 font-bold shadow-lg hover:bg-slate-100"
+                  endContent={<ArrowRight className="w-4 h-4" />}
+                  onPress={() =>
+                    document.getElementById('products')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  }
+                >
+                  Browse the Catalogue →
+                </Button>
               </div>
-              <button
-                className="btn-ghost"
-                style={{ flexShrink: 0, color: 'var(--white)', borderColor: 'rgba(255,255,255,0.25)' }}
-                onMouseEnter={e => { (e.currentTarget.style.borderColor = 'var(--accent)'); (e.currentTarget.style.color = 'var(--accent)'); }}
-                onMouseLeave={e => { (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)'); (e.currentTarget.style.color = 'var(--white)'); }}
-                onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-              >
-                Browse the Catalogue <ArrowRight style={{ width: 14, height: 14 }} />
-              </button>
-            </div>
-          </div>
+            </CardBody>
+          </Card>
         )}
 
       </section>

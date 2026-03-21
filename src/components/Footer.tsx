@@ -1,181 +1,179 @@
+import { Divider, Chip, Link } from '@heroui/react';
 import { Link as RouterLink } from 'react-router-dom';
-import { Mail, ArrowUpRight, MessageCircle } from 'lucide-react';
+import { Mail, ArrowUpRight, MessageCircle, ShieldCheck, Globe, FileCheck, FlaskConical } from 'lucide-react';
 import Logo from './Logo';
 
+const TRUST_BADGES = [
+  { icon: ShieldCheck, label: 'COA Verified', color: 'text-emerald-400', chipColor: 'success' as const },
+  { icon: Globe, label: 'GMP Sourced', color: 'text-accent-400', chipColor: 'warning' as const },
+  { icon: FlaskConical, label: 'Trustpilot Verified', color: 'text-emerald-400', chipColor: 'success' as const },
+  { icon: FileCheck, label: 'HPLC Tested', color: 'text-blue-400', chipColor: 'primary' as const },
+];
+
 const COMPANY_LINKS = [
-  { to: '/about',     label: 'About Us' },
-  { to: '/contact',   label: 'Contact Us' },
-  { to: '/support',   label: 'Support' },
+  { to: '/about', label: 'About Us' },
+  { to: '/contact', label: 'Contact Us' },
+  { to: '/support', label: 'Support' },
   { to: '/catalogue', label: 'Products' },
-  { to: '/reviews',   label: 'Reviews' },
+  { to: '/reviews', label: 'Reviews' },
 ];
 
 const LEGAL_LINKS = [
   { to: '/privacy', label: 'Privacy Policy' },
-  { to: '/terms',   label: 'Terms & Conditions' },
-  { to: '/refund',  label: 'Refund Policy' },
+  { to: '/terms', label: 'Terms & Conditions' },
+  { to: '/refund', label: 'Refund Policy' },
 ];
 
-const PHONE      = '918217824384';
+const PHONE = '918217824384';
 const WA_DEFAULT = `https://wa.me/${PHONE}?text=${encodeURIComponent('Hi, I have a question about RetraLabs products.')}`;
 
-const linkStyle: React.CSSProperties = {
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: '0.25rem',
-  fontSize: '0.82rem',
-  color: 'var(--text-muted)',
-  textDecoration: 'none',
-  transition: 'color 0.2s',
-  lineHeight: 1.4,
-};
+function FooterLink({ href, children, external = false }: {
+  href: string;
+  children: React.ReactNode;
+  external?: boolean;
+}) {
+  const cls =
+    'text-sm text-slate-500 hover:text-white transition-colors duration-200 flex items-center gap-1 group';
 
-const headingStyle: React.CSSProperties = {
-  fontSize: '0.65rem',
-  fontWeight: 500,
-  letterSpacing: '0.18em',
-  textTransform: 'uppercase',
-  color: 'var(--text)',
-  marginBottom: '1.25rem',
-};
+  if (external) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={cls}>
+        {children}
+        <ArrowUpRight className="w-3 h-3 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
+      </a>
+    );
+  }
+
+  return (
+    <RouterLink to={href} className={cls}>
+      {children}
+      <ArrowUpRight className="w-3 h-3 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
+    </RouterLink>
+  );
+}
 
 export default function Footer() {
   return (
-    <footer
-      style={{
-        background: 'var(--off-white)',
-        borderTop: '1px solid var(--border)',
-        marginTop: 'auto',
-        fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-        fontWeight: 300,
-      }}
-    >
-      {/* Main footer grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style={{ paddingTop: '4rem', paddingBottom: '2rem' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr', gap: '3rem' }}
-             className="grid-cols-1 md:grid-cols-4">
+    <footer className="bg-slate-950 text-slate-400 mt-auto">
 
-          {/* Brand column */}
-          <div>
-            <div style={{ marginBottom: '1.25rem' }}>
-              <Logo size="sm" variant="dark" />
+      {/* Trust Badges Bar */}
+      <div className="border-b border-slate-800/60">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+          <div className="flex flex-wrap items-center justify-center gap-3 md:gap-6">
+            {TRUST_BADGES.map((badge) => {
+              const Icon = badge.icon;
+              return (
+                <Chip
+                  key={badge.label}
+                  variant="flat"
+                  color={badge.chipColor}
+                  size="sm"
+                  startContent={<Icon className={`w-3.5 h-3.5 ${badge.color} ml-1`} />}
+                  classNames={{
+                    base: 'bg-white/5 border border-white/10 px-3 py-4',
+                    content: 'text-slate-400 text-xs font-medium',
+                  }}
+                >
+                  {badge.label}
+                </Chip>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Main Footer Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+
+          {/* Brand Column */}
+          <div className="md:col-span-1">
+            <div className="mb-5">
+              <Logo size="sm" variant="light" />
             </div>
-            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.8, marginBottom: '1.5rem', maxWidth: 260 }}>
+            <p className="text-sm leading-relaxed mb-5 text-slate-500">
               India's trusted research peptide supplier. HPLC-verified, COA-backed compounds sourced
               directly from GMP-certified manufacturers.
             </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              <a
+            <div className="flex flex-col gap-3">
+              <Link
                 href="mailto:support@retralabs.in"
-                style={{ ...linkStyle, color: 'var(--accent)' }}
-                onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
-                onMouseLeave={e => (e.currentTarget.style.color = 'var(--accent)')}
+                className="inline-flex items-center gap-2 text-sm text-accent-400 hover:text-accent-300 transition-colors"
               >
-                <Mail size={14} />
+                <Mail className="w-4 h-4 flex-shrink-0" />
                 support@retralabs.in
-              </a>
+              </Link>
               <a
                 href={WA_DEFAULT}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ ...linkStyle, color: 'var(--accent)' }}
-                onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
-                onMouseLeave={e => (e.currentTarget.style.color = 'var(--accent)')}
+                className="flex items-center gap-2 text-sm text-emerald-400 hover:text-emerald-300 transition-colors"
               >
-                <MessageCircle size={14} />
+                <MessageCircle className="w-4 h-4 flex-shrink-0" />
                 WhatsApp Support
               </a>
             </div>
           </div>
 
-          {/* Company column */}
+          {/* Company Column */}
           <div>
-            <p style={headingStyle}>Company</p>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-              {COMPANY_LINKS.map(link => (
+            <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-5">
+              Company
+            </h4>
+            <ul className="space-y-3">
+              {COMPANY_LINKS.map((link) => (
                 <li key={link.to}>
-                  <RouterLink
-                    to={link.to}
-                    style={linkStyle}
-                    onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
-                    onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
-                  >
-                    {link.label}
-                  </RouterLink>
+                  <FooterLink href={link.to}>{link.label}</FooterLink>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Legal column */}
+          {/* Legal Column */}
           <div>
-            <p style={headingStyle}>Legal</p>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-              {LEGAL_LINKS.map(link => (
+            <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-5">
+              Legal
+            </h4>
+            <ul className="space-y-3">
+              {LEGAL_LINKS.map((link) => (
                 <li key={link.to}>
-                  <RouterLink
-                    to={link.to}
-                    style={linkStyle}
-                    onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
-                    onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
-                  >
-                    {link.label}
-                  </RouterLink>
+                  <FooterLink href={link.to}>{link.label}</FooterLink>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Quick Links */}
+          {/* Quick Links Column */}
           <div>
-            <p style={headingStyle}>Quick Links</p>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+            <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-5">
+              Quick Links
+            </h4>
+            <ul className="space-y-3">
               <li>
-                <RouterLink
-                  to="/track-order"
-                  style={linkStyle}
-                  onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
-                  onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
-                >
-                  Track Order
-                </RouterLink>
+                <FooterLink href="/track-order">Track Order</FooterLink>
               </li>
               <li>
-                <a
-                  href="https://www.trustpilot.com/review/retralabs.in"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={linkStyle}
-                  onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
-                  onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
-                >
-                  Trustpilot Reviews <ArrowUpRight size={11} />
-                </a>
+                <FooterLink href="https://www.trustpilot.com/review/retralabs.in" external>
+                  Trustpilot Reviews
+                </FooterLink>
               </li>
               <li>
-                <a
-                  href={WA_DEFAULT}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={linkStyle}
-                  onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
-                  onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
-                >
-                  WhatsApp Support <ArrowUpRight size={11} />
-                </a>
+                <FooterLink href={WA_DEFAULT} external>
+                  WhatsApp Support
+                </FooterLink>
               </li>
             </ul>
           </div>
         </div>
 
-        {/* Divider */}
-        <div style={{ borderTop: '1px solid var(--border)', marginTop: '3rem', paddingTop: '1.5rem' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }} className="md:flex-row md:justify-between md:items-center">
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>
-              &copy; {new Date().getFullYear()} RetraLabs. All rights reserved.
-            </p>
-            <p style={{ fontSize: '0.72rem', color: 'var(--text-light)', maxWidth: 480, lineHeight: 1.5 }}>
-              Research Use Disclaimer: All products are for in vitro research purposes only. Not for human or veterinary use.
+        <Divider className="bg-slate-800/50 mb-8" />
+
+        {/* Bottom Bar */}
+        <div className="pr-20 md:pr-24">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-600">
+            <p>&copy; {new Date().getFullYear()} RetraLabs. All rights reserved.</p>
+            <p className="text-center md:text-right">
+              Research Use Disclaimer: All products are for laboratory research purposes only. Not for human use.
             </p>
           </div>
         </div>

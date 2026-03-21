@@ -1,588 +1,552 @@
 /**
- * HomePage — Luxury minimal redesign.
+ * HomePage — fully animated with Framer Motion + canvas particles.
  *
- * Design tokens: Cormorant Garamond (serif headings) + Outfit (body copy)
- * Accent: #1a6b4a (deep emerald)
- * Palette: --off-white, --cream, --text, --text-muted
- *
- * Sections:
- *  1. Hero          — particle canvas, serif headline, animated entrance
- *  2. Trust Bar     — 4 stats with IntersectionObserver count-up
- *  3. Products      — 3-col TiltCard grid
- *  4. How It Works  — 3-step process
- *  5. Why Us        — 2-col feature list
- *  6. Testimonials  — dark bg, 3 review cards
- *  7. CTA           — cream bg, centred serif headline
+ * Animation layers:
+ *  1. HeroParticles     — 55 floating cyan/sky/indigo particles (canvas, GPU)
+ *  2. Animated orbs     — Framer Motion infinite float + scale keyframes
+ *  3. Hero stagger      — badge → headline → subtext → CTAs with spring easing
+ *  4. Headline rotation — AnimatePresence fade+blur between 3 headlines
+ *  5. Scroll reveals    — AnimatedSection wraps every content block
+ *  6. Stagger cards     — motion.div staggerChildren for feature + testimonial cards
+ *  7. Card hovers       — whileHover lift + per-card glow shadow
+ *  8. GSAP counter      — AnimatedCounter for live stats section
+ *  9. MagneticButton    — primary CTA pulls gently toward cursor
  */
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Star, Check, ShieldCheck, FlaskConical, Truck, MessageCircle } from 'lucide-react';
-import ParticleCanvas from '../components/ParticleCanvas';
-import TiltCard from '../components/TiltCard';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Button, Chip } from '@heroui/react';
+import {
+  FlaskConical, ShieldCheck, ArrowRight, Star,
+  CheckCircle2, MessageCircle, AlertTriangle,
+} from 'lucide-react';
+import HeroParticles from '../components/HeroParticles';
+import AnimatedSection from '../components/AnimatedSection';
+import MagneticButton from '../components/MagneticButton';
+import {
+  fadeUp, fadeDown, scaleIn, staggerMedium, staggerFast,
+  orbFloat, orbFloat2,
+} from '../animations/variants';
 
-// ── DEMO_PRODUCTS (first 6 for home page feature) ──────────────────────────
-// Imported inline to avoid circular deps — just use the catalogue products
-const FEATURED_PRODUCTS = [
-  { id: '1', name: 'Retatrutide', purity: '99.2%', from: 3500, image: '/Retatrutide.png', tag: 'Best Seller' },
-  { id: '2', name: 'Tirzepatide', purity: '99.4%', from: 2500, image: '/TIRZEPATIDE.png', tag: 'Popular' },
-  { id: '3', name: 'GHK-Cu',      purity: '99.1%', from: 4000, image: '/GHKCU.png',       tag: 'Longevity' },
-  { id: '7', name: 'Semax',       purity: '99.1%', from: 2500, image: '/SEMAX.png',       tag: 'Cognitive' },
-  { id: '8', name: 'BPC-157',     purity: '99.3%', from: 2000, image: '/BPC.png',         tag: 'Recovery' },
-  { id: '9', name: 'TB-500',      purity: '99.0%', from: 4000, image: '/TB500.png',       tag: 'Recovery' },
-];
+gsap.registerPlugin(ScrollTrigger);
 
-const HOW_IT_WORKS = [
-  { step: '01', title: 'Choose Your Peptide', desc: 'Browse HPLC-verified peptides sourced directly from GMP manufacturers. Every batch has a COA.' },
-  { step: '02', title: 'Order via WhatsApp', desc: 'No account needed. Review your order, confirm via WhatsApp. We reply within the hour.' },
-  { step: '03', title: 'Swift Dispatch', desc: 'Cold-chain packed and shipped within 48h. Track your order at retralabs.in/track-order.' },
-];
-
-const WHY_FEATURES = [
-  'HPLC-verified purity on every single batch',
-  'Certificate of Analysis included — always',
-  'GMP-certified manufacturing partners',
-  'No middlemen. No markup chains.',
-  'WhatsApp support — real humans, <1 hr SLA',
-  'Cold-chain packaging for peptide integrity',
-];
-
-const TESTIMONIALS = [
+// ── Rotating hero headlines ────────────────────────────────────────────────────
+const HERO_HEADLINES = [
   {
-    name: 'u/Frosty-Ad-9691',
-    initial: 'F',
-    rating: 5,
-    text: "Not gonna lie, I've seen really mindblowing progress. Dropped tons of fat and health feels much more under control. Sugar levels way better. Friends noticed. RetraLabs peps are really genuine.",
-    product: 'Retatrutide',
+    id: 'scam',
+    jsx: (
+      <>
+        We Built RetraLabs<br />
+        <span className="text-gradient">Because We Got</span><br />
+        <span className="text-gradient">Scammed.</span>
+      </>
+    ),
   },
   {
-    name: 'u/Affectionate_Fox_313',
-    initial: 'A',
-    rating: 5,
-    text: "I was very skeptical — had already been scammed by a fake seller (fake vials, wasted ~7k). After checking proof from another user, I took the gamble. Quality is absolutely legit.",
-    product: 'Retatrutide',
+    id: 'mess',
+    jsx: (
+      <>
+        India's Peptide Market<br />
+        <span className="text-gradient">Was a Mess.</span><br />
+        We Fixed It.
+        <span className="block text-2xl md:text-3xl text-slate-500 font-normal italic mt-3">
+          (You're welcome.)
+        </span>
+      </>
+    ),
   },
   {
-    name: 'u/Delhi_Research_2024',
-    initial: 'D',
-    rating: 5,
-    text: "The CoA and HPLC reports are real. Reached out on WhatsApp and got a response in 20 minutes. This is what every peptide supplier should look like.",
-    product: 'BPC-157',
+    id: 'trusted',
+    jsx: (
+      <>
+        India's Only Trusted<br />
+        <span className="text-gradient">Research Peptide</span><br />
+        Supplier.
+      </>
+    ),
   },
 ];
 
-// ── Scroll counter hook ────────────────────────────────────────────────────
-function useCounter(target: number, duration = 1500) {
-  const [value, setValue] = useState(0);
-  const ref               = useRef<HTMLSpanElement>(null);
-  const fired             = useRef(false);
+// ── GSAP-powered counter (ScrollTrigger fires once when in view) ──────────────
+function AnimatedCounter({ to, suffix = '' }: { to: number; suffix?: string }) {
+  const elRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    const el = ref.current;
+    const el = elRef.current;
     if (!el) return;
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !fired.current) {
-          fired.current = true;
-          const start = performance.now();
-          function tick(now: number) {
-            const progress = Math.min((now - start) / duration, 1);
-            setValue(Math.floor(progress * target));
-            if (progress < 1) requestAnimationFrame(tick);
-            else setValue(target);
-          }
-          requestAnimationFrame(tick);
-        }
+
+    const obj = { val: 0 };
+    const tween = gsap.to(obj, {
+      val: to,
+      duration: 1.8,
+      ease: 'power2.out',
+      paused: true,
+      onUpdate() {
+        if (el) el.textContent = Math.round(obj.val) + suffix;
       },
-      { threshold: 0.5 },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, [target, duration]);
+    });
 
-  return { value, ref };
+    const trigger = ScrollTrigger.create({
+      trigger: el,
+      start: 'top 85%',
+      once: true,
+      onEnter: () => tween.play(),
+    });
+
+    return () => { tween.kill(); trigger.kill(); };
+  }, [to, suffix]);
+
+  return <span ref={elRef}>0{suffix}</span>;
 }
 
-function Counter({ target, suffix = '' }: { target: number; suffix?: string }) {
-  const { value, ref } = useCounter(target);
-  return (
-    <span className="section-heading" style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)' }}>
-      <span ref={ref}>{value}</span>{suffix}
-    </span>
-  );
-}
+// ── Data ──────────────────────────────────────────────────────────────────────
+const TESTIMONIALS = [
+  {
+    name: 'u/Frosty-Ad-9691', initial: 'F',
+    gradient: 'from-blue-500 to-cyan-500', rating: 5,
+    text: "Not gonna lie, I've seen really mindblowing progress. Dropped tons of fat and health feels much more under control. Sugar levels way better. Friends noticed — one jumped on it too. RetraLabs peps are really genuine.",
+    product: 'Retatrutide',
+  },
+  {
+    name: 'u/Affectionate_Fox_313', initial: 'A',
+    gradient: 'from-emerald-500 to-teal-500', rating: 5,
+    text: "I was very skeptical — had already been scammed by a fake online seller (fake vials, wasted ~7k). After checking proof from another user, I took the gamble. Quality is absolutely legit.",
+    product: 'Retatrutide',
+  },
+];
+
+const FEATURES = [
+  {
+    icon: FlaskConical, title: 'HPLC-Verified. Every Batch.',
+    desc: 'Independent third-party purity testing on every single batch. COA included — not on request, just always.',
+    stat: '99%+ Purity', chipColor: 'primary' as const,
+    bg: 'from-blue-50 to-cyan-50', border: 'border-blue-100',
+    iconBg: 'bg-blue-100', iconColor: 'text-blue-700',
+    glow: 'rgba(59,130,246,0.1)',
+  },
+  {
+    icon: ShieldCheck, title: 'Direct from GMP. No Middlemen.',
+    desc: 'Certified GMP manufacturing partners. No markup chains. No mystery suppliers. No "trust me bro" sourcing.',
+    stat: 'GMP Certified Source', chipColor: 'success' as const,
+    bg: 'from-emerald-50 to-teal-50', border: 'border-emerald-100',
+    iconBg: 'bg-emerald-100', iconColor: 'text-emerald-700',
+    glow: 'rgba(16,185,129,0.1)',
+  },
+  {
+    icon: MessageCircle, title: 'Real Humans. Fast Replies.',
+    desc: 'WhatsApp support with actual people who know the products. No bots. No 5-day email threads. Usually under an hour.',
+    stat: '1hr SLA · 9AM–6PM', chipColor: 'warning' as const,
+    bg: 'from-amber-50 to-orange-50', border: 'border-amber-100',
+    iconBg: 'bg-amber-100', iconColor: 'text-amber-700',
+    glow: 'rgba(245,158,11,0.1)',
+  },
+];
 
 // ─────────────────────────────────────────────────────────────────────────────
 export default function HomePage() {
   const navigate = useNavigate();
   const [heroIndex, setHeroIndex] = useState(0);
 
-  const heroHeadlines = [
-    <>Pure Science.<br /><em>Delivered.</em></>,
-    <>India's Only Verified<br /><em>Peptide Source.</em></>,
-    <>Research Grade.<br /><em>Zero Compromise.</em></>,
-  ];
-
   // Rotate headlines every 5 s
   useEffect(() => {
     const t = setInterval(
-      () => setHeroIndex(i => (i + 1) % heroHeadlines.length),
+      () => setHeroIndex(i => (i + 1) % HERO_HEADLINES.length),
       5000,
     );
     return () => clearInterval(t);
   }, []);
 
-  // Scroll reveal
-  useEffect(() => {
-    const els = document.querySelectorAll('.scroll-reveal');
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const el = entry.target as HTMLElement;
-            const siblings = [...(el.parentElement?.children ?? [])];
-            const idx = siblings.indexOf(el);
-            el.style.transitionDelay = `${idx * 0.1}s`;
-            el.classList.add('revealed');
-            io.unobserve(el);
-          }
-        });
-      },
-      { threshold: 0.12 },
-    );
-    els.forEach(el => { el.classList.add('reveal'); io.observe(el); });
-    return () => io.disconnect();
-  }, []);
-
   return (
-    <div style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", fontWeight: 300 }}>
+    <div className="min-h-screen">
 
-      {/* ══════════ HERO ══════════ */}
-      <section
-        style={{
-          minHeight: '100vh',
-          background: 'var(--off-white)',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          position: 'relative',
-          overflow: 'hidden',
-          paddingTop: '80px',
-        }}
-      >
-        {/* Particle canvas — behind everything */}
-        <ParticleCanvas />
+      {/* ════════════════════ HERO ════════════════════ */}
+      <section className="relative overflow-hidden bg-slate-950 pt-16 pb-0">
 
-        <div className="max-w-4xl mx-auto px-6 text-center" style={{ position: 'relative', zIndex: 1 }}>
+        {/* Rising canvas particles */}
+        <HeroParticles />
 
-          {/* Eyebrow */}
-          <motion.p
-            className="section-eyebrow mb-6"
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          >
-            Premium Research Peptides · India
-          </motion.p>
+        {/* Framer Motion floating orbs */}
+        <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+          <div className="absolute inset-0 bg-dot-pattern bg-dot-sm opacity-[0.04]" />
+          <motion.div
+            className="absolute top-1/4 -left-56 w-[600px] h-[600px] bg-accent-500/10 rounded-full blur-3xl"
+            animate={orbFloat.animate}
+          />
+          <motion.div
+            className="absolute bottom-1/3 -right-56 w-[600px] h-[600px] bg-brand-500/10 rounded-full blur-3xl"
+            animate={orbFloat2.animate}
+          />
+        </div>
 
-          {/* Rotating serif headline */}
-          <div style={{ minHeight: 'clamp(180px, 20vw, 340px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <AnimatePresence mode="wait">
-              <motion.h1
-                key={heroIndex}
-                className="section-heading"
-                style={{ fontSize: 'clamp(52px, 9vw, 120px)', textAlign: 'center' }}
-                initial={{ opacity: 0, y: 24, filter: 'blur(8px)' }}
-                animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
-                exit={{   opacity: 0, y: -20, filter: 'blur(4px)' }}
-                transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative text-center">
+
+          {/* Trustpilot badge */}
+          <AnimatedSection variants={fadeDown} className="flex justify-center mb-10">
+            <a
+              href="https://www.trustpilot.com/review/retralabs.in"
+              target="_blank" rel="noopener noreferrer"
+              className="inline-block"
+            >
+              <motion.div
+                className="inline-flex items-center gap-2.5 bg-white/5 border border-white/10 backdrop-blur-sm rounded-full px-5 py-2.5"
+                whileHover={{ scale: 1.04, backgroundColor: 'rgba(255,255,255,0.09)' }}
+                transition={{ duration: 0.2 }}
               >
-                {heroHeadlines[heroIndex]}
-              </motion.h1>
-            </AnimatePresence>
-          </div>
+                <div className="flex gap-0.5">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
+                  ))}
+                </div>
+                <span className="text-white/30 text-xs">|</span>
+                <span className="text-cyan-300 text-sm font-medium">
+                  Verified on Trustpilot · See real reviews →
+                </span>
+              </motion.div>
+            </a>
+          </AnimatedSection>
 
-          {/* Headline dots */}
-          <div className="flex justify-center gap-2 mb-8 mt-4">
-            {heroHeadlines.map((_, i) => (
-              <motion.button
-                key={i}
-                onClick={() => setHeroIndex(i)}
-                animate={{
-                  width:           i === heroIndex ? 24 : 6,
-                  backgroundColor: i === heroIndex ? 'var(--accent)' : 'rgba(0,0,0,0.2)',
-                }}
-                style={{ height: 6, borderRadius: 9999, border: 'none', cursor: 'pointer', padding: 0 }}
-                transition={{ duration: 0.3 }}
-                aria-label={`Headline ${i + 1}`}
-              />
-            ))}
-          </div>
+          {/* Rotating headline — AnimatePresence cross-fades with blur */}
+          <AnimatedSection variants={fadeUp} delay={0.1}>
+            <div className="min-h-[200px] md:min-h-[280px] flex items-center justify-center mb-4">
+              <AnimatePresence mode="wait">
+                <motion.h1
+                  key={heroIndex}
+                  initial={{ opacity: 0, y: 22, filter: 'blur(6px)' }}
+                  animate={{ opacity: 1, y: 0,  filter: 'blur(0px)',
+                    transition: { duration: 0.58, ease: [0.16, 1, 0.3, 1] } }}
+                  exit={{   opacity: 0, y: -18, filter: 'blur(4px)',
+                    transition: { duration: 0.28, ease: 'easeIn' } }}
+                  className="text-5xl md:text-7xl font-bold text-white tracking-tight leading-[1.05] text-center"
+                >
+                  {HERO_HEADLINES[heroIndex].jsx}
+                </motion.h1>
+              </AnimatePresence>
+            </div>
+
+            {/* Dot indicators — animated width/color */}
+            <div className="flex justify-center gap-2 mb-6">
+              {HERO_HEADLINES.map((_, i) => (
+                <motion.button
+                  key={i}
+                  onClick={() => setHeroIndex(i)}
+                  animate={{
+                    width:           i === heroIndex ? 24 : 6,
+                    backgroundColor: i === heroIndex ? 'rgb(34,211,238)' : 'rgba(255,255,255,0.25)',
+                  }}
+                  style={{ height: 6, borderRadius: 9999, border: 'none' }}
+                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                  aria-label={`Headline ${i + 1}`}
+                />
+              ))}
+            </div>
+          </AnimatedSection>
 
           {/* Sub-copy */}
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            style={{ color: 'var(--text-muted)', fontSize: '1.1rem', maxWidth: 560, margin: '0 auto 2.5rem', lineHeight: 1.75 }}
-          >
-            HPLC-verified, GMP-sourced research peptides shipped across India.
-            Real COAs. Zero middlemen. Actual humans on WhatsApp.
-          </motion.p>
+          <AnimatedSection variants={fadeUp} delay={0.22}>
+            <p className="text-lg md:text-xl text-slate-400 mb-4 leading-relaxed max-w-2xl mx-auto">
+              Fake vials. Useless compounds. Thousands wasted. We couldn't find a single
+              legitimate peptide supplier in India, so we went directly to GMP manufacturers,
+              got HPLC testing done, and made it accessible to everyone.
+            </p>
+            <p className="text-slate-500 text-sm italic mb-10">
+              That's the whole story. Everything else is just good products at honest prices.
+            </p>
+          </AnimatedSection>
 
-          {/* CTA buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.38, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-col sm:flex-row gap-3 justify-center"
+          {/* CTAs */}
+          <AnimatedSection
+            variants={fadeUp}
+            delay={0.34}
+            className="flex flex-col sm:flex-row gap-3 justify-center mb-16"
           >
-            <button className="btn-dark" onClick={() => navigate('/catalogue')}>
-              Shop Peptides <ArrowRight size={16} />
-            </button>
-            <button className="btn-ghost" onClick={() => navigate('/about')}>
-              Our Story
-            </button>
-          </motion.div>
-        </div>
-      </section>
+            {/* Primary — magnetic pull toward cursor */}
+            <MagneticButton strength={20}>
+              <motion.button
+                type="button"
+                onClick={() => navigate('/catalogue')}
+                className="inline-flex items-center justify-center gap-2 bg-cyan-400 text-slate-900 font-extrabold text-base px-8 py-3.5 rounded-2xl shadow-lg shadow-cyan-400/20"
+                whileHover={{ scale: 1.05, boxShadow: '0 8px 36px rgba(34,211,238,0.45)', backgroundColor: 'rgb(103,232,249)' }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
+              >
+                Shop the Real Stuff
+                <motion.span
+                  animate={{ x: [0, 4, 0] }}
+                  transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}
+                >
+                  <ArrowRight className="w-4 h-4" />
+                </motion.span>
+              </motion.button>
+            </MagneticButton>
 
-      {/* ══════════ TRUST BAR ══════════ */}
-      <section style={{ background: 'var(--cream)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
-        <div
-          className="max-w-5xl mx-auto"
-          style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)' }}
-        >
-          {[
-            { target: 99, suffix: '.2%', label: 'Avg purity', sub: 'HPLC-verified' },
-            { target: 2400, suffix: '+',  label: 'Orders shipped', sub: 'Across India' },
-            { target: 48, suffix: 'h',   label: 'Dispatch time', sub: 'Cold-chain packed' },
-            { target: 5, suffix: '+',    label: 'Peptides stocked', sub: 'GMP source' },
-          ].map((item, i) => (
-            <div
-              key={item.label}
-              className="scroll-reveal"
-              style={{
-                padding: '2.5rem 1.5rem',
-                textAlign: 'center',
-                borderRight: i < 3 ? '1px solid var(--border)' : 'none',
-              }}
+            {/* Secondary */}
+            <motion.button
+              type="button"
+              onClick={() => navigate('/about')}
+              className="inline-flex items-center justify-center gap-2 bg-white/8 border border-white/15 text-white font-semibold text-base px-8 py-3.5 rounded-2xl backdrop-blur-sm"
+              whileHover={{ scale: 1.03, backgroundColor: 'rgba(255,255,255,0.13)', borderColor: 'rgba(255,255,255,0.3)' }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ duration: 0.2 }}
             >
-              <Counter target={item.target} suffix={item.suffix} />
-              <p style={{ color: 'var(--text)', fontSize: '0.8rem', fontWeight: 500, marginTop: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.12em' }}>
-                {item.label}
-              </p>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '0.2rem' }}>{item.sub}</p>
-            </div>
-          ))}
+              Read Our Story
+            </motion.button>
+          </AnimatedSection>
+
         </div>
-      </section>
 
-      {/* ══════════ PRODUCTS ══════════ */}
-      <section style={{ background: 'var(--white)', padding: '6rem 0' }}>
-        <div className="max-w-6xl mx-auto px-6">
-
-          <div className="text-center mb-14">
-            <p className="section-eyebrow mb-3 scroll-reveal">Our Catalogue</p>
-            <h2 className="section-heading scroll-reveal" style={{ fontSize: 'clamp(2rem, 5vw, 4rem)' }}>
-              Researched. Verified. Ready.
-            </h2>
-          </div>
-
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-              gap: '1.5rem',
-            }}
-          >
-            {FEATURED_PRODUCTS.map((p) => (
-              <TiltCard key={p.id} className="scroll-reveal">
-                <Link
-                  to={`/product/${p.id}`}
-                  style={{ display: 'block', textDecoration: 'none' }}
-                >
-                  <div
-                    style={{
-                      background: 'var(--white)',
-                      border: '1px solid var(--border)',
-                      borderRadius: '1rem',
-                      padding: '2rem',
-                      cursor: 'pointer',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    {/* Tag */}
-                    <span
-                      style={{
-                        display: 'inline-block',
-                        fontSize: '0.65rem',
-                        fontWeight: 500,
-                        letterSpacing: '0.15em',
-                        textTransform: 'uppercase',
-                        color: 'var(--accent)',
-                        background: 'var(--accent-light)',
-                        padding: '0.2rem 0.6rem',
-                        borderRadius: 999,
-                        marginBottom: '1.25rem',
-                      }}
-                    >
-                      {p.tag}
-                    </span>
-
-                    {/* Product image */}
-                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.25rem' }}>
-                      <img
-                        src={p.image}
-                        alt={p.name}
-                        style={{ height: 140, width: 'auto', objectFit: 'contain' }}
-                        onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-peptide.png'; }}
-                      />
-                    </div>
-
-                    {/* Name */}
-                    <h3
-                      className="section-heading"
-                      style={{ fontSize: '1.5rem', marginBottom: '0.5rem', color: 'var(--text)' }}
-                    >
-                      {p.name}
-                    </h3>
-
-                    {/* Purity */}
-                    <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                      {p.purity} purity · HPLC-verified
-                    </p>
-
-                    {/* Price + CTA */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                        From <strong style={{ color: 'var(--text)', fontWeight: 500 }}>
-                          ₹{p.from.toLocaleString('en-IN')}
-                        </strong>
+        {/* ── Stats marquee ── */}
+        <div className="relative mt-10 overflow-hidden py-6">
+          <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-slate-950 to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-slate-950 to-transparent z-10 pointer-events-none" />
+          <div className="flex" style={{ animation: 'marquee-scroll 28s linear infinite' }}>
+            {[0, 1].map(set => (
+              <div key={set} className="flex items-center flex-shrink-0">
+                {[
+                  { value: '2,400+', label: 'Orders Shipped' },
+                  { value: '99%+',   label: 'Purity Guaranteed' },
+                  { value: '★ 4.9',  label: 'On Trustpilot' },
+                  { value: '48h',    label: 'Avg Dispatch' },
+                  { value: 'GMP',    label: 'Certified Source' },
+                  { value: '100%',   label: 'HPLC-Tested' },
+                  { value: '0',      label: 'Middlemen. Ever.' },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center">
+                    <div className="px-8 flex items-baseline gap-3 whitespace-nowrap">
+                      <span className="text-2xl md:text-3xl font-black text-white tracking-tight">
+                        {item.value}
                       </span>
-                      <span style={{ fontSize: '0.85rem', color: 'var(--accent)', fontWeight: 500 }}>
-                        View →
+                      <span className="text-xs text-slate-500 font-semibold uppercase tracking-widest">
+                        {item.label}
                       </span>
                     </div>
+                    <span className="text-cyan-500/25 text-sm select-none">◆</span>
                   </div>
-                </Link>
-              </TiltCard>
-            ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <button className="btn-ghost" onClick={() => navigate('/catalogue')}>
-              View Full Catalogue <ArrowRight size={15} />
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════ HOW IT WORKS ══════════ */}
-      <section style={{ background: 'var(--off-white)', padding: '6rem 0' }}>
-        <div className="max-w-5xl mx-auto px-6">
-
-          <div className="text-center mb-14">
-            <p className="section-eyebrow mb-3 scroll-reveal">Process</p>
-            <h2 className="section-heading scroll-reveal" style={{ fontSize: 'clamp(2rem, 5vw, 4rem)' }}>
-              How It Works
-            </h2>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '2rem' }}>
-            {HOW_IT_WORKS.map((step) => (
-              <div key={step.step} className="scroll-reveal">
-                <span
-                  className="section-heading"
-                  style={{ fontSize: '3.5rem', color: 'var(--border-strong)', display: 'block', marginBottom: '1rem' }}
-                >
-                  {step.step}
-                </span>
-                <h3
-                  className="section-heading"
-                  style={{ fontSize: '1.4rem', marginBottom: '0.75rem' }}
-                >
-                  {step.title}
-                </h3>
-                <p style={{ color: 'var(--text-muted)', lineHeight: 1.75, fontSize: '0.9rem' }}>
-                  {step.desc}
-                </p>
+                ))}
               </div>
             ))}
           </div>
         </div>
+
+        <style>{`
+          @keyframes marquee-scroll {
+            from { transform: translateX(0); }
+            to   { transform: translateX(-50%); }
+          }
+        `}</style>
+
+        <div className="h-20 bg-gradient-to-t from-white to-transparent" />
       </section>
 
-      {/* ══════════ WHY US ══════════ */}
-      <section style={{ background: 'var(--white)', padding: '6rem 0' }}>
-        <div className="max-w-5xl mx-auto px-6">
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5rem', alignItems: 'center' }}
-               className="flex-col md:grid">
-
-            {/* Left — text */}
-            <div>
-              <p className="section-eyebrow mb-4 scroll-reveal">Why RetraLabs</p>
-              <h2
-                className="section-heading scroll-reveal"
-                style={{ fontSize: 'clamp(2rem, 4vw, 3.5rem)', marginBottom: '1.25rem' }}
-              >
-                Built Because We Got Scammed First.
-              </h2>
-              <p
-                className="scroll-reveal"
-                style={{ color: 'var(--text-muted)', lineHeight: 1.8, fontSize: '0.95rem', marginBottom: '2rem' }}
-              >
-                Fake vials. Useless compounds. Thousands wasted. We couldn't find a single legitimate
-                peptide supplier in India, so we went directly to GMP manufacturers, got HPLC testing
-                done, and made it accessible to every researcher.
-              </p>
-              <button className="btn-dark scroll-reveal" onClick={() => navigate('/about')}>
-                Read Our Story <ArrowRight size={15} />
-              </button>
-            </div>
-
-            {/* Right — feature list */}
-            <div>
-              {WHY_FEATURES.map((feat) => (
-                <div
-                  key={feat}
-                  className="scroll-reveal"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '1rem',
-                    padding: '1rem 0',
-                    borderBottom: '1px solid var(--border)',
-                  }}
-                >
-                  <span
-                    style={{
-                      width: 22, height: 22, borderRadius: '50%',
-                      background: 'var(--accent-light)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      flexShrink: 0, marginTop: 2,
-                    }}
-                  >
-                    <Check size={12} color="var(--accent)" strokeWidth={2.5} />
-                  </span>
-                  <span style={{ color: 'var(--text)', fontSize: '0.9rem', lineHeight: 1.5 }}>
-                    {feat}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════ TESTIMONIALS (dark) ══════════ */}
-      <section style={{ background: 'var(--text)', padding: '6rem 0' }}>
-        <div className="max-w-5xl mx-auto px-6">
-
-          <div className="text-center mb-14">
-            <p className="section-eyebrow mb-3 scroll-reveal" style={{ color: 'rgba(255,255,255,0.5)' }}>
-              Social Proof
+      {/* ════════════════ WHY IT'S DIFFERENT ════════════════ */}
+      <section className="py-20 bg-white overflow-hidden">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <AnimatedSection className="text-center mb-12">
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">
+              What makes us different
             </p>
-            <h2
-              className="section-heading scroll-reveal"
-              style={{ fontSize: 'clamp(2rem, 5vw, 4rem)', color: 'var(--white)' }}
-            >
-              Real Researchers. Real Results.
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
+              Because the Alternative Is Fake, Unverified Junk.
             </h2>
-          </div>
+            <p className="text-slate-500 mt-3 max-w-xl mx-auto">
+              Every peptide we sell is HPLC-verified, COA-backed, and sourced directly.
+              Radical concept, we know.
+            </p>
+          </AnimatedSection>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1.5rem' }}>
-            {TESTIMONIALS.map((t) => (
-              <TiltCard key={t.name} className="scroll-reveal">
-                <div
-                  style={{
-                    background: 'rgba(255,255,255,0.06)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: '1rem',
-                    padding: '2rem',
-                    height: '100%',
+          {/* Staggered feature cards */}
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-3 gap-5"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '0px 0px -60px 0px' }}
+            variants={staggerFast}
+          >
+            {FEATURES.map(item => (
+              <motion.div key={item.title} variants={scaleIn}>
+                <motion.div
+                  className={`bg-gradient-to-br ${item.bg} border ${item.border} rounded-2xl h-full`}
+                  whileHover={{
+                    y: -6,
+                    boxShadow: `0 20px 48px ${item.glow}`,
+                    transition: { duration: 0.22, ease: 'easeOut' },
                   }}
                 >
-                  {/* Stars */}
-                  <div style={{ display: 'flex', gap: 3, marginBottom: '1.25rem' }}>
-                    {[...Array(t.rating)].map((_, j) => (
-                      <Star key={j} size={14} fill="#f59e0b" color="#f59e0b" />
-                    ))}
-                  </div>
-
-                  {/* Quote */}
-                  <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.9rem', lineHeight: 1.75, marginBottom: '1.5rem' }}>
-                    "{t.text}"
-                  </p>
-
-                  {/* Author */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <div
-                      style={{
-                        width: 36, height: 36, borderRadius: '50%',
-                        background: 'var(--accent)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        color: 'white', fontSize: '0.85rem', fontWeight: 500, flexShrink: 0,
-                      }}
+                  <div className="p-7 flex flex-col h-full">
+                    <motion.div
+                      className={`w-12 h-12 ${item.iconBg} rounded-xl flex items-center justify-center mb-5`}
+                      whileHover={{ rotate: [0, -10, 8, 0], transition: { duration: 0.45 } }}
                     >
-                      {t.initial}
-                    </div>
-                    <div>
-                      <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.8rem', fontWeight: 500 }}>{t.name}</p>
-                      <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.72rem' }}>{t.product} · via Reddit</p>
-                    </div>
+                      <item.icon className={`w-6 h-6 ${item.iconColor}`} />
+                    </motion.div>
+                    <h3 className="text-lg font-bold text-slate-900 mb-2">{item.title}</h3>
+                    <p className="text-slate-600 text-sm leading-relaxed mb-5 flex-1">{item.desc}</p>
+                    <Chip
+                      variant="bordered" color={item.chipColor} size="sm"
+                      className="self-start text-xs font-bold"
+                      startContent={<CheckCircle2 className="w-3.5 h-3.5" />}
+                    >
+                      {item.stat}
+                    </Chip>
                   </div>
-                </div>
-              </TiltCard>
+                </motion.div>
+              </motion.div>
             ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <button
-              className="btn-ghost scroll-reveal"
-              onClick={() => navigate('/reviews')}
-              style={{ borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.8)' }}
-            >
-              Read All Reviews <ArrowRight size={15} />
-            </button>
-          </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* ══════════ CTA ══════════ */}
-      <section style={{ background: 'var(--cream)', padding: '7rem 0', textAlign: 'center' }}>
-        <div className="max-w-2xl mx-auto px-6">
-          <p className="section-eyebrow mb-4 scroll-reveal">Get Started</p>
-          <h2
-            className="section-heading scroll-reveal"
-            style={{ fontSize: 'clamp(2rem, 5vw, 4.5rem)', marginBottom: '1.5rem' }}
+      {/* ════════════════ LIVE STATS (GSAP counters) ════════════════ */}
+      <section className="py-16 bg-slate-950 relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+          <div className="absolute inset-0 bg-dot-pattern bg-dot-sm opacity-[0.03]" />
+          {/* Ambient glow behind stats */}
+          <motion.div
+            className="absolute inset-0 opacity-30"
+            animate={{ opacity: [0.2, 0.4, 0.2] }}
+            transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+            style={{
+              background: 'radial-gradient(ellipse 60% 40% at 50% 50%, rgba(34,211,238,0.07), transparent)',
+            }}
+          />
+        </div>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <motion.div
+            className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '0px 0px -40px 0px' }}
+            variants={staggerMedium}
           >
-            Research Without Compromise.
-          </h2>
-          <p
-            className="scroll-reveal"
-            style={{ color: 'var(--text-muted)', fontSize: '1rem', lineHeight: 1.8, marginBottom: '2.5rem' }}
-          >
-            Join 2,400+ researchers who trust RetraLabs for verified, GMP-sourced peptides
-            delivered across India.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center scroll-reveal">
-            <button className="btn-dark" onClick={() => navigate('/catalogue')}>
-              Shop Peptides <ArrowRight size={15} />
-            </button>
-            <button className="btn-ghost" onClick={() => navigate('/contact')}>
-              Contact Us
-            </button>
-          </div>
+            {[
+              { to: 2400, suffix: '+', label: 'Orders shipped' },
+              { to: 99,   suffix: '%+', label: 'Avg purity' },
+              { to: 48,   suffix: 'h',  label: 'Avg dispatch' },
+              { to: 0,    suffix: '',   label: 'Middlemen' },
+            ].map(stat => (
+              <motion.div key={stat.label} variants={fadeUp}>
+                <p className="text-4xl md:text-5xl font-black text-white tracking-tight">
+                  <AnimatedCounter to={stat.to} suffix={stat.suffix} />
+                </p>
+                <p className="text-xs text-slate-500 font-semibold uppercase tracking-widest mt-2">
+                  {stat.label}
+                </p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
 
-          {/* Research disclaimer */}
-          <p
-            className="scroll-reveal"
-            style={{ color: 'var(--text-light)', fontSize: '0.72rem', marginTop: '2.5rem', letterSpacing: '0.05em' }}
+      {/* ════════════════ SOCIAL PROOF ════════════════ */}
+      <section className="py-20 bg-white overflow-hidden">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <AnimatedSection className="text-center mb-10">
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">
+              The internet agrees
+            </p>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
+              Don't Take Our Word For It.
+            </h2>
+            <p className="text-slate-500 mt-2 text-sm">
+              Real posts. Real researchers. Zero paid promotions.
+            </p>
+          </AnimatedSection>
+
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '0px 0px -40px 0px' }}
+            variants={staggerMedium}
           >
-            All products are for in vitro research use only. Not approved for human or veterinary use.
-          </p>
+            {TESTIMONIALS.map(t => (
+              <motion.div key={t.name} variants={fadeUp}>
+                <motion.div
+                  className="bg-slate-50 border border-slate-200 rounded-2xl h-full"
+                  whileHover={{
+                    y: -5,
+                    borderColor: 'rgb(203,213,225)',
+                    boxShadow: '0 12px 36px rgba(0,0,0,0.07)',
+                    transition: { duration: 0.22, ease: 'easeOut' },
+                  }}
+                >
+                  <div className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${t.gradient} flex items-center justify-center text-white font-bold text-sm flex-shrink-0`}>
+                        {t.initial}
+                      </div>
+                      <div>
+                        <div className="font-bold text-slate-900 text-sm">{t.name}</div>
+                        <div className="flex gap-0.5 mt-0.5">
+                          {[...Array(t.rating)].map((_, j) => (
+                            <Star key={j} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                          ))}
+                        </div>
+                      </div>
+                      <Chip
+                        size="sm" variant="flat"
+                        className="ml-auto text-xs text-orange-600 bg-orange-50 border border-orange-100 font-semibold"
+                        startContent={<MessageCircle className="w-3 h-3" />}
+                      >
+                        Reddit
+                      </Chip>
+                    </div>
+                    <p className="text-slate-600 text-sm leading-relaxed">"{t.text}"</p>
+                    <div className="mt-3 pt-3 border-t border-slate-200">
+                      <span className="text-xs text-slate-400">{t.product} · via r/retralabs</span>
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          <AnimatedSection className="text-center" delay={0.1}>
+            <motion.div
+              whileHover={{ scale: 1.025 }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ duration: 0.18 }}
+              className="inline-block"
+            >
+              <Button
+                className="bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 px-7"
+                endContent={<ArrowRight className="w-4 h-4" />}
+                onPress={() => navigate('/reviews')}
+              >
+                Read All 5-Star Reviews →
+              </Button>
+            </motion.div>
+          </AnimatedSection>
+        </div>
+      </section>
+
+      {/* ════════════════ DISCLAIMER ════════════════ */}
+      <section className="py-12 bg-slate-50 border-t border-slate-200">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <AnimatedSection variants={scaleIn}>
+            <motion.div
+              className="border border-amber-200 bg-amber-50 rounded-2xl"
+              whileHover={{ boxShadow: '0 8px 24px rgba(245,158,11,0.1)', transition: { duration: 0.2 } }}
+            >
+              <div className="flex flex-row items-start gap-4 p-6">
+                <div className="p-2 bg-amber-100 rounded-xl flex-shrink-0 mt-0.5">
+                  <AlertTriangle className="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-amber-900 mb-1.5">Heads Up — Research Use Only.</h3>
+                  <p className="text-sm text-amber-800 leading-relaxed">
+                    All products are intended solely for in vitro research and analytical applications.
+                    Not approved for human or veterinary use. By ordering, you confirm you are a qualified
+                    researcher operating in compliance with applicable regulations.
+                  </p>
+                  <Chip size="sm" variant="flat" color="warning" className="mt-3 text-xs font-bold">
+                    Not for Human Use
+                  </Chip>
+                </div>
+              </div>
+            </motion.div>
+          </AnimatedSection>
         </div>
       </section>
 
