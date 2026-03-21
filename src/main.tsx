@@ -17,7 +17,7 @@ createRoot(document.getElementById('root')!).render(
         <HeroUIProvider>
           <AuthProvider>
             <CurrencyProvider>
-              {/* Lenis ultra-smooth scrolling — wraps entire app */}
+              {/* Smooth scroll behaviour — CSS scroll-behavior provider */}
               <SmoothScroll>
                 {/* Cursor radial glow — desktop only, auto-hidden on touch */}
                 <CursorGlow />

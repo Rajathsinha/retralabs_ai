@@ -1,37 +1,34 @@
 /**
- * HomePage — fully animated with Framer Motion + canvas particles.
+ * HomePage — premium motion system v2.
  *
  * Animation layers:
- *  1. HeroParticles     — 55 floating cyan/sky/indigo particles (canvas, GPU)
- *  2. Animated orbs     — Framer Motion infinite float + scale keyframes
- *  3. Hero stagger      — badge → headline → subtext → CTAs with spring easing
- *  4. Headline rotation — AnimatePresence fade+blur between 3 headlines
- *  5. Scroll reveals    — AnimatedSection wraps every content block
- *  6. Stagger cards     — motion.div staggerChildren for feature + testimonial cards
- *  7. Card hovers       — whileHover lift + per-card glow shadow
- *  8. GSAP counter      — AnimatedCounter for live stats section
- *  9. MagneticButton    — primary CTA pulls gently toward cursor
+ *  1. HeroParticles  — 55 floating cyan/sky/indigo particles (canvas, GPU)
+ *  2. Animated orbs  — infinite float keyframes
+ *  3. Hero stagger   — DRIFT container → badge → headline → subtext → CTAs
+ *  4. Headline rotation — AnimatePresence blur cross-fade
+ *  5. Scroll reveals — AnimatedSection (RISE by default)
+ *  6. Stagger cards  — WAVE container with SURFACE item variants
+ *  7. Card hovers    — whileHover lift + per-card glow shadow
+ *  8. FM counter     — useInView + useSpring (no GSAP dependency)
+ *  9. MagneticButton — cursor attraction + ambient glow
  */
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Button, Chip } from '@heroui/react';
+import { motion, AnimatePresence, useInView, useMotionValue, useSpring } from 'framer-motion';
+import { Chip } from '@heroui/react';
 import {
   FlaskConical, ShieldCheck, ArrowRight, Star,
-  CheckCircle2, MessageCircle, AlertTriangle,
+  CheckCircle2, MessageCircle,
 } from 'lucide-react';
 import HeroParticles from '../components/HeroParticles';
 import AnimatedSection from '../components/AnimatedSection';
 import MagneticButton from '../components/MagneticButton';
 import SEO from '../components/SEO';
 import {
-  fadeUp, fadeDown, scaleIn, staggerMedium, staggerFast,
-  orbFloat, orbFloat2,
+  RISE, EMERGE, SURFACE, WAVE, DRIFT, CASCADE,
+  EASE_OUT, EASE_SHARP, EASE_SPRING, DUR,
+  fadeDown, orbFloat, orbFloat2,
 } from '../animations/variants';
-
-gsap.registerPlugin(ScrollTrigger);
 
 // ── Rotating hero headlines ────────────────────────────────────────────────────
 const HERO_HEADLINES = [
@@ -70,36 +67,28 @@ const HERO_HEADLINES = [
   },
 ];
 
-// ── GSAP-powered counter (ScrollTrigger fires once when in view) ──────────────
+// ── Framer Motion counter — no GSAP dependency ───────────────────────────────
 function AnimatedCounter({ to, suffix = '' }: { to: number; suffix?: string }) {
-  const elRef = useRef<HTMLSpanElement>(null);
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref, { once: true, margin: '0px 0px -40px 0px' });
+
+  const motionVal = useMotionValue(0);
+  const spring = useSpring(motionVal, { stiffness: 38, damping: 18, mass: 1 });
+  const [display, setDisplay] = useState(0);
 
   useEffect(() => {
-    const el = elRef.current;
-    if (!el) return;
+    if (isInView) motionVal.set(to);
+  }, [isInView, to, motionVal]);
 
-    const obj = { val: 0 };
-    const tween = gsap.to(obj, {
-      val: to,
-      duration: 1.8,
-      ease: 'power2.out',
-      paused: true,
-      onUpdate() {
-        if (el) el.textContent = Math.round(obj.val) + suffix;
-      },
-    });
+  useEffect(() => {
+    return spring.on('change', v => setDisplay(Math.round(v)));
+  }, [spring]);
 
-    const trigger = ScrollTrigger.create({
-      trigger: el,
-      start: 'top 85%',
-      once: true,
-      onEnter: () => tween.play(),
-    });
-
-    return () => { tween.kill(); trigger.kill(); };
-  }, [to, suffix]);
-
-  return <span ref={elRef}>0{suffix}</span>;
+  return (
+    <span ref={ref}>
+      {display.toLocaleString('en-IN')}{suffix}
+    </span>
+  );
 }
 
 // ── Data ──────────────────────────────────────────────────────────────────────
@@ -213,6 +202,13 @@ export default function HomePage() {
 
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative text-center">
 
+          {/* ── Hero content — DRIFT stagger container ── */}
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={DRIFT}
+          >
+
           {/* Trustpilot badge */}
           <AnimatedSection variants={fadeDown} className="flex justify-center mb-10">
             <a
@@ -239,7 +235,7 @@ export default function HomePage() {
           </AnimatedSection>
 
           {/* Rotating headline — AnimatePresence cross-fades with blur */}
-          <AnimatedSection variants={fadeUp} delay={0.1}>
+          <AnimatedSection variants={RISE} delay={0.1}>
             <div className="min-h-[200px] md:min-h-[280px] flex items-center justify-center mb-4">
               <AnimatePresence mode="wait">
                 <motion.h1
@@ -275,7 +271,7 @@ export default function HomePage() {
           </AnimatedSection>
 
           {/* Sub-copy */}
-          <AnimatedSection variants={fadeUp} delay={0.22}>
+          <AnimatedSection variants={RISE} delay={0.22}>
             <p className="text-lg md:text-xl text-slate-400 mb-4 leading-relaxed max-w-2xl mx-auto">
               Fake vials. Useless compounds. Thousands wasted. We couldn't find a single
               legitimate peptide supplier in India, so we went directly to GMP manufacturers,
@@ -288,24 +284,28 @@ export default function HomePage() {
 
           {/* CTAs */}
           <AnimatedSection
-            variants={fadeUp}
+            variants={RISE}
             delay={0.34}
             className="flex flex-col sm:flex-row gap-3 justify-center mb-16"
           >
             {/* Primary — magnetic pull toward cursor */}
-            <MagneticButton strength={20}>
+            <MagneticButton strength={24} glowColor="rgba(34,211,238,0.4)">
               <motion.button
                 type="button"
                 onClick={() => navigate('/catalogue')}
                 className="inline-flex items-center justify-center gap-2 bg-cyan-400 text-slate-900 font-extrabold text-base px-8 py-3.5 rounded-2xl shadow-lg shadow-cyan-400/20"
-                whileHover={{ scale: 1.05, boxShadow: '0 8px 36px rgba(34,211,238,0.45)', backgroundColor: 'rgb(103,232,249)' }}
-                whileTap={{ scale: 0.97 }}
-                transition={{ duration: 0.2, ease: 'easeOut' }}
+                whileHover={{
+                  scale: 1.04,
+                  boxShadow: '0 12px 40px rgba(34,211,238,0.5)',
+                  backgroundColor: 'rgb(103,232,249)',
+                }}
+                whileTap={{ scale: 0.96 }}
+                transition={{ duration: DUR.fast, ease: EASE_OUT }}
               >
                 Shop the Real Stuff
                 <motion.span
-                  animate={{ x: [0, 4, 0] }}
-                  transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}
+                  animate={{ x: [0, 5, 0] }}
+                  transition={{ repeat: Infinity, duration: 1.6, ease: EASE_SPRING }}
                 >
                   <ArrowRight className="w-4 h-4" />
                 </motion.span>
@@ -324,6 +324,9 @@ export default function HomePage() {
               Read Our Story
             </motion.button>
           </AnimatedSection>
+
+          {/* close DRIFT container */}
+          </motion.div>
 
         </div>
 
@@ -392,10 +395,10 @@ export default function HomePage() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: '0px 0px -60px 0px' }}
-            variants={staggerFast}
+            variants={WAVE}
           >
             {FEATURES.map(item => (
-              <motion.div key={item.title} variants={scaleIn}>
+              <motion.div key={item.title} variants={SURFACE}>
                 <motion.div
                   className={`bg-gradient-to-br ${item.bg} border ${item.border} rounded-2xl h-full`}
                   whileHover={{
@@ -448,7 +451,7 @@ export default function HomePage() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: '0px 0px -40px 0px' }}
-            variants={staggerMedium}
+            variants={WAVE}
           >
             {[
               { to: 2400, suffix: '+', label: 'Orders shipped' },
@@ -456,7 +459,7 @@ export default function HomePage() {
               { to: 48,   suffix: 'h',  label: 'Avg dispatch' },
               { to: 0,    suffix: '',   label: 'Middlemen' },
             ].map(stat => (
-              <motion.div key={stat.label} variants={fadeUp}>
+              <motion.div key={stat.label} variants={RISE}>
                 <p className="text-4xl md:text-5xl font-black text-white tracking-tight">
                   <AnimatedCounter to={stat.to} suffix={stat.suffix} />
                 </p>
@@ -489,10 +492,10 @@ export default function HomePage() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: '0px 0px -40px 0px' }}
-            variants={staggerMedium}
+            variants={WAVE}
           >
             {TESTIMONIALS.map(t => (
-              <motion.div key={t.name} variants={fadeUp}>
+              <motion.div key={t.name} variants={RISE}>
                 <motion.div
                   className="bg-slate-50 border border-slate-200 rounded-2xl h-full"
                   whileHover={{
@@ -555,7 +558,7 @@ export default function HomePage() {
       {/* ════════════════ DISCLAIMER ════════════════ */}
       <section className="py-12 bg-slate-50 border-t border-slate-200">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <AnimatedSection variants={scaleIn}>
+          <AnimatedSection variants={SURFACE}>
             <motion.div
               className="border border-amber-200 bg-amber-50 rounded-2xl"
               whileHover={{ boxShadow: '0 8px 24px rgba(245,158,11,0.1)', transition: { duration: 0.2 } }}
