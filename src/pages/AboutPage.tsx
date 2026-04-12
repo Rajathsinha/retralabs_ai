@@ -18,7 +18,6 @@ const STATS = [
   { value: '2,400+', label: 'Orders Shipped', icon: Truck, colorClass: 'text-brand-600 bg-brand-50' },
   { value: '99%+', label: 'Avg Purity Verified', icon: FlaskConical, colorClass: 'text-emerald-700 bg-emerald-50' },
   { value: '6', label: 'Premium Compounds', icon: Microscope, colorClass: 'text-accent-700 bg-accent-50' },
-  { value: 'Verified', label: 'On Trustpilot', icon: ShieldCheck, colorClass: 'text-emerald-700 bg-emerald-50' },
 ];
 
 const TEAM = [
@@ -148,7 +147,7 @@ export default function AboutPage() {
                     Then came a direct connection with a GMP-certified facility in China. Properly HPLC-tested. COA included. Night and day. The question wasn't complicated: why doesn't India have a single trustworthy supplier for researchers?
                   </p>
                   <p>
-                    So we built one. Real manufacturer relationships. Strict batch testing. No middlemen, no markups, no mystery. We started on Reddit, grew through word of mouth, and landed on Trustpilot — because when the product is real, the reviews take care of themselves.
+                    So we built one. Real manufacturer relationships. Strict batch testing. No middlemen, no markups, no mystery. We started on Reddit, grew through word of mouth — because when the product is real, the reviews take care of themselves.
                   </p>
                 </div>
               </div>

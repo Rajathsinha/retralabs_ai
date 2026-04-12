@@ -6,7 +6,6 @@ import Logo from './Logo';
 const TRUST_BADGES = [
   { icon: ShieldCheck, label: 'COA Verified', color: 'text-emerald-400', chipColor: 'success' as const },
   { icon: Globe, label: 'GMP Sourced', color: 'text-accent-400', chipColor: 'warning' as const },
-  { icon: FlaskConical, label: 'Trustpilot Verified', color: 'text-emerald-400', chipColor: 'success' as const },
   { icon: FileCheck, label: 'HPLC Tested', color: 'text-blue-400', chipColor: 'primary' as const },
 ];
 
@@ -151,11 +150,6 @@ export default function Footer() {
             <ul className="space-y-3">
               <li>
                 <FooterLink href="/track-order">Track Order</FooterLink>
-              </li>
-              <li>
-                <FooterLink href="https://www.trustpilot.com/review/retralabs.in" external>
-                  Trustpilot Reviews
-                </FooterLink>
               </li>
               <li>
                 <FooterLink href={WA_DEFAULT} external>

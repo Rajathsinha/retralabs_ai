@@ -39,166 +39,9 @@ import {
   X,
 } from 'lucide-react';
 
-// Demo products fallback (when Supabase not configured)
-const DEMO_PRODUCTS: ProductWithVariants[] = [
-  {
-    id: '1',
-    name: 'Retatrutide',
-    description: 'Triple agonist peptide targeting GLP-1, GIP, and glucagon receptors for metabolic and obesity research.',
-    category: 'research-peptide',
-    image_url: '/Retatrutide.png',
-    created_at: new Date().toISOString(),
-    variants: [
-      { id: '1s', product_id: '1', dosage_mg: 10, price_inr: 3500, in_stock: true, vial_configuration: 'Starter vial', created_at: new Date().toISOString() },
-      { id: '1a', product_id: '1', dosage_mg: 20, price_inr: 6000, in_stock: true, vial_configuration: '10mg × 2', created_at: new Date().toISOString() },
-      { id: '1b', product_id: '1', dosage_mg: 50, price_inr: 13000, in_stock: true, vial_configuration: '10mg x 5 vials', created_at: new Date().toISOString() },
-      { id: '1c', product_id: '1', dosage_mg: 100, price_inr: 21000, in_stock: true, vial_configuration: '10mg x 10 vials / 20mg x 5 vials', created_at: new Date().toISOString() },
-    ],
-  },
-  {
-    id: '2',
-    name: 'Tirzepatide',
-    description: 'Dual GIP and GLP-1 receptor agonist for metabolic research and analytical applications.',
-    category: 'research-peptide',
-    image_url: '/TIRZEPATIDE.png',
-    created_at: new Date().toISOString(),
-    variants: [
-      { id: '2x', product_id: '2', dosage_mg: 10, price_inr: 2500, in_stock: true, vial_configuration: 'Single vial', created_at: new Date().toISOString() },
-      { id: '2a', product_id: '2', dosage_mg: 20, price_inr: 4000, in_stock: true, vial_configuration: '2 vials', created_at: new Date().toISOString() },
-      { id: '2b', product_id: '2', dosage_mg: 50, price_inr: 9000, in_stock: true, vial_configuration: '5 vials', created_at: new Date().toISOString() },
-      { id: '2c', product_id: '2', dosage_mg: 100, price_inr: 16000, in_stock: true, vial_configuration: '10 vials', created_at: new Date().toISOString() },
-    ],
-  },
-  {
-    id: '3',
-    name: 'GHK-Cu',
-    description: 'Copper peptide complex for skin regeneration, wound healing, and anti-aging research applications.',
-    category: 'research-peptide',
-    image_url: '/GHKCU.png',
-    created_at: new Date().toISOString(),
-    variants: [
-      { id: '3a', product_id: '3', dosage_mg: 100,  price_inr: 4000,  in_stock: true, vial_configuration: '1×100mg',           created_at: new Date().toISOString() },
-      { id: '3b', product_id: '3', dosage_mg: 200,  price_inr: 6000,  in_stock: true, vial_configuration: '2×100mg',           created_at: new Date().toISOString() },
-      { id: '3c', product_id: '3', dosage_mg: 300,  price_inr: 8000,  in_stock: true, vial_configuration: '3×100mg',           created_at: new Date().toISOString() },
-      { id: '3d', product_id: '3', dosage_mg: 500,  price_inr: 11000, in_stock: true, vial_configuration: '5×100mg',           created_at: new Date().toISOString() },
-      { id: '3e', product_id: '3', dosage_mg: 1000, price_inr: 20000, in_stock: true, vial_configuration: 'Full Kit 10×100mg', created_at: new Date().toISOString() },
-    ],
-  },
-  {
-    id: '4',
-    name: 'Semax',
-    description: 'Synthetic ACTH analogue nootropic peptide for cognitive function, neuroprotection, and CNS research.',
-    category: 'research-peptide',
-    image_url: '/SEMAX.png',
-    created_at: new Date().toISOString(),
-    variants: [
-      { id: '4a', product_id: '4', dosage_mg: 10, price_inr: 2000, in_stock: true, created_at: new Date().toISOString() },
-      { id: '4b', product_id: '4', dosage_mg: 20, price_inr: 3500, in_stock: true, created_at: new Date().toISOString() },
-      { id: '4c', product_id: '4', dosage_mg: 50, price_inr: 7000, in_stock: true, created_at: new Date().toISOString() },
-      { id: '4d', product_id: '4', dosage_mg: 100, price_inr: 12000, in_stock: true, created_at: new Date().toISOString() },
-    ],
-  },
-  {
-    id: '5',
-    name: 'Selank',
-    description: 'Anxiolytic and nootropic heptapeptide derived from tuftsin, researched for anti-anxiety and cognitive enhancement.',
-    category: 'research-peptide',
-    image_url: '/SELANK.png',
-    created_at: new Date().toISOString(),
-    variants: [
-      { id: '5a', product_id: '5', dosage_mg: 10, price_inr: 2000, in_stock: true, created_at: new Date().toISOString() },
-      { id: '5b', product_id: '5', dosage_mg: 20, price_inr: 3500, in_stock: true, created_at: new Date().toISOString() },
-      { id: '5c', product_id: '5', dosage_mg: 50, price_inr: 7000, in_stock: true, created_at: new Date().toISOString() },
-      { id: '5d', product_id: '5', dosage_mg: 100, price_inr: 12000, in_stock: true, created_at: new Date().toISOString() },
-    ],
-  },
-  {
-    id: '7',
-    name: 'BPC-157',
-    description: 'Body protection compound derived from human gastric juice, researched for tissue repair, gut health, and injury recovery.',
-    category: 'research-peptide',
-    image_url: '/BPC.png',
-    created_at: new Date().toISOString(),
-    variants: [
-      { id: '7a', product_id: '7', dosage_mg: 10,  price_inr: 2500,  in_stock: true, created_at: new Date().toISOString() },
-      { id: '7b', product_id: '7', dosage_mg: 20,  price_inr: 4000,  in_stock: true, created_at: new Date().toISOString() },
-      { id: '7c', product_id: '7', dosage_mg: 50,  price_inr: 7000,  in_stock: true, created_at: new Date().toISOString() },
-      { id: '7d', product_id: '7', dosage_mg: 100, price_inr: 13000, in_stock: true, created_at: new Date().toISOString() },
-    ],
-  },
-  {
-    id: '8',
-    name: 'NAD+',
-    description: 'Nicotinamide adenine dinucleotide coenzyme for cellular energy metabolism, DNA repair, and longevity research.',
-    category: 'research-peptide',
-    image_url: '/NAD+.png',
-    created_at: new Date().toISOString(),
-    variants: [
-      { id: '8a', product_id: '8', dosage_mg: 10, price_inr: 4500, in_stock: true, created_at: new Date().toISOString() },
-      { id: '8b', product_id: '8', dosage_mg: 20, price_inr: 8000, in_stock: true, created_at: new Date().toISOString() },
-      { id: '8c', product_id: '8', dosage_mg: 50, price_inr: 17000, in_stock: true, created_at: new Date().toISOString() },
-      { id: '8d', product_id: '8', dosage_mg: 100, price_inr: 30000, in_stock: true, created_at: new Date().toISOString() },
-    ],
-  },
-  {
-    id: '9',
-    name: 'TB-500',
-    description: 'Synthetic analogue of Thymosin Beta-4, studied for tissue regeneration, wound healing, and inflammation modulation.',
-    category: 'research-peptide',
-    image_url: '/TB500.png',
-    created_at: new Date().toISOString(),
-    variants: [
-      { id: '9a', product_id: '9', dosage_mg: 10, price_inr: 4000, in_stock: true, created_at: new Date().toISOString() },
-      { id: '9b', product_id: '9', dosage_mg: 20, price_inr: 7000, in_stock: true, created_at: new Date().toISOString() },
-      { id: '9c', product_id: '9', dosage_mg: 50, price_inr: 14000, in_stock: true, created_at: new Date().toISOString() },
-      { id: '9d', product_id: '9', dosage_mg: 100, price_inr: 24000, in_stock: true, created_at: new Date().toISOString() },
-    ],
-  },
-  {
-    id: '10',
-    name: 'Tesamorelin',
-    description: 'GHRH analogue that stimulates growth hormone release, researched for metabolic regulation and body composition studies.',
-    category: 'research-peptide',
-    image_url: '/Tesa.png',
-    created_at: new Date().toISOString(),
-    variants: [
-      { id: '10a', product_id: '10', dosage_mg: 1,  price_inr: 3000,  in_stock: true, vial_configuration: '1×1000mcg', created_at: new Date().toISOString() },
-      { id: '10b', product_id: '10', dosage_mg: 2,  price_inr: 5000,  in_stock: true, vial_configuration: '2×1000mcg', created_at: new Date().toISOString() },
-      { id: '10c', product_id: '10', dosage_mg: 5,  price_inr: 12000, in_stock: true, vial_configuration: '5×1000mcg', created_at: new Date().toISOString() },
-      { id: '10d', product_id: '10', dosage_mg: 10, price_inr: 22000, in_stock: true, vial_configuration: '10×1000mcg', created_at: new Date().toISOString() },
-    ],
-  },
-  {
-    id: '11',
-    name: 'MOT-C',
-    description: 'MOTS-c mitochondrial-derived peptide studied for metabolic regulation, insulin sensitivity, and cellular homeostasis.',
-    category: 'research-peptide',
-    image_url: '/motc.png',
-    created_at: new Date().toISOString(),
-    variants: [
-      { id: '11a', product_id: '11', dosage_mg: 10,  price_inr: 2000,  in_stock: true, created_at: new Date().toISOString() },
-      { id: '11b', product_id: '11', dosage_mg: 20,  price_inr: 3000,  in_stock: true, created_at: new Date().toISOString() },
-      { id: '11c', product_id: '11', dosage_mg: 50,  price_inr: 6000,  in_stock: true, created_at: new Date().toISOString() },
-      { id: '11d', product_id: '11', dosage_mg: 100, price_inr: 11000, in_stock: true, created_at: new Date().toISOString() },
-    ],
-  },
-  {
-    id: '6',
-    name: 'Bacteriostatic Water (Pharma Grade)',
-    description: 'Pharmaceutical grade bacteriostatic water for reconstituting peptides. Sterile, 0.9% benzyl alcohol.',
-    category: 'Medical Supplies',
-    image_url: '/bac-water.png',
-    created_at: new Date().toISOString(),
-    variants: [
-      { id: '6a', product_id: '6', dosage_mg: 10, price_inr: 400, in_stock: true, vial_configuration: '1×10ML', created_at: new Date().toISOString() },
-      { id: '6b', product_id: '6', dosage_mg: 20, price_inr: 600, in_stock: true, vial_configuration: '2×10ML', created_at: new Date().toISOString() },
-      { id: '6c', product_id: '6', dosage_mg: 50, price_inr: 800, in_stock: true, vial_configuration: '5×10ML', created_at: new Date().toISOString() },
-      { id: '6d', product_id: '6', dosage_mg: 100, price_inr: 1500, in_stock: true, vial_configuration: '10×10ML', created_at: new Date().toISOString() },
-    ],
-  },
-];
+import { PRODUCTS } from '../data/products';
 
-const DEMO_BAC_WATER = DEMO_PRODUCTS.find((p) => p.name.includes('Bacteriostatic'))!;
+const DEMO_BAC_WATER = PRODUCTS.find((p) => p.name.includes('Bacteriostatic'))!;
 
 const PURITY_MAP: Record<string, string> = {
   'Retatrutide': '99.2',
@@ -211,6 +54,9 @@ const PURITY_MAP: Record<string, string> = {
   'TB-500': '99.1',
   'Tesamorelin': '99.2',
   'MOT-C': '99.0',
+  'Klow Blend': '99.0',
+  'CJC-1295 + Ipamorelin Stack': '99.1',
+  'The Wolverine Stack': '99.1',
 };
 
 const FAQ_MAP: Record<string, { q: string; a: string }[]> = {
@@ -225,6 +71,24 @@ const FAQ_MAP: Record<string, { q: string; a: string }[]> = {
     { q: 'What purity can I expect?', a: 'Our Tirzepatide is HPLC-verified at 99.4% purity. The COA with full testing data is included with every order.' },
     { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Standard delivery is 3–4 business days (standard, free) or 1 day (fast, +₹800) with temperature-controlled packaging.' },
     { q: 'Can I get a COA before ordering?', a: "Yes. Contact our support team via WhatsApp or email and we'll send you the batch COA within 24 hours." },
+  ],
+  'Klow Blend': [
+    { q: 'What is the Klow Blend?', a: 'Klow Blend is a proprietary research-grade peptide blend formulated for advanced metabolic and body composition studies. Each vial is HPLC-verified and supplied with a full Certificate of Analysis.' },
+    { q: 'What is included with my order?', a: 'Every order includes a sterile lyophilised vial along with a Certificate of Analysis (COA) detailing purity, molecular weight, and HPLC testing results.' },
+    { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Standard delivery is 3–4 business days (free) or 1 day (fast, +₹800) with temperature-controlled packaging.' },
+    { q: 'How do I reconstitute it?', a: 'Use the Reconstitution Calculator in the header to determine the exact volume of Bacteriostatic Water for your desired concentration.' },
+  ],
+  'CJC-1295 + Ipamorelin Stack': [
+    { q: 'What is the CJC-1295 + Ipamorelin Stack?', a: 'This is a pre-blended vial containing 5mg CJC-1295 (with DAC) and 5mg Ipamorelin — the most researched GHRH/GHRP combination for GH secretion and body composition studies. Having both in one vial eliminates mixing errors.' },
+    { q: 'Why buy a pre-blended stack?', a: 'Pre-blending saves preparation time, eliminates measurement errors, and ensures precise 1:1 ratio. Both peptides are lyophilised together for maximum stability.' },
+    { q: 'What purity can I expect?', a: 'Both CJC-1295 and Ipamorelin are independently HPLC-verified at 99.1%+ purity. The combined COA is included with every order.' },
+    { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Standard delivery is 3–4 business days (free) or 1 day (fast, +₹800) with temperature-controlled packaging.' },
+  ],
+  'The Wolverine Stack': [
+    { q: 'What is The Wolverine Stack?', a: 'The Wolverine Stack is a pre-combined BPC-157 + TB-500 blend (5mg each per vial) — the most researched peptide combination for tissue repair, injury recovery, and inflammation modulation. Pre-blended for convenience and precision.' },
+    { q: 'Why combine BPC-157 and TB-500?', a: 'BPC-157 targets local tissue healing while TB-500 promotes systemic repair and cell migration. Together they cover complementary repair pathways. Pre-blending ensures accurate dosing every time.' },
+    { q: 'What purity can I expect?', a: 'Both BPC-157 and TB-500 are independently HPLC-verified at 99.1%+ purity. Full COA included with every order.' },
+    { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Standard delivery is 3–4 business days (free) or 1 day (fast, +₹800) with temperature-controlled packaging.' },
   ],
   'default': [
     { q: 'What purity can I expect?', a: 'All our peptides are HPLC-verified with purity exceeding 99%. A Certificate of Analysis is included with every order.' },
@@ -245,7 +109,7 @@ export default function ProductDetailPage() {
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [bundleAdded, setBundleAdded] = useState(false);
-  const { addToCart } = useCart();
+  const { addToCart, openCart } = useCart();
   const { format } = useCurrency();
 
   // ── Per-product SEO ──────────────────────────────────────────────────────
@@ -305,7 +169,7 @@ export default function ProductDetailPage() {
 
     // Demo fallback: if Supabase is not configured, use local DEMO_PRODUCTS
     if (!isSupabaseConfigured()) {
-      const demoProduct = DEMO_PRODUCTS.find((p) => p.id === productId);
+      const demoProduct = PRODUCTS.find((p) => p.id === productId);
       if (demoProduct) {
         setProduct(demoProduct);
         if (demoProduct.variants.length > 0) setSelectedVariant(demoProduct.variants[0]);
@@ -356,7 +220,7 @@ export default function ProductDetailPage() {
     } catch (error) {
       console.error('Error loading product:', error);
       // Fallback to demo on error too
-      const demoProduct = DEMO_PRODUCTS.find((p) => p.id === productId);
+      const demoProduct = PRODUCTS.find((p) => p.id === productId);
       if (demoProduct) {
         setProduct(demoProduct);
         if (demoProduct.variants.length > 0) setSelectedVariant(demoProduct.variants[0]);
@@ -375,7 +239,7 @@ export default function ProductDetailPage() {
   const [friendName, setFriendName] = useState('');
   const [pendingWhatsAppUrl, setPendingWhatsAppUrl] = useState('');
 
-  const REFERRAL_OPTIONS = ['Reddit', 'Google', 'Friend', 'Instagram', 'YouTube', 'Other'];
+  const REFERRAL_OPTIONS = ['Reddit', 'Google', 'Friend', 'Instagram', 'YouTube', 'IndiaMART', 'Other'];
 
   const openWithReferral = (baseUrl: string) => {
     setPendingWhatsAppUrl(baseUrl);
@@ -405,6 +269,7 @@ export default function ProductDetailPage() {
     }
     setCartAdded(true);
     setTimeout(() => setCartAdded(false), 2000);
+    openCart();
   };
 
   const handleOrderNow = () => {
@@ -416,7 +281,7 @@ export default function ProductDetailPage() {
       const bacWaterVariant = bacWater.variants.find((v) => v.dosage_mg === 50);
       if (bacWaterVariant) addToCart(bacWater, bacWaterVariant);
     }
-    navigate('/checkout');
+    openCart();
   };
 
   // ── Loading skeleton ──────────────────────────────────────────────────────
@@ -767,13 +632,24 @@ export default function ProductDetailPage() {
                           {format(variant.price_inr)}
                         </p>
                         <p className="text-sm text-slate-500 font-medium">
-                          {variant.vial_configuration?.includes('×')
+                          {variant.vial_configuration?.includes('×') || variant.vial_configuration?.includes('vial')
                             ? variant.vial_configuration
                             : isBacWater ? `${variant.dosage_mg}ML` : `${variant.dosage_mg}mg`}
                         </p>
-                        {variant.vial_configuration && !variant.vial_configuration.includes('×') && (
+                        {variant.vial_configuration && !variant.vial_configuration.includes('×') && !variant.vial_configuration.includes('vial') && (
                           <p className="text-xs text-slate-400 mt-1">{variant.vial_configuration}</p>
                         )}
+                        {(() => {
+                          const basePrice = Math.min(...product.variants.map(v => v.price_inr));
+                          const baseDosage = product.variants.find(v => v.price_inr === basePrice)?.dosage_mg ?? 1;
+                          const units = Math.round(variant.dosage_mg / baseDosage);
+                          const saving = units > 1 ? (basePrice * units) - variant.price_inr : 0;
+                          return saving > 0 ? (
+                            <span className="inline-block mt-1.5 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5">
+                              Save {format(saving)}
+                            </span>
+                          ) : null;
+                        })()}
                         {isSelected && (
                           <div className="mt-2 flex items-center gap-1">
                             <Check className={`w-4 h-4 ${variant.is_recommended ? 'text-emerald-600' : 'text-slate-900'}`} />

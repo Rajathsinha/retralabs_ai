@@ -9,7 +9,6 @@ import {
 } from '@heroui/react';
 import { ExternalLink, Star, ShieldCheck, MessageCircle, ArrowRight } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
-import TrustpilotWidget, { TRUSTPILOT_TEMPLATES } from '../components/TrustpilotWidget';
 
 const communityReviews = [
   {
@@ -110,13 +109,6 @@ export default function ReviewsPage() {
           <p className="text-slate-400 max-w-xl mx-auto text-lg mb-10">
             Real posts from real researchers. We didn't write these. We just showed up with quality product.
           </p>
-          <div className="flex justify-center">
-            <TrustpilotWidget
-              templateId={TRUSTPILOT_TEMPLATES.micro}
-              height="24px"
-              theme="dark"
-            />
-          </div>
         </div>
       </section>
 
