@@ -29,6 +29,10 @@ interface CartContextType {
   applyCoupon: (code: string) => { success: boolean; message: string };
   removeCoupon: () => void;
   getCouponAmount: () => number;
+  // drawer
+  isCartOpen: boolean;
+  openCart: () => void;
+  closeCart: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -37,6 +41,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [couponCode,     setCouponCode]     = useState<string | null>(null);
   const [couponDiscount, setCouponDiscount] = useState<CouponDiscount | null>(null);
+  const [isCartOpen,     setIsCartOpen]     = useState(false);
+
+  const openCart  = () => setIsCartOpen(true);
+  const closeCart = () => setIsCartOpen(false);
 
   const addToCart = (product: Product, variant: ProductVariant) => {
     setCart((prevCart) => {
@@ -77,33 +85,31 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setCart([]);
   };
 
-  // Products excluded from qty discounts
-  const isNonDiscountable = (name: string) => {
-    const n = name.toLowerCase();
-    return n.includes('bacteriostatic water') || n.includes('ghk');
-  };
-
-  // Per-item discount rate: only applies when buying 2+ of the SAME peptide
-  // qty 2 → 10%  |  qty 3+ → 20%  |  supplies / GHK-Cu / qty 1 → 0%
-  const getItemDiscountRate = (item: CartItem): number => {
-    if (isNonDiscountable(item.product.name)) return 0;
-    if (item.quantity >= 3) return 20;
-    if (item.quantity === 2) return 10;
-    return 0;
-  };
-
-  // Returns the highest discount tier active in the cart (for display only)
-  const getDiscount = () =>
-    cart.reduce((max, item) => Math.max(max, getItemDiscountRate(item)), 0);
+  const isBacWater = (name: string) =>
+    name.toLowerCase().includes('bacteriostatic water');
 
   const getSubtotal = () =>
     cart.reduce((total, item) => total + item.variant.price_inr * item.quantity, 0);
 
-  const getDiscountAmount = () =>
-    cart.reduce((total, item) => {
-      const pct = getItemDiscountRate(item);
-      return total + Math.round((item.variant.price_inr * item.quantity * pct) / 100);
-    }, 0);
+  // Subtotal of peptide items only (BAC water excluded from discount)
+  const getDiscountableSubtotal = () =>
+    cart.reduce((total, item) =>
+      isBacWater(item.product.name) ? total : total + item.variant.price_inr * item.quantity
+    , 0);
+
+  // Bill-based discount: ≥₹20,000 → 15% | ≥₹10,000 → 10% | else → 0%
+  const getDiscount = (): number => {
+    const s = getDiscountableSubtotal();
+    if (s >= 20000) return 15;
+    if (s >= 10000) return 10;
+    return 0;
+  };
+
+  const getDiscountAmount = () => {
+    const pct = getDiscount();
+    if (pct === 0) return 0;
+    return Math.round((getDiscountableSubtotal() * pct) / 100);
+  };
 
   // ── Coupon methods ──────────────────────────────────────────────────────────
   const applyCoupon = (code: string): { success: boolean; message: string } => {
@@ -151,6 +157,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
         applyCoupon,
         removeCoupon,
         getCouponAmount,
+        isCartOpen,
+        openCart,
+        closeCart,
       }}
     >
       {children}

@@ -98,7 +98,7 @@ const SUPPORT_CHANNELS = [
   },
 ];
 
-const REFERRAL_SOURCES = ['YouTube', 'Instagram', 'Reddit', 'Friend', 'Google', 'Twitter / X', 'TikTok'];
+const REFERRAL_SOURCES = ['YouTube', 'Instagram', 'Reddit', 'Friend', 'Google', 'Twitter / X', 'TikTok', 'IndiaMART'];
 
 export default function SupportPage() {
   const navigate = useNavigate();

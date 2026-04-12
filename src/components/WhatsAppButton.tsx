@@ -4,7 +4,7 @@ import { MessageCircle, X, ArrowLeft } from 'lucide-react';
 
 const PHONE = '918217824384';
 
-const REFERRAL_SOURCES = ['YouTube', 'Instagram', 'Reddit', 'Friend', 'Google', 'Twitter / X', 'TikTok'];
+const REFERRAL_SOURCES = ['YouTube', 'Instagram', 'Reddit', 'Friend', 'Google', 'Twitter / X', 'TikTok', 'IndiaMART'];
 
 const QUICK_MESSAGES = [
   {

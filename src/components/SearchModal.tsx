@@ -1,81 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { Search, X, ArrowRight, FlaskConical, Droplets, Command } from 'lucide-react';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { Search, X, ArrowRight, FlaskConical, Droplets } from 'lucide-react';
 import { getProductImageUrl, BAC_WATER_IMAGE_URL } from '../utils/imageUrl';
 import { useCurrency } from '../context/CurrencyContext';
-import { ProductWithVariants } from '../types';
-
-/* ── Fallback data (shown when Supabase isn't configured) ── */
-const DEMO: ProductWithVariants[] = [
-  {
-    id: '1', name: 'Retatrutide', category: 'research-peptide',
-    description: 'Triple agonist peptide targeting GLP-1, GIP, and glucagon receptors.',
-    image_url: '/Retatrutide.png', created_at: '',
-    variants: [{ id: '1s', product_id: '1', dosage_mg: 10, price_inr: 3500, in_stock: true, created_at: '' }],
-  },
-  {
-    id: '2', name: 'Tirzepatide', category: 'research-peptide',
-    description: 'Dual GIP and GLP-1 receptor agonist for metabolic research.',
-    image_url: '/TIRZEPATIDE.png', created_at: '',
-    variants: [{ id: '2x', product_id: '2', dosage_mg: 10, price_inr: 2500, in_stock: true, created_at: '' }],
-  },
-  {
-    id: '3', name: 'GHK-Cu', category: 'research-peptide',
-    description: 'Copper peptide for skin regeneration and anti-aging research.',
-    image_url: '/GHKCU.png', created_at: '',
-    variants: [{ id: '3a', product_id: '3', dosage_mg: 100, price_inr: 4000, in_stock: true, created_at: '' }],
-  },
-  {
-    id: '4', name: 'Semax', category: 'research-peptide',
-    description: 'Synthetic ACTH analogue nootropic peptide for cognitive function and CNS research.',
-    image_url: '/SEMAX.png', created_at: '',
-    variants: [{ id: '4a', product_id: '4', dosage_mg: 10, price_inr: 2000, in_stock: true, created_at: '' }],
-  },
-  {
-    id: '5', name: 'Selank', category: 'research-peptide',
-    description: 'Anxiolytic heptapeptide derived from tuftsin for anti-anxiety and cognitive research.',
-    image_url: '/SELANK.png', created_at: '',
-    variants: [{ id: '5a', product_id: '5', dosage_mg: 10, price_inr: 2000, in_stock: true, created_at: '' }],
-  },
-  {
-    id: '7', name: 'BPC-157', category: 'research-peptide',
-    description: 'Body protection compound for tissue repair, gut health, and injury recovery.',
-    image_url: '/BPC.png', created_at: '',
-    variants: [{ id: '7a', product_id: '7', dosage_mg: 10, price_inr: 3000, in_stock: true, created_at: '' }],
-  },
-  {
-    id: '8', name: 'NAD+', category: 'research-peptide',
-    description: 'Coenzyme for cellular energy metabolism, DNA repair, and longevity research.',
-    image_url: '/NAD+.png', created_at: '',
-    variants: [{ id: '8a', product_id: '8', dosage_mg: 10, price_inr: 4500, in_stock: true, created_at: '' }],
-  },
-  {
-    id: '9', name: 'TB-500', category: 'research-peptide',
-    description: 'Thymosin Beta-4 analogue for tissue regeneration and wound healing research.',
-    image_url: '/TB500.png', created_at: '',
-    variants: [{ id: '9a', product_id: '9', dosage_mg: 10, price_inr: 4000, in_stock: true, created_at: '' }],
-  },
-  {
-    id: '10', name: 'Tesamorelin', category: 'research-peptide',
-    description: 'GHRH analogue for growth hormone release and metabolic regulation research.',
-    image_url: '/Tesa.png', created_at: '',
-    variants: [{ id: '10a', product_id: '10', dosage_mg: 10, price_inr: 5500, in_stock: true, created_at: '' }],
-  },
-  {
-    id: '11', name: 'MOT-C', category: 'research-peptide',
-    description: 'Mitochondrial-derived peptide for metabolic regulation and insulin sensitivity research.',
-    image_url: '/motc.png', created_at: '',
-    variants: [{ id: '11a', product_id: '11', dosage_mg: 10, price_inr: 5000, in_stock: true, created_at: '' }],
-  },
-  {
-    id: '6', name: 'Bacteriostatic Water', category: 'Medical Supplies',
-    description: 'Pharmaceutical grade sterile water for reconstituting peptides.',
-    image_url: '/bac-water.png', created_at: '',
-    variants: [{ id: '6a', product_id: '6', dosage_mg: 10, price_inr: 400, in_stock: true, created_at: '' }],
-  },
-];
+import { PRODUCTS } from '../data/products';
 
 interface Props {
   isOpen: boolean;
@@ -87,33 +16,8 @@ function SearchOverlay({ isOpen, onClose }: Props) {
   const { format } = useCurrency();
   const inputRef   = useRef<HTMLInputElement>(null);
 
-  const [query,    setQuery]    = useState('');
-  const [products, setProducts] = useState<ProductWithVariants[]>([]);
-  const [loading,  setLoading]  = useState(false);
-  const [cursor,   setCursor]   = useState(0);
-
-  /* ── Load products on first open ── */
-  useEffect(() => {
-    if (!isOpen || products.length > 0) return;
-    if (!isSupabaseConfigured()) { setProducts(DEMO); return; }
-
-    setLoading(true);
-    Promise.all([
-      supabase.from('products').select('*').order('created_at'),
-      supabase.from('product_variants').select('*').order('price_inr'),
-    ]).then(([{ data: prods }, { data: vars }]) => {
-      if (prods && vars) {
-        const mapped: ProductWithVariants[] = prods.map(p => ({
-          ...p,
-          variants: vars.filter(v => v.product_id === p.id),
-        }));
-        setProducts(mapped.length ? mapped : DEMO);
-      } else {
-        setProducts(DEMO);
-      }
-    }).catch(() => setProducts(DEMO)).finally(() => setLoading(false));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
+  const [query,  setQuery]  = useState('');
+  const [cursor, setCursor] = useState(0);
 
   /* ── Focus input on open ── */
   useEffect(() => {
@@ -133,8 +37,8 @@ function SearchOverlay({ isOpen, onClose }: Props) {
 
   /* ── Filtered results ── */
   const results = query.trim().length === 0
-    ? products.slice(0, 8)
-    : products.filter(p =>
+    ? PRODUCTS.slice(0, 8)
+    : PRODUCTS.filter(p =>
         p.name.toLowerCase().includes(query.toLowerCase()) ||
         p.description.toLowerCase().includes(query.toLowerCase()) ||
         p.category.toLowerCase().includes(query.toLowerCase())
@@ -196,17 +100,13 @@ function SearchOverlay({ isOpen, onClose }: Props) {
 
         {/* Results */}
         <div className="max-h-[60vh] overflow-y-auto">
-          {loading && (
-            <div className="px-4 py-8 text-center text-white/30 text-sm">Loading products…</div>
-          )}
-
-          {!loading && results.length === 0 && (
+          {results.length === 0 && (
             <div className="px-4 py-8 text-center">
               <p className="text-white/30 text-sm">No products found for "<span className="text-white/50">{query}</span>"</p>
             </div>
           )}
 
-          {!loading && results.length > 0 && (
+          {results.length > 0 && (
             <ul className="py-2">
               {!query.trim() && (
                 <li className="px-4 py-1.5">

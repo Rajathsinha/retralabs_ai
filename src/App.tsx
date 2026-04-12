@@ -7,6 +7,7 @@ import { supabase } from './lib/supabase';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import WhatsAppButton from './components/WhatsAppButton';
+import CartDrawer from './components/CartDrawer';
 import HomePage from './pages/HomePage';
 import CataloguePage from './pages/CataloguePage';
 import ProductDetailPage from './pages/ProductDetailPage';
@@ -148,6 +149,7 @@ function RootLayout() {
       </main>
       <Footer />
       <WhatsAppButton />
+      <CartDrawer />
     </div>
   );
 }

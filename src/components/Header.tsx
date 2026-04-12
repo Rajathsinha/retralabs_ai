@@ -22,7 +22,7 @@ const NAV_ITEMS = [
 ];
 
 export default function Header() {
-  const { cart }                      = useCart();
+  const { cart, openCart }            = useCart();
   const { currency, setCurrencyCode } = useCurrency();
   const { user, signOut }             = useAuth();
   const cartCount                     = cart.reduce((n, i) => n + i.quantity, 0);
@@ -266,7 +266,7 @@ export default function Header() {
 
               {/* Cart */}
               <button
-                onClick={() => navigate('/checkout')}
+                onClick={openCart}
                 aria-label="View cart"
                 className="relative flex items-center gap-2 p-2 md:px-4 md:py-1.5 rounded-lg text-sm font-medium text-white/60 hover:text-white border border-transparent md:border-white/10 md:hover:border-white/25 hover:bg-white/8 transition-all duration-200"
               >
@@ -360,7 +360,7 @@ export default function Header() {
               {/* Cart CTA */}
               <div className="mt-2 pt-3 border-t border-white/10 flex flex-col gap-2">
                 <button
-                  onClick={() => { setOpen(false); navigate('/checkout'); }}
+                  onClick={() => { setOpen(false); openCart(); }}
                   className="w-full flex items-center justify-center gap-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 text-cyan-300 font-semibold px-4 py-3.5 rounded-xl transition-all duration-200"
                 >
                   <ShoppingCart className="w-4 h-4" />

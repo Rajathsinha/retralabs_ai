@@ -96,13 +96,15 @@ export default function CheckoutPage() {
     }
 
     const lines = cart.map(
-      (item) =>
-        `• ${item.product.name} (${item.variant.dosage_mg}mg) — ₹${item.variant.price_inr.toLocaleString('en-IN')} × ${item.quantity}`
+      (item) => {
+        const config = item.variant.vial_configuration || `${item.variant.dosage_mg}mg`;
+        return `• ${item.product.name} (${config}) — ₹${item.variant.price_inr.toLocaleString('en-IN')} × ${item.quantity}`;
+      }
     );
 
     const discountText =
       getDiscountAmount() > 0
-        ? `\n*Subtotal:* ₹${getSubtotal().toLocaleString('en-IN')}\n*Qty Discount:* -₹${getDiscountAmount().toLocaleString('en-IN')}`
+        ? `\n*Subtotal:* ₹${getSubtotal().toLocaleString('en-IN')}\n*Peptide Discount:* -₹${getDiscountAmount().toLocaleString('en-IN')}`
         : '';
 
     const couponAmt = getCouponAmount();
@@ -324,7 +326,7 @@ export default function CheckoutPage() {
                 <div key={item.variant.id} className="flex justify-between items-center">
                   <div>
                     <p className="text-sm font-semibold text-slate-800">{item.product.name}</p>
-                    <p className="text-xs text-slate-400">{item.variant.dosage_mg}mg · qty {item.quantity}</p>
+                    <p className="text-xs text-slate-400">{item.variant.vial_configuration || `${item.variant.dosage_mg}mg`} · qty {item.quantity}</p>
                   </div>
                   <p className="text-sm font-bold text-slate-900">
                     {format(item.variant.price_inr * item.quantity)}
@@ -336,7 +338,7 @@ export default function CheckoutPage() {
               <div className="border-t border-slate-100 pt-3 space-y-1.5">
                 {getDiscount() > 0 && (
                   <div className="flex justify-between text-sm text-emerald-600">
-                    <span>Qty Discount</span>
+                    <span>Peptide Discount</span>
                     <span>&minus;{format(getDiscountAmount())}</span>
                   </div>
                 )}
@@ -461,13 +463,13 @@ export default function CheckoutPage() {
               <Tag className="w-5 h-5 text-emerald-600" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-emerald-900 mb-3">Buy More of the Same, Pay Less.</h3>
+              <h3 className="text-base font-bold text-emerald-900 mb-3">Order More, Save More.</h3>
               <div className="flex flex-wrap gap-2">
                 <Chip color="success" variant="flat" size="sm">
-                  Same peptide ×2 = 10% OFF
+                  Peptides ₹10,000+ = 10% OFF
                 </Chip>
                 <Chip color="success" variant="flat" size="sm">
-                  Same peptide ×3 = 20% OFF
+                  Peptides ₹20,000+ = 15% OFF
                 </Chip>
               </div>
             </div>
@@ -512,7 +514,7 @@ export default function CheckoutPage() {
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-slate-900 truncate">{item.product.name}</p>
                         <p className="text-sm text-slate-500">
-                          {item.variant.dosage_mg}mg &mdash; {format(item.variant.price_inr)}
+                          {item.variant.vial_configuration || `${item.variant.dosage_mg}mg`} &mdash; {format(item.variant.price_inr)}
                         </p>
                       </div>
                       {/* Quantity controls */}
@@ -568,7 +570,7 @@ export default function CheckoutPage() {
 
                   {getDiscount() > 0 && (
                     <div className="flex justify-between items-center text-emerald-600">
-                      <span className="font-medium">Qty Discount</span>
+                      <span className="font-medium">Peptide Discount</span>
                       <span className="font-semibold">
                         &minus;{format(getDiscountAmount())}
                       </span>
@@ -790,7 +792,7 @@ export default function CheckoutPage() {
                     How did you find us? <span className="text-red-500">*</span>
                   </label>
                   <div className="flex flex-wrap gap-2 mb-2">
-                    {['YouTube', 'Instagram', 'Reddit', 'Friend', 'Google', 'Twitter / X', 'TikTok'].map((src) => (
+                    {['YouTube', 'Instagram', 'Reddit', 'Friend', 'Google', 'Twitter / X', 'TikTok', 'IndiaMART'].map((src) => (
                       <button
                         key={src}
                         type="button"
