@@ -541,9 +541,9 @@ export default function CataloguePage() {
                             </div>
                           )}
 
-                          {/* Research-area tag badge */}
+                          {/* Research-area tag badge — hidden on mobile to avoid badge collision */}
                           {PRODUCT_TAG[product.name] && (
-                            <div className="absolute bottom-3 left-3 z-10">
+                            <div className="hidden sm:block absolute bottom-3 left-3 z-10">
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-wide">
                                 {(() => {
                                   const t = RESEARCH_TAGS.find(r => r.key === PRODUCT_TAG[product.name]);
@@ -569,7 +569,7 @@ export default function CataloguePage() {
                         </div>
 
                         {/* Content */}
-                        <div className="px-5 pt-4 pb-2">
+                        <div className="px-5 py-4">
                           {/* Highlight matching search text in name */}
                           <h3 className="text-lg font-bold text-slate-900 mb-1.5 group-hover:text-primary-600 transition-colors duration-200">
                             {product.name}
@@ -594,7 +594,7 @@ export default function CataloguePage() {
                         </div>
                       </CardBody>
 
-                      <CardFooter className="px-5 pb-4 pt-2 flex items-center justify-between gap-3">
+                      <CardFooter className="px-5 pb-4 pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
                         <div>
                           {startingPrice && (
                             <div className="flex items-baseline gap-1">

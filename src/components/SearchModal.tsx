@@ -6,9 +6,32 @@ import { getProductImageUrl, BAC_WATER_IMAGE_URL } from '../utils/imageUrl';
 import { useCurrency } from '../context/CurrencyContext';
 import { PRODUCTS } from '../data/products';
 
-interface Props {
-  isOpen: boolean;
-  onClose: () => void;
+interface Props { isOpen: boolean; onClose: () => void; }
+
+/* ── Reusable keyboard hint ── */
+function KbdHint({ keys, label }: { keys: string; label: string }) {
+  return (
+    <span className="flex items-center gap-1.5 text-white/25 text-[11px]">
+      <kbd className="inline-flex items-center px-1.5 py-0.5 rounded bg-white/8 border border-white/10 font-mono text-[10px]">
+        {keys}
+      </kbd>
+      {label}
+    </span>
+  );
+}
+
+/* ── Text highlight helper ── */
+function HighlightMatch({ text, query }: { text: string; query: string }) {
+  if (!query.trim()) return <>{text}</>;
+  const idx = text.toLowerCase().indexOf(query.toLowerCase());
+  if (idx === -1) return <>{text}</>;
+  return (
+    <>
+      {text.slice(0, idx)}
+      <mark className="bg-transparent text-emerald-400 font-bold not-italic">{text.slice(idx, idx + query.length)}</mark>
+      {text.slice(idx + query.length)}
+    </>
+  );
 }
 
 function SearchOverlay({ isOpen, onClose }: Props) {
@@ -67,7 +90,7 @@ function SearchOverlay({ isOpen, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-start justify-center pt-[10vh] px-4"
+      className="fixed inset-0 z-modal flex items-start justify-center pt-4 sm:pt-[10vh] px-4"
       onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       {/* Backdrop */}
@@ -124,7 +147,7 @@ function SearchOverlay({ isOpen, onClose }: Props) {
                       type="button"
                       onMouseEnter={() => setCursor(i)}
                       onClick={() => goToProduct(product.id)}
-                      className={`w-full flex items-center gap-3.5 px-4 py-3 transition-colors text-left ${
+                      className={`group w-full flex items-center gap-3.5 px-4 py-3 transition-colors text-left ${
                         isFocused ? 'bg-white/8' : 'hover:bg-white/5'
                       }`}
                     >
@@ -140,7 +163,9 @@ function SearchOverlay({ isOpen, onClose }: Props) {
 
                       {/* Info */}
                       <div className="flex-1 min-w-0">
-                        <p className="text-white text-sm font-semibold truncate">{product.name}</p>
+                        <p className="text-white text-sm font-semibold truncate">
+                          <HighlightMatch text={product.name} query={query} />
+                        </p>
                         <p className="text-white/40 text-xs truncate mt-0.5">{product.description}</p>
                       </div>
 
@@ -158,7 +183,7 @@ function SearchOverlay({ isOpen, onClose }: Props) {
                         <span className="text-white/80 text-sm font-bold tabular-nums">
                           {format(minPrice)}
                         </span>
-                        <ArrowRight className={`w-3.5 h-3.5 transition-opacity ${isFocused ? 'text-cyan-400 opacity-100' : 'text-white/20 opacity-0'}`} />
+                        <ArrowRight className={`w-3.5 h-3.5 transition-opacity duration-200 ${isFocused ? 'text-cyan-400 opacity-100' : 'text-white/20 opacity-0 group-hover:opacity-60'}`} />
                       </div>
                     </button>
                   </li>
@@ -168,20 +193,11 @@ function SearchOverlay({ isOpen, onClose }: Props) {
           )}
         </div>
 
-        {/* Footer hint */}
+        {/* Footer hints */}
         <div className="flex items-center gap-4 px-4 py-2.5 border-t border-white/8 bg-slate-950/40">
-          <span className="flex items-center gap-1.5 text-white/25 text-[11px]">
-            <kbd className="inline-flex items-center px-1.5 py-0.5 rounded bg-white/8 border border-white/10 font-mono text-[10px]">↑↓</kbd>
-            navigate
-          </span>
-          <span className="flex items-center gap-1.5 text-white/25 text-[11px]">
-            <kbd className="inline-flex items-center px-1.5 py-0.5 rounded bg-white/8 border border-white/10 font-mono text-[10px]">↵</kbd>
-            open
-          </span>
-          <span className="flex items-center gap-1.5 text-white/25 text-[11px]">
-            <kbd className="inline-flex items-center px-1.5 py-0.5 rounded bg-white/8 border border-white/10 font-mono text-[10px]">esc</kbd>
-            close
-          </span>
+          <KbdHint keys="↑↓" label="navigate" />
+          <KbdHint keys="↵"  label="open" />
+          <KbdHint keys="esc" label="close" />
         </div>
       </div>
     </div>

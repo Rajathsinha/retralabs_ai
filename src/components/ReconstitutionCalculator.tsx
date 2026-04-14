@@ -46,8 +46,7 @@ export default function ReconstitutionCalculator({ isOpen, onClose }: Props) {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-      style={{ background: 'rgba(2,6,23,0.85)', backdropFilter: 'blur(6px)' }}
+      className="fixed inset-0 z-modal flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div

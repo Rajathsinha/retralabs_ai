@@ -72,6 +72,10 @@ export default {
         'dot-pattern': 'radial-gradient(circle, rgba(0,0,0,0.07) 1px, transparent 1px)',
       },
       backgroundSize: { 'dot-sm': '20px 20px' },
+      zIndex: {
+        dropdown: '400',
+        modal: '500',
+      },
     },
   },
   darkMode: 'class',

@@ -2,6 +2,7 @@ import { Divider, Chip, Link } from '@heroui/react';
 import { Link as RouterLink } from 'react-router-dom';
 import { Mail, ArrowUpRight, MessageCircle, ShieldCheck, Globe, FileCheck, FlaskConical } from 'lucide-react';
 import Logo from './Logo';
+import { WHATSAPP_NUMBER } from '../constants/config';
 
 const TRUST_BADGES = [
   { icon: ShieldCheck, label: 'COA Verified', color: 'text-emerald-400', chipColor: 'success' as const },
@@ -23,8 +24,7 @@ const LEGAL_LINKS = [
   { to: '/refund', label: 'Refund Policy' },
 ];
 
-const PHONE = '918217824384';
-const WA_DEFAULT = `https://wa.me/${PHONE}?text=${encodeURIComponent('Hi, I have a question about RetraLabs products.')}`;
+const WA_DEFAULT = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hi, I have a question about RetraLabs products.')}`;
 
 function FooterLink({ href, children, external = false }: {
   href: string;

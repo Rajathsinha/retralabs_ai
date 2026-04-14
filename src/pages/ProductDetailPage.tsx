@@ -18,6 +18,7 @@ import { ProductWithVariants, ProductVariant } from '../types';
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { useSEO } from '../hooks/useSEO';
+import { WHATSAPP_NUMBER } from '../constants/config';
 import {
   ChevronLeft,
   Star,
@@ -557,7 +558,7 @@ export default function ProductDetailPage() {
 
               {/* WhatsApp support */}
               <button
-                onClick={() => openWithReferral(`https://wa.me/918217824384?text=${encodeURIComponent(`Hi! I'd like to know more about ${product.name} before ordering. Can you help?`)}`)}
+                onClick={() => openWithReferral(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hi! I'd like to know more about ${product.name} before ordering. Can you help?`)}`)}
                 className="flex items-center gap-3 p-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition-colors w-full text-left"
               >
                 <MessageCircle className="w-5 h-5 flex-shrink-0" />
@@ -848,7 +849,7 @@ export default function ProductDetailPage() {
 
                 {/* ── Student discount notice ── */}
                 <button
-                  onClick={() => openWithReferral(`https://wa.me/918217824384?text=${encodeURIComponent("Hi, I'm a student and would like to enquire about the student discount.")}`)}
+                  onClick={() => openWithReferral(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi, I'm a student and would like to enquire about the student discount.")}`)}
                   className="flex items-center gap-2 w-full bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 hover:border-indigo-300 transition-colors rounded-xl px-4 py-2.5 group"
                 >
                   <GraduationCap className="w-4 h-4 text-indigo-500 flex-shrink-0" />
@@ -882,7 +883,7 @@ export default function ProductDetailPage() {
                     {cartAdded ? 'Added!' : 'Add to Cart'}
                   </button>
                   <button
-                    onClick={() => openWithReferral(`https://wa.me/918217824384?text=${whatsappMsg}`)}
+                    onClick={() => openWithReferral(`https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappMsg}`)}
                     className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl border-2 border-emerald-200 bg-emerald-50 hover:bg-emerald-100 hover:border-emerald-400 text-emerald-700 font-semibold text-sm transition-all"
                   >
                     <MessageCircle className="w-4 h-4" />
@@ -946,7 +947,7 @@ export default function ProductDetailPage() {
       {/* ── Mobile sticky bottom bar ──────────────────────────────────────── */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 shadow-[0_-4px_20px_rgba(0,0,0,0.10)] rounded-t-2xl">
         <Card className="rounded-none rounded-t-2xl bg-white shadow-none border-none">
-          <CardBody className="px-4 py-3 flex-row items-center gap-4">
+          <CardBody className="px-4 py-3 flex-row items-center gap-4" style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom))' }}>
             <div className="flex-1">
               <p className="text-xs text-slate-500 mb-0.5">Total</p>
               <div className="flex items-baseline gap-2">
@@ -964,6 +965,7 @@ export default function ProductDetailPage() {
               disabled={!selectedVariant}
               onClick={handleAddToCart}
               aria-label="Add to cart"
+              title="Add to cart"
               className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center flex-shrink-0 transition-all disabled:opacity-40 ${
                 cartAdded
                   ? 'bg-emerald-50 border-emerald-400 text-emerald-700'
@@ -989,8 +991,7 @@ export default function ProductDetailPage() {
       {/* ── Referral popup ────────────────────────────────────────────────── */}
       {referralOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)' }}
+          className="fixed inset-0 z-modal flex items-center justify-center p-4 bg-black/55 backdrop-blur-sm"
           onClick={e => { if (e.target === e.currentTarget) setReferralOpen(false); }}
         >
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
@@ -999,17 +1000,17 @@ export default function ProductDetailPage() {
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">Before we chat</p>
                 <h3 className="text-lg font-bold text-slate-900">How did you find us? <span className="text-red-500">*</span></h3>
               </div>
-              <button onClick={() => setReferralOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors mt-0.5">
+              <button onClick={() => setReferralOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors mt-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 rounded-md">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 mb-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
               {REFERRAL_OPTIONS.map(src => (
                 <button
                   key={src}
                   onClick={() => setReferralSource(src)}
-                  className={`px-3 py-2.5 rounded-xl text-sm font-medium border-2 transition-all ${
+                  className={`px-3 py-2.5 rounded-xl text-sm font-medium border-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-slate-900 ${
                     referralSource === src
                       ? 'border-slate-900 bg-slate-900 text-white'
                       : 'border-slate-200 bg-white text-slate-700 hover:border-slate-400'

@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Button, Card, CardHeader, CardBody, Input } from '@heroui/react';
 import { MessageCircle, X, ArrowLeft } from 'lucide-react';
+import { WHATSAPP_NUMBER } from '../constants/config';
 
-const PHONE = '918217824384';
+const PHONE = WHATSAPP_NUMBER;
 
 const REFERRAL_SOURCES = ['YouTube', 'Instagram', 'Reddit', 'Friend', 'Google', 'Twitter / X', 'TikTok', 'IndiaMART'];
 

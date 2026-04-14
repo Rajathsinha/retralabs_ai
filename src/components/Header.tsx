@@ -294,7 +294,7 @@ export default function Header() {
         {/* ── Mobile drawer ── */}
         <div
           className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-            open ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'
+            open ? 'max-h-[100dvh] opacity-100' : 'max-h-0 opacity-0'
           }`}
         >
           <div className="border-t border-white/10 bg-slate-950/98 backdrop-blur-md">
@@ -314,8 +314,7 @@ export default function Header() {
                 <RouterLink
                   key={path}
                   to={path}
-                  style={{ transitionDelay: open ? `${i * 40}ms` : '0ms' }}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all duration-200 ${
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all duration-200 ${['delay-0','delay-75','delay-100','delay-150','delay-200','delay-300'][i] ?? ''} ${
                     active(path)
                       ? 'text-white bg-white/10 border border-white/10'
                       : 'text-white/55 hover:text-white hover:bg-white/6'
