@@ -11,6 +11,11 @@ const COUPONS: Record<string, CouponDiscount> = {
   'bulk2000':    { type: 'flat',    value: 2000 },
   'welfare1000': { type: 'flat',    value: 1000 },
   'rajath':      { type: 'percent', value: 10   },
+  'new500':      { type: 'flat',    value: 500  },
+  'goodwill600': { type: 'flat',    value: 600  },
+  'bacwater400': { type: 'flat',    value: 400  },
+  'bacwater800': { type: 'flat',    value: 800  },
+  'extra15%':    { type: 'percent', value: 15   },
 };
 
 interface CartContextType {
