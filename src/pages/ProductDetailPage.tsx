@@ -544,7 +544,7 @@ export default function ProductDetailPage() {
               <div className="grid grid-cols-3 gap-3">
                 {[
                   { value: '48h', label: 'Dispatch' },
-                  { value: '2K+', label: 'Orders' },
+                  { value: '3K+', label: 'Orders' },
                   { value: `${purity}%`, label: 'Purity' },
                 ].map((stat) => (
                   <Card key={stat.label} className="border border-slate-200 shadow-none">

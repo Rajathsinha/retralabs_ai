@@ -15,7 +15,7 @@ import {
 import ScrollReveal from '../components/ScrollReveal';
 
 const STATS = [
-  { value: '2,400+', label: 'Orders Shipped', icon: Truck, colorClass: 'text-brand-600 bg-brand-50' },
+  { value: '3,000+', label: 'Orders Shipped', icon: Truck, colorClass: 'text-brand-600 bg-brand-50' },
   { value: '99%+', label: 'Avg Purity Verified', icon: FlaskConical, colorClass: 'text-emerald-700 bg-emerald-50' },
   { value: '6', label: 'Premium Compounds', icon: Microscope, colorClass: 'text-accent-700 bg-accent-50' },
 ];
@@ -187,7 +187,7 @@ export default function AboutPage() {
                           </div>
                           <div>
                             <div className="font-bold text-slate-900 mb-1">With RetraLabs</div>
-                            <p className="text-sm text-slate-600">Verified GMP source, HPLC-tested batch, COA included, real effects within hours, 2,400+ researchers served.</p>
+                            <p className="text-sm text-slate-600">Verified GMP source, HPLC-tested batch, COA included, real effects within hours, 3,000+ researchers served.</p>
                           </div>
                         </div>
                       </CardBody>
@@ -374,7 +374,7 @@ export default function AboutPage() {
               {[
                 { icon: BadgeCheck, label: 'COA with Every Order' },
                 { icon: Globe, label: 'Verified GMP Source' },
-                { icon: TrendingUp, label: '2,400+ Happy Researchers' },
+                { icon: TrendingUp, label: '3,000+ Happy Researchers' },
                 { icon: Clock, label: 'Fast Support Response' },
               ].map((item) => (
                 <Chip

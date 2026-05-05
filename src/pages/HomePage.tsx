@@ -279,7 +279,7 @@ export default function HomePage() {
             {[0, 1].map(set => (
               <div key={set} className="flex items-center flex-shrink-0">
                 {[
-                  { value: '2,400+', label: 'Orders Shipped' },
+                  { value: '3,000+', label: 'Orders Shipped' },
                   { value: '99%+',   label: 'Purity Guaranteed' },
                   { value: '48h',    label: 'Avg Dispatch' },
                   { value: 'GMP',    label: 'Certified Source' },
@@ -394,7 +394,7 @@ export default function HomePage() {
             variants={staggerMedium}
           >
             {[
-              { to: 2400, suffix: '+', label: 'Orders shipped' },
+              { to: 3000, suffix: '+', label: 'Orders shipped' },
               { to: 99,   suffix: '%+', label: 'Avg purity' },
               { to: 48,   suffix: 'h',  label: 'Avg dispatch' },
               { to: 0,    suffix: '',   label: 'Middlemen' },
