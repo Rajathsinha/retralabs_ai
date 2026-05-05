@@ -11,7 +11,6 @@ import HomePage from './pages/HomePage';
 import CataloguePage from './pages/CataloguePage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import CheckoutPage from './pages/CheckoutPage';
-import ReviewsPage from './pages/ReviewsPage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import SupportPage from './pages/SupportPage';
@@ -143,7 +142,6 @@ export default function App() {
             <Route path="/catalogue"       element={<CataloguePage />} />
             <Route path="/product/:id"     element={<ProductDetailPage />} />
             <Route path="/checkout"        element={<CheckoutPage />} />
-            <Route path="/reviews"         element={<ReviewsPage />} />
             <Route path="/proof"           element={<ProofPage />} />
             <Route path="/about"           element={<AboutPage />} />
             <Route path="/contact"         element={<ContactPage />} />

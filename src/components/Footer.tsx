@@ -15,7 +15,6 @@ const COMPANY_LINKS = [
   { to: '/contact', label: 'Contact Us' },
   { to: '/support', label: 'Support' },
   { to: '/catalogue', label: 'Products' },
-  { to: '/reviews', label: 'Reviews' },
 ];
 
 const LEGAL_LINKS = [
