@@ -117,8 +117,8 @@ export default function CheckoutPage() {
       : '';
 
     const deliveryLine = formData.delivery_option === 'fast'
-      ? `\n*Delivery: Fast (1 day) — +₹${FAST_DELIVERY_CHARGE.toLocaleString('en-IN')}*`
-      : `\n*Delivery: Standard (3–4 days) — Free*`;
+      ? `\n*Delivery: Express (1–2 days, major cities) — +₹${FAST_DELIVERY_CHARGE.toLocaleString('en-IN')}*`
+      : `\n*Delivery: Standard (3–4 days Tier 1/2 · 4–6 days remote) — Free*`;
 
     const message =
       `*New Order — RetraLabs.in*\n\n` +
@@ -352,7 +352,7 @@ export default function CheckoutPage() {
                   <div className="flex justify-between text-sm text-amber-600">
                     <span className="flex items-center gap-1">
                       <Zap className="w-3.5 h-3.5" />
-                      Fast Delivery (1 day)
+                      Express Delivery (1–2 days)
                     </span>
                     <span>+{format(deliveryCharge)}</span>
                   </div>
@@ -630,8 +630,8 @@ export default function CheckoutPage() {
                   <div className="flex justify-between items-center">
                     <span className={`flex items-center gap-1.5 text-sm font-medium ${formData.delivery_option === 'fast' ? 'text-amber-600' : 'text-slate-500'}`}>
                       {formData.delivery_option === 'fast'
-                        ? <><Zap className="w-3.5 h-3.5" />Fast Delivery (1 day)</>
-                        : <><Clock className="w-3.5 h-3.5" />Standard Delivery (3–4 days)</>
+                        ? <><Zap className="w-3.5 h-3.5" />Express Delivery (1–2 days)</>
+                        : <><Clock className="w-3.5 h-3.5" />Standard Delivery (3–4 / 4–6 days)</>
                       }
                     </span>
                     <span className={`font-semibold text-sm ${formData.delivery_option === 'fast' ? 'text-amber-600' : 'text-emerald-600'}`}>
@@ -745,7 +745,7 @@ export default function CheckoutPage() {
                         <span className="text-sm font-bold">Standard</span>
                       </div>
                       <p className={`text-xs ${formData.delivery_option === 'normal' ? 'text-slate-300' : 'text-slate-500'}`}>
-                        3–4 business days
+                        Tier 1 &amp; 2: 3–4 days · Remote: 4–6 days
                       </p>
                       <span className={`text-base font-black ${formData.delivery_option === 'normal' ? 'text-emerald-400' : 'text-emerald-600'}`}>
                         FREE
@@ -769,10 +769,10 @@ export default function CheckoutPage() {
                     >
                       <div className="flex items-center gap-2">
                         <Zap className={`w-4 h-4 ${formData.delivery_option === 'fast' ? 'text-white' : 'text-amber-500'}`} />
-                        <span className="text-sm font-bold">Fast</span>
+                        <span className="text-sm font-bold">Express</span>
                       </div>
                       <p className={`text-xs ${formData.delivery_option === 'fast' ? 'text-amber-100' : 'text-slate-500'}`}>
-                        1 business day
+                        1–2 days · Major cities only
                       </p>
                       <span className={`text-base font-black ${formData.delivery_option === 'fast' ? 'text-white' : 'text-amber-600'}`}>
                         +{format(FAST_DELIVERY_CHARGE)}

@@ -64,32 +64,32 @@ const FAQ_MAP: Record<string, { q: string; a: string }[]> = {
   'Retatrutide': [
     { q: 'What is Retatrutide?', a: 'Retatrutide (LY3437943) is a triple agonist targeting GLP-1, GIP, and glucagon receptors. It is being researched for its potential in metabolic conditions and obesity management in controlled laboratory settings.' },
     { q: 'What is included with my order?', a: 'Every order includes the peptide in a sterile lyophilised vial along with a Certificate of Analysis (COA) detailing purity, molecular weight, and HPLC testing results.' },
-    { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Standard delivery is 3–4 business days (standard, free) or 1 day (fast, +₹800). All peptides are shipped with temperature-controlled packaging to maintain stability.' },
+    { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Yes — free standard shipping pan-India. Tier 1 &amp; 2 cities: 3–4 business days. Remote areas: 4–6 business days. Express delivery (1–2 days) available for major cities at +₹800. All shipments are temperature-controlled.' },
     { q: 'How do I reconstitute the peptide?', a: 'Use the Reconstitution Calculator (available in the header) to determine the exact volume of Bacteriostatic Water required for your desired concentration. Standard practice is to add BAC water slowly along the vial wall.' },
   ],
   'Tirzepatide': [
     { q: 'What is Tirzepatide?', a: 'Tirzepatide is a dual GIP/GLP-1 receptor agonist. It is supplied for in vitro research and analytical applications only.' },
     { q: 'What purity can I expect?', a: 'Our Tirzepatide is HPLC-verified at 99.4% purity. The COA with full testing data is included with every order.' },
-    { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Standard delivery is 3–4 business days (standard, free) or 1 day (fast, +₹800) with temperature-controlled packaging.' },
+    { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Free standard shipping pan-India. Tier 1 &amp; 2 cities: 3–4 business days. Remote areas: 4–6 business days. Express 1–2 days for major cities (+₹800). Temperature-controlled packaging.' },
     { q: 'Can I get a COA before ordering?', a: "Yes. Contact our support team via WhatsApp or email and we'll send you the batch COA within 24 hours." },
   ],
   'Klow Blend': [
     { q: 'What is the Klow Blend?', a: 'Klow Blend is a proprietary research-grade peptide blend formulated for advanced metabolic and body composition studies. Each vial is HPLC-verified and supplied with a full Certificate of Analysis.' },
     { q: 'What is included with my order?', a: 'Every order includes a sterile lyophilised vial along with a Certificate of Analysis (COA) detailing purity, molecular weight, and HPLC testing results.' },
-    { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Standard delivery is 3–4 business days (free) or 1 day (fast, +₹800) with temperature-controlled packaging.' },
+    { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Free standard shipping pan-India. Tier 1 &amp; 2 cities: 3–4 business days. Remote areas: 4–6 business days. Express 1–2 days for major cities (+₹800). Temperature-controlled packaging.' },
     { q: 'How do I reconstitute it?', a: 'Use the Reconstitution Calculator in the header to determine the exact volume of Bacteriostatic Water for your desired concentration.' },
   ],
   'CJC-1295 + Ipamorelin Stack': [
     { q: 'What is the CJC-1295 + Ipamorelin Stack?', a: 'This is a pre-blended vial containing 5mg CJC-1295 (with DAC) and 5mg Ipamorelin — the most researched GHRH/GHRP combination for GH secretion and body composition studies. Having both in one vial eliminates mixing errors.' },
     { q: 'Why buy a pre-blended stack?', a: 'Pre-blending saves preparation time, eliminates measurement errors, and ensures precise 1:1 ratio. Both peptides are lyophilised together for maximum stability.' },
     { q: 'What purity can I expect?', a: 'Both CJC-1295 and Ipamorelin are independently HPLC-verified at 99.1%+ purity. The combined COA is included with every order.' },
-    { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Standard delivery is 3–4 business days (free) or 1 day (fast, +₹800) with temperature-controlled packaging.' },
+    { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Free standard shipping pan-India. Tier 1 &amp; 2 cities: 3–4 business days. Remote areas: 4–6 business days. Express 1–2 days for major cities (+₹800). Temperature-controlled packaging.' },
   ],
   'The Wolverine Stack': [
     { q: 'What is The Wolverine Stack?', a: 'The Wolverine Stack is a pre-combined BPC-157 + TB-500 blend (5mg each per vial) — the most researched peptide combination for tissue repair, injury recovery, and inflammation modulation. Pre-blended for convenience and precision.' },
     { q: 'Why combine BPC-157 and TB-500?', a: 'BPC-157 targets local tissue healing while TB-500 promotes systemic repair and cell migration. Together they cover complementary repair pathways. Pre-blending ensures accurate dosing every time.' },
     { q: 'What purity can I expect?', a: 'Both BPC-157 and TB-500 are independently HPLC-verified at 99.1%+ purity. Full COA included with every order.' },
-    { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Standard delivery is 3–4 business days (free) or 1 day (fast, +₹800) with temperature-controlled packaging.' },
+    { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Free standard shipping pan-India. Tier 1 &amp; 2 cities: 3–4 business days. Remote areas: 4–6 business days. Express 1–2 days for major cities (+₹800). Temperature-controlled packaging.' },
   ],
   'default': [
     { q: 'What purity can I expect?', a: 'All our peptides are HPLC-verified with purity exceeding 99%. A Certificate of Analysis is included with every order.' },
@@ -815,7 +815,7 @@ export default function ProductDetailPage() {
                       <MapPin className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                       <div>
                         <p className="text-sm font-semibold text-blue-900">Free Shipping Across India</p>
-                        <p className="text-xs text-blue-700 mt-0.5">Standard 3–4 days (free) · Fast 1-day (+₹800) · Temperature-controlled packaging</p>
+                        <p className="text-xs text-blue-700 mt-0.5">Standard: Tier 1 &amp; 2 cities 3–4 days · Remote areas 4–6 days · Express 1–2 days major cities (+₹800)</p>
                       </div>
                     </CardBody>
                   </Card>
