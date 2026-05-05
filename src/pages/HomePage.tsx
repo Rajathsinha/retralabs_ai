@@ -184,22 +184,6 @@ export default function HomePage() {
               </AnimatePresence>
             </div>
 
-            {/* Dot indicators — animated width/color */}
-            <div className="flex justify-center gap-2 mb-6">
-              {HERO_HEADLINES.map((_, i) => (
-                <motion.button
-                  key={i}
-                  onClick={() => setHeroIndex(i)}
-                  animate={{
-                    width:           i === heroIndex ? 24 : 6,
-                    backgroundColor: i === heroIndex ? 'rgb(34,211,238)' : 'rgba(255,255,255,0.25)',
-                  }}
-                  style={{ height: 6, borderRadius: 9999, border: 'none' }}
-                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                  aria-label={`Headline ${i + 1}`}
-                />
-              ))}
-            </div>
           </motion.div>
 
           {/* Sub-copy */}
