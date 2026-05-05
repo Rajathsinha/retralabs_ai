@@ -59,7 +59,25 @@ const SCREENSHOTS: { file: string; quote: string; tag: string; pos?: string }[] 
     file: 'IMG_8264.JPG',
     quote: '"Working pretty great"',
     tag: 'Retatrutide',
-    pos: '0 40%',   // show "It is actually working pretty great"
+    pos: '0 40%',
+  },
+  {
+    file: 'IMG_8259.jpg',
+    quote: '"Now I trust you guys completely"',
+    tag: 'Retatrutide',
+    pos: '0 45%',   // show "I also have the same doubts but now I trust you guys"
+  },
+  {
+    file: 'IMG_8262.jpg',
+    quote: '"I don\'t feel that hungry like I used to"',
+    tag: 'Retatrutide',
+    pos: '0 15%',
+  },
+  {
+    file: 'IMG_8271.jpg',
+    quote: '"reta is anyway a long journey"',
+    tag: 'Retatrutide',
+    pos: '0 35%',   // show "I trust on you bro, reta is anyway a long journey"
   },
 ];
 
