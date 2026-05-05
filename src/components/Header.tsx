@@ -16,7 +16,7 @@ import SearchModal from './SearchModal';
 const NAV_ITEMS = [
   { path: '/',          label: 'Home',      icon: Home },
   { path: '/catalogue', label: 'Catalogue', icon: FlaskConical },
-  { path: '/proof',     label: 'Field Reports', icon: MessageSquare },
+  { path: '/proof',     label: 'Proof',     icon: MessageSquare },
   { path: '/about',     label: 'About',     icon: Users },
   { path: '/support',   label: 'Support',   icon: HelpCircle },
 ];
@@ -127,33 +127,23 @@ export default function Header() {
             </RouterLink>
 
             {/* CENTER — Desktop nav */}
-            <nav className="hidden md:flex flex-1 items-center justify-center gap-0.5">
-              {NAV_ITEMS.map(({ path, label, icon: Icon }) => (
+            <nav className="hidden md:flex flex-1 items-center justify-center gap-1">
+              {NAV_ITEMS.map(({ path, label }) => (
                 <RouterLink
                   key={path}
                   to={path}
-                  className={`relative flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium tracking-wide transition-all duration-200 rounded-lg ${
+                  className={`relative px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-200 rounded-lg ${
                     active(path)
                       ? 'text-white'
-                      : 'text-white/45 hover:text-white/80 hover:bg-white/5'
+                      : 'text-white/45 hover:text-white/80'
                   }`}
                 >
-                  <Icon className={`w-3.5 h-3.5 flex-shrink-0 ${active(path) ? 'text-cyan-400' : 'text-white/30'}`} />
                   {label}
                   {active(path) && (
-                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-0.5 bg-cyan-400 rounded-full" />
+                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-0.5 bg-cyan-400 rounded-full" />
                   )}
                 </RouterLink>
               ))}
-
-              {/* Calculator */}
-              <button
-                onClick={openCalc}
-                className="flex items-center gap-1.5 px-3.5 py-2 ml-1 rounded-lg text-sm font-medium text-white/45 hover:text-white/80 hover:bg-white/5 transition-all duration-200"
-              >
-                <Calculator className="w-3.5 h-3.5 text-white/30" />
-                Calculator
-              </button>
             </nav>
 
             {/* RIGHT — Search | Currency | Cart | Hamburger */}
@@ -174,6 +164,15 @@ export default function Header() {
                     {isMac ? '⌘' : 'ctrl'} K
                   </span>
                 </span>
+              </button>
+
+              {/* Calculator — icon only */}
+              <button
+                onClick={openCalc}
+                aria-label="Reconstitution Calculator"
+                className="hidden md:flex p-2 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/5 transition-all duration-200"
+              >
+                <Calculator className="w-4 h-4" />
               </button>
 
               {/* Currency picker */}
