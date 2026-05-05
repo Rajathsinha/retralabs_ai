@@ -106,7 +106,7 @@ const SCREENSHOTS: { file: string; quote: string; tag: string; pos?: string }[] 
   {
     file: 'IMG_8260.JPG',
     quote: '"Going good now. Effects at 2mg, 3rd dose."',
-    tag: 'GHK-CU',
+    tag: 'Retatrutide',
     pos: '0 35%',
   },
   {
@@ -118,7 +118,7 @@ const SCREENSHOTS: { file: string; quote: string; tag: string; pos?: string }[] 
   {
     file: 'IMG_8268.JPG',
     quote: '"Perfect mix n color"',
-    tag: 'Retatrutide',
+    tag: 'GHK-CU',
     pos: '0 30%',   // show the vial video + "Perfect mix n color" message
   },
 ];
