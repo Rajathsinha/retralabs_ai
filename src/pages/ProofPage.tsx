@@ -77,7 +77,49 @@ const SCREENSHOTS: { file: string; quote: string; tag: string; pos?: string }[] 
     file: 'IMG_8271.jpg',
     quote: '"reta is anyway a long journey"',
     tag: 'Retatrutide',
-    pos: '0 35%',   // show "I trust on you bro, reta is anyway a long journey"
+    pos: '0 35%',
+  },
+  {
+    file: 'IMG_8255.JPG',
+    quote: '"Dude it works like a charm"',
+    tag: 'Retatrutide',
+    pos: '0 38%',   // message is mid-screen, context menu below gets cropped
+  },
+  {
+    file: 'IMG_8256.JPG',
+    quote: '"Dude it works like a charm"',
+    tag: 'Retatrutide',
+    pos: '0 5%',    // show top: "Dude it works like a charm / At least for now"
+  },
+  {
+    file: 'IMG_8257.jpg',
+    quote: '"Adjusting protocol for best results"',
+    tag: 'Retatrutide',
+    pos: '0 0%',
+  },
+  {
+    file: 'IMG_8258.JPG',
+    quote: '"Not very hungry anymore. Under 1200 calories daily."',
+    tag: 'Retatrutide',
+    pos: '0 38%',   // message is mid-screen above context menu
+  },
+  {
+    file: 'IMG_8260.JPG',
+    quote: '"Going good now. Effects at 2mg, 3rd dose."',
+    tag: 'Retatrutide',
+    pos: '0 35%',
+  },
+  {
+    file: 'IMG_8267.JPG',
+    quote: '"Yes, using it. It\'s working well."',
+    tag: 'Retatrutide',
+    pos: '0 32%',
+  },
+  {
+    file: 'IMG_8268.JPG',
+    quote: '"Perfect mix n color"',
+    tag: 'Retatrutide',
+    pos: '0 30%',   // show the vial video + "Perfect mix n color" message
   },
 ];
 
