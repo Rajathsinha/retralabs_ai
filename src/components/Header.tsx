@@ -102,9 +102,9 @@ export default function Header() {
       <ReconstitutionCalculator isOpen={calcOpen} onClose={closeCalc} />
 
       {/* ── Free shipping announcement bar ── */}
-      <div className="sticky top-0 z-50 bg-emerald-500 text-white text-center py-2 px-4">
-        <p className="text-sm sm:text-base font-black uppercase tracking-widest">
-          🚚 FREE SHIPPING EVERYWHERE IN INDIA — ALWAYS
+      <div className="sticky top-0 z-50 bg-slate-950 text-center py-2 px-4 border-b border-white/10">
+        <p className="text-xs sm:text-sm font-bold uppercase tracking-[0.2em] text-cyan-400">
+          🚚 Free Shipping Everywhere in India — Always
         </p>
       </div>
 
