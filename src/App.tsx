@@ -26,6 +26,7 @@ import SignUpPage from './pages/SignUpPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import AccountPage from './pages/AccountPage';
+import ProofPage from './pages/ProofPage';
 
 // ─── Error Boundary ───────────────────────────────────────────────────────────
 interface ErrorBoundaryState { hasError: boolean; error?: Error }
@@ -143,6 +144,7 @@ export default function App() {
             <Route path="/product/:id"     element={<ProductDetailPage />} />
             <Route path="/checkout"        element={<CheckoutPage />} />
             <Route path="/reviews"         element={<ReviewsPage />} />
+            <Route path="/proof"           element={<ProofPage />} />
             <Route path="/about"           element={<AboutPage />} />
             <Route path="/contact"         element={<ContactPage />} />
             <Route path="/support"         element={<SupportPage />} />

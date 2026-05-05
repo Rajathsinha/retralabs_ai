@@ -3,7 +3,7 @@ import { useDisclosure } from '@heroui/react';
 import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   ShoppingCart, Calculator, Menu, X,
-  Home, FlaskConical, Star, Users, HelpCircle,
+  Home, FlaskConical, Star, Users, HelpCircle, MessageSquare,
   Search, ChevronDown, Check, LogOut, UserCircle2,
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
@@ -17,6 +17,7 @@ const NAV_ITEMS = [
   { path: '/',          label: 'Home',      icon: Home },
   { path: '/catalogue', label: 'Catalogue', icon: FlaskConical },
   { path: '/reviews',   label: 'Reviews',   icon: Star },
+  { path: '/proof',     label: 'Real Proof', icon: MessageSquare },
   { path: '/about',     label: 'About',     icon: Users },
   { path: '/support',   label: 'Support',   icon: HelpCircle },
 ];
