@@ -11,55 +11,55 @@ const SCREENSHOTS: { file: string; quote: string; tag: string; pos?: string }[] 
     file: 'IMG_8272.JPG',
     quote: '"The quality is top-notch!"',
     tag: 'Retatrutide',
-    pos: '0 0%',
-  },
-  {
-    file: 'IMG_8265.jpg',
-    quote: '"Bro the stuff is bomb"',
-    tag: 'Retatrutide',
-    pos: '0 25%',
+    pos: '0 52%',   // skip phone header → show the review message
   },
   {
     file: 'IMG_8263.jpg',
     quote: '"Down 2 kgs in a week"',
     tag: 'Retatrutide',
-    pos: '0 10%',
+    pos: '0 22%',   // skip header, show "Going great down 2 kgs"
   },
   {
     file: 'IMG_8254.JPG',
     quote: '"It\'s really effective"',
     tag: 'Retatrutide',
-    pos: '0 0%',
+    pos: '0 0%',    // scale data + "It's really effective" starts near top
+  },
+  {
+    file: 'IMG_8265.jpg',
+    quote: '"Bro the stuff is bomb"',
+    tag: 'Retatrutide',
+    pos: '0 20%',   // show "Bro the stuff is bomb" messages
   },
   {
     file: 'IMG_8261.JPG',
     quote: '"Food suppression is crazzy bro"',
     tag: 'Retatrutide',
-    pos: '0 30%',
-  },
-  {
-    file: 'IMG_8266.jpg',
-    quote: '"BPC and TB are doing wonders"',
-    tag: 'BPC-157 + TB-500',
-    pos: '0 10%',
+    pos: '0 38%',   // skip to the food suppression part
   },
   {
     file: 'IMG_8269.JPG',
     quote: '"reta is sort of magical now"',
     tag: 'Retatrutide',
-    pos: '0 20%',
+    pos: '0 35%',   // skip header, show the key messages
+  },
+  {
+    file: 'IMG_8266.jpg',
+    quote: '"BPC and TB are doing wonders"',
+    tag: 'BPC-157 + TB-500',
+    pos: '0 18%',   // skip header, show "Bpc and Tb are doing wonders"
   },
   {
     file: 'IMG_8274.jpg',
     quote: '"food noise is gone"',
     tag: 'Retatrutide',
-    pos: '0 20%',
+    pos: '0 30%',   // skip header, show the key messages
   },
   {
     file: 'IMG_8264.JPG',
-    quote: '"It is actually working pretty great"',
+    quote: '"Working pretty great"',
     tag: 'Retatrutide',
-    pos: '0 30%',
+    pos: '0 40%',   // show "It is actually working pretty great"
   },
 ];
 
