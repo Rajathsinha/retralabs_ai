@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useDisclosure } from '@heroui/react';
 import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -6,6 +7,13 @@ import {
   Home, FlaskConical, Users, HelpCircle, MessageSquare,
   Search, ChevronDown, Check, LogOut, UserCircle2,
 } from 'lucide-react';
+
+const BANNERS = [
+  { text: '🚚 Free Shipping Everywhere in India — Always',                    color: 'text-cyan-400'    },
+  { text: '🎉 5% Off — Mix 2+ Different Peptides & Spend ₹9,000+',           color: 'text-emerald-400' },
+  { text: '🔬 HPLC-Verified · COA on Every Order · GMP-Certified Source',    color: 'text-sky-400'     },
+  { text: '⚡ Usually Ships in 48h · WhatsApp Support · No Middlemen Ever',   color: 'text-amber-400'   },
+];
 import { useCart } from '../context/CartContext';
 import { useCurrency, CURRENCIES } from '../context/CurrencyContext';
 import { useAuth } from '../context/AuthContext';
@@ -20,6 +28,61 @@ const NAV_ITEMS = [
   { path: '/about',     label: 'About',     icon: Users },
   { path: '/support',   label: 'Support',   icon: HelpCircle },
 ];
+
+function AnnouncementBanner() {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const t = setInterval(() => setIndex(i => (i + 1) % BANNERS.length), 5000);
+    return () => clearInterval(t);
+  }, []);
+
+  const banner = BANNERS[index];
+
+  return (
+    <div className="sticky top-0 z-50 bg-slate-950 border-b border-white/10 overflow-hidden" style={{ height: 36 }}>
+      {/* Progress bar */}
+      <AnimatePresence mode="sync">
+        <motion.div
+          key={`bar-${index}`}
+          className="absolute bottom-0 left-0 h-[2px] bg-current opacity-40"
+          style={{ color: banner.color.replace('text-', '') }}
+          initial={{ width: '0%' }}
+          animate={{ width: '100%' }}
+          transition={{ duration: 5, ease: 'linear' }}
+        />
+      </AnimatePresence>
+
+      {/* Text */}
+      <AnimatePresence mode="wait">
+        <motion.p
+          key={index}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.35, ease: 'easeOut' }}
+          className={`absolute inset-0 flex items-center justify-center text-xs sm:text-sm font-bold uppercase tracking-[0.18em] px-4 ${banner.color}`}
+        >
+          {banner.text}
+        </motion.p>
+      </AnimatePresence>
+
+      {/* Dot indicators */}
+      <div className="absolute right-3 top-1/2 -translate-y-1/2 flex gap-1">
+        {BANNERS.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setIndex(i)}
+            aria-label={`Banner ${i + 1}`}
+            className={`w-1 h-1 rounded-full transition-all duration-300 ${
+              i === index ? 'bg-white/60 w-3' : 'bg-white/20'
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function Header() {
   const { cart, openCart }            = useCart();
@@ -99,12 +162,8 @@ export default function Header() {
       {/* ── Calculator Modal ── */}
       <ReconstitutionCalculator isOpen={calcOpen} onClose={closeCalc} />
 
-      {/* ── Free shipping announcement bar ── */}
-      <div className="sticky top-0 z-50 bg-slate-950 text-center py-2 px-4 border-b border-white/10">
-        <p className="text-xs sm:text-sm font-bold uppercase tracking-[0.2em] text-cyan-400">
-          🚚 Free Shipping Everywhere in India — Always
-        </p>
-      </div>
+      {/* ── Rotating announcement banner ── */}
+      <AnnouncementBanner />
 
       {/* ── Header shell ── */}
       <header
