@@ -91,8 +91,6 @@ export default function Header() {
   const active = (path: string) =>
     path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
 
-  const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.userAgent);
-
   return (
     <>
       {/* ── Search modal (portal to body) ── */}
@@ -127,21 +125,19 @@ export default function Header() {
             </RouterLink>
 
             {/* CENTER — Desktop nav */}
-            <nav className="hidden md:flex flex-1 items-center justify-center gap-1">
-              {NAV_ITEMS.map(({ path, label }) => (
+            <nav className="hidden md:flex flex-1 items-center justify-center gap-0.5">
+              {NAV_ITEMS.map(({ path, label, icon: Icon }) => (
                 <RouterLink
                   key={path}
                   to={path}
-                  className={`relative px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-200 rounded-lg ${
+                  className={`relative flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
                     active(path)
-                      ? 'text-white'
-                      : 'text-white/45 hover:text-white/80'
+                      ? 'text-white bg-white/8'
+                      : 'text-white/50 hover:text-white hover:bg-white/5'
                   }`}
                 >
+                  <Icon className={`w-4 h-4 flex-shrink-0 ${active(path) ? 'text-cyan-400' : ''}`} />
                   {label}
-                  {active(path) && (
-                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-0.5 bg-cyan-400 rounded-full" />
-                  )}
                 </RouterLink>
               ))}
             </nav>
@@ -149,21 +145,13 @@ export default function Header() {
             {/* RIGHT — Search | Currency | Cart | Hamburger */}
             <div className="flex items-center gap-1.5">
 
-              {/* Search button — desktop: pill with shortcut hint, mobile: icon */}
+              {/* Search button — icon only */}
               <button
                 onClick={() => setSearchOpen(true)}
                 aria-label="Search products"
-                className="flex items-center gap-2 rounded-lg text-white/50 hover:text-white/80 transition-all duration-200
-                           px-2 py-2
-                           md:px-3 md:py-1.5 md:border md:border-white/10 md:hover:border-white/20 md:hover:bg-white/5 md:text-sm"
+                className="p-2 rounded-lg text-white/50 hover:text-white hover:bg-white/8 transition-all duration-200"
               >
-                <Search className="w-4 h-4 flex-shrink-0" />
-                <span className="hidden md:flex items-center gap-2 text-sm text-white/35">
-                  Search products…
-                  <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-white/8 border border-white/10 text-[11px] font-mono text-white/30">
-                    {isMac ? '⌘' : 'ctrl'} K
-                  </span>
-                </span>
+                <Search className="w-5 h-5" />
               </button>
 
               {/* Calculator — icon only */}
