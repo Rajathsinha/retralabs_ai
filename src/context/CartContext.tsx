@@ -15,7 +15,6 @@ const COUPONS: Record<string, CouponDiscount> = {
   'goodwill600': { type: 'flat',    value: 600  },
   'bacwater400': { type: 'flat',    value: 400  },
   'bacwater800': { type: 'flat',    value: 800  },
-  'extra15%':    { type: 'percent', value: 15   },
 };
 
 interface CartContextType {
