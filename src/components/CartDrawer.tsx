@@ -168,12 +168,17 @@ export default function CartDrawer() {
                 {/* ── Footer ── */}
                 <div className="border-t border-slate-100 bg-white px-4 pt-4 pb-5 space-y-3">
 
-                  {/* Volume discount badge */}
+                  {/* 5% discount badge — always shown when peptides in cart */}
                   {getDiscount() > 0 && (
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200">
-                      <span className="text-xs font-bold text-emerald-700">
-                        🎉 {getDiscount()}% peptide discount applied!
-                      </span>
+                    <div className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-gradient-to-r from-emerald-50 to-cyan-50 border border-emerald-200">
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">🎉</span>
+                        <div>
+                          <p className="text-xs font-extrabold text-emerald-700 uppercase tracking-wide">5% Off — Applied!</p>
+                          <p className="text-[10px] text-emerald-600">Exclusive discount on every RetraLabs order</p>
+                        </div>
+                      </div>
+                      <span className="text-sm font-black text-emerald-600">−{format(getDiscountAmount())}</span>
                     </div>
                   )}
 
@@ -222,7 +227,7 @@ export default function CartDrawer() {
                     </div>
                     {getDiscountAmount() > 0 && (
                       <div className="flex justify-between text-emerald-600">
-                        <span>Peptide discount</span>
+                        <span>5% discount</span>
                         <span className="font-semibold">−{format(getDiscountAmount())}</span>
                       </div>
                     )}

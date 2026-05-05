@@ -338,7 +338,7 @@ export default function CheckoutPage() {
               <div className="border-t border-slate-100 pt-3 space-y-1.5">
                 {getDiscount() > 0 && (
                   <div className="flex justify-between text-sm text-emerald-600">
-                    <span>Peptide Discount</span>
+                    <span>5% Discount 🎉</span>
                     <span>&minus;{format(getDiscountAmount())}</span>
                   </div>
                 )}
@@ -456,23 +456,21 @@ export default function CheckoutPage() {
           </CardBody>
         </Card>
 
-        {/* Volume discount notice */}
-        <Card className="mb-8 border border-emerald-200 bg-emerald-50" shadow="none">
-          <CardBody className="flex flex-row items-start gap-4 p-5">
-            <div className="p-2 bg-emerald-100 rounded-xl flex-shrink-0">
+        {/* 5% discount notice */}
+        <Card className="mb-8 border border-emerald-200 bg-gradient-to-r from-emerald-50 to-cyan-50" shadow="none">
+          <CardBody className="flex flex-row items-center gap-4 p-5">
+            <div className="p-2.5 bg-emerald-100 rounded-xl flex-shrink-0">
               <Tag className="w-5 h-5 text-emerald-600" />
             </div>
-            <div>
-              <h3 className="text-base font-bold text-emerald-900 mb-3">Order More, Save More.</h3>
-              <div className="flex flex-wrap gap-2">
-                <Chip color="success" variant="flat" size="sm">
-                  Peptides ₹10,000+ = 10% OFF
-                </Chip>
-                <Chip color="success" variant="flat" size="sm">
-                  Peptides ₹20,000+ = 15% OFF
-                </Chip>
-              </div>
+            <div className="flex-1">
+              <h3 className="text-base font-extrabold text-emerald-900">🎉 5% Off — On Every Order.</h3>
+              <p className="text-sm text-emerald-700 mt-0.5">
+                No codes needed. No minimum spend. Just 5% off automatically on all peptide orders — always.
+              </p>
             </div>
+            <Chip color="success" variant="flat" className="font-black text-sm flex-shrink-0">
+              5% OFF
+            </Chip>
           </CardBody>
         </Card>
 
@@ -570,7 +568,7 @@ export default function CheckoutPage() {
 
                   {getDiscount() > 0 && (
                     <div className="flex justify-between items-center text-emerald-600">
-                      <span className="font-medium">Peptide Discount</span>
+                      <span className="font-medium">5% Discount 🎉</span>
                       <span className="font-semibold">
                         &minus;{format(getDiscountAmount())}
                       </span>

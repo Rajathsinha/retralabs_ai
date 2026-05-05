@@ -108,14 +108,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
       isBacWater(item.product.name) ? total : total + item.quantity
     , 0);
 
-  // Bill-based discount: requires ≥2 peptide items AND spend threshold
-  // ≥₹20,000 → 15% | ≥₹10,000 → 10% | else → 0%
+  // Flat 5% discount on all peptide items — always applied
   const getDiscount = (): number => {
-    if (getDiscountableQuantity() < 2) return 0;
-    const s = getDiscountableSubtotal();
-    if (s >= 20000) return 15;
-    if (s >= 10000) return 10;
-    return 0;
+    if (getDiscountableSubtotal() === 0) return 0;
+    return 5;
   };
 
   const getDiscountAmount = () => {
