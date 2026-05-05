@@ -137,7 +137,7 @@ export default function CataloguePage() {
 
   useSEO({
     title: 'Buy Research Peptides India | Retatrutide, Tirzepatide, GHK-Cu | RetraLabs',
-    description: 'Buy research-grade Retatrutide, Tirzepatide, BPC-157, NAD+, TB-500, Tesamorelin & more in India. 99%+ HPLC purity, COA verified. From ₹2,000. India-wide shipping.',
+    description: 'Buy research-grade Retatrutide, Tirzepatide, BPC-157, NAD+, TB-500, Tesamorelin & more in India. 98%+ HPLC purity, COA verified. From ₹2,000. India-wide shipping.',
     keywords: 'buy retatrutide india, retatrutide catalogue india, buy tirzepatide india, GHK-Cu india, research peptides india, reta india, peptide catalogue india, buy peptides online india',
     canonical: 'https://retralabs.in/catalogue',
     ogImage: 'https://retralabs.in/retatrutide.jpg',
@@ -290,7 +290,7 @@ export default function CataloguePage() {
             </div>
             <div className="flex flex-wrap gap-3">
               <Chip startContent={<ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />} color="success" variant="flat" classNames={{ base: 'bg-emerald-400/15 border border-emerald-400/25', content: 'text-emerald-300 font-semibold' }}>COA Included</Chip>
-              <Chip startContent={<FlaskConical className="w-3.5 h-3.5 text-blue-400" />} color="primary" variant="flat" classNames={{ base: 'bg-blue-400/15 border border-blue-400/25', content: 'text-blue-300 font-semibold' }}>99%+ Purity</Chip>
+              <Chip startContent={<FlaskConical className="w-3.5 h-3.5 text-blue-400" />} color="primary" variant="flat" classNames={{ base: 'bg-blue-400/15 border border-blue-400/25', content: 'text-blue-300 font-semibold' }}>98%+ Purity</Chip>
               <Chip startContent={<FileCheck className="w-3.5 h-3.5 text-amber-400" />} color="warning" variant="flat" classNames={{ base: 'bg-amber-400/15 border border-amber-400/25', content: 'text-amber-300 font-semibold' }}>HPLC Verified</Chip>
             </div>
           </div>
@@ -491,7 +491,7 @@ export default function CataloguePage() {
             <AnimatePresence mode="sync" initial={false}>
               {filteredProducts.map((product, index) => {
                 const startingPrice = getStartingPrice(product);
-                const purity        = PURITY_MAP[product.name] || '99%+';
+                const purity        = PURITY_MAP[product.name] || '98%+';
                 const badge         = BADGE_MAP[product.name];
                 const isBacWater    = product.name.toLowerCase().includes('bacteriostatic');
 

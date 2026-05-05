@@ -115,7 +115,7 @@ const FEATURES = [
   {
     icon: FlaskConical, title: 'HPLC-Verified. Every Batch.',
     desc: 'Independent third-party purity testing on every single batch. COA included — not on request, just always.',
-    stat: '99%+ Purity', chipColor: 'primary' as const,
+    stat: '98%+ Purity', chipColor: 'primary' as const,
     bg: 'from-blue-50 to-cyan-50', border: 'border-blue-100',
     iconBg: 'bg-blue-100', iconColor: 'text-blue-700',
     glow: 'rgba(59,130,246,0.1)',
@@ -262,7 +262,7 @@ export default function HomePage() {
               <div key={set} className="flex items-center flex-shrink-0">
                 {[
                   { value: '3,000+', label: 'Orders Shipped' },
-                  { value: '99%+',   label: 'Purity Guaranteed' },
+                  { value: '98%+',   label: 'Purity Guaranteed' },
                   { value: '48h',    label: 'Avg Dispatch' },
                   { value: 'GMP',    label: 'Certified Source' },
                   { value: '100%',   label: 'HPLC-Tested' },

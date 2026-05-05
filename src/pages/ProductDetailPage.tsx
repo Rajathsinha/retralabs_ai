@@ -92,7 +92,7 @@ const FAQ_MAP: Record<string, { q: string; a: string }[]> = {
     { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Free standard shipping pan-India. Tier 1 &amp; 2 cities: 3–4 business days. Remote areas: 4–6 business days. Express 1–2 days for major cities (+₹800). Temperature-controlled packaging.' },
   ],
   'default': [
-    { q: 'What purity can I expect?', a: 'All our peptides are HPLC-verified with purity exceeding 99%. A Certificate of Analysis is included with every order.' },
+    { q: 'What purity can I expect?', a: 'All our peptides are HPLC-verified with purity exceeding 98%. A Certificate of Analysis is included with every order.' },
     { q: 'What is included with my order?', a: 'Every order includes the compound in a sterile vial along with a Certificate of Analysis (COA) detailing purity and testing results.' },
     { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Standard delivery is 3–4 business days (standard, free) or 1 day (fast, +₹800). All peptides are shipped with temperature-controlled packaging.' },
     { q: 'Can I get a COA before ordering?', a: "Yes. Contact our support team via WhatsApp or email and we'll send you the batch COA within 24 hours." },
@@ -928,7 +928,7 @@ export default function ProductDetailPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
                   { icon: ShieldCheck, label: 'COA with every order', color: 'text-emerald-400' },
-                  { icon: FlaskConical, label: '99%+ HPLC verified purity', color: 'text-blue-400' },
+                  { icon: FlaskConical, label: '98%+ HPLC verified purity', color: 'text-blue-400' },
                   { icon: Truck, label: 'Pan-India free shipping', color: 'text-amber-400' },
                   { icon: MessageCircle, label: 'WhatsApp support always on', color: 'text-green-400' },
                 ].map((item) => (

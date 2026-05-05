@@ -16,7 +16,7 @@ import ScrollReveal from '../components/ScrollReveal';
 
 const STATS = [
   { value: '3,000+', label: 'Orders Shipped', icon: Truck, colorClass: 'text-brand-600 bg-brand-50' },
-  { value: '99%+', label: 'Avg Purity Verified', icon: FlaskConical, colorClass: 'text-emerald-700 bg-emerald-50' },
+  { value: '98%+', label: 'Avg Purity Verified', icon: FlaskConical, colorClass: 'text-emerald-700 bg-emerald-50' },
   { value: '6', label: 'Premium Compounds', icon: Microscope, colorClass: 'text-accent-700 bg-accent-50' },
 ];
 
@@ -70,7 +70,7 @@ const VALUES = [
 
 const QUALITY_STEPS = [
   { step: '01', title: 'Source Verification', desc: 'Manufacturer credentials, GMP certification, and prior batch records reviewed before any new supplier relationship.' },
-  { step: '02', title: 'Batch Testing', desc: 'Each incoming batch is independently HPLC-tested. Batches below 99% threshold are rejected outright — no exceptions.' },
+  { step: '02', title: 'Batch Testing', desc: 'Each incoming batch is independently HPLC-tested. Batches below 98% threshold are rejected outright — no exceptions.' },
   { step: '03', title: 'COA Issuance', desc: 'Certificate of Analysis documenting purity, molecular weight, and testing methodology issued with every single order.' },
   { step: '04', title: 'Sterile Packaging', desc: 'Lyophilised peptides sealed in pharmaceutical-grade sterile vials. Cold-chain packaging for transit integrity.' },
 ];
