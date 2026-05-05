@@ -1,16 +1,13 @@
 /**
- * HomePage — fully animated with Framer Motion + canvas particles.
+ * HomePage — animated with Framer Motion + GSAP scroll counters.
  *
  * Animation layers:
- *  1. HeroParticles     — 55 floating cyan/sky/indigo particles (canvas, GPU)
- *  2. Animated orbs     — Framer Motion infinite float + scale keyframes
- *  3. Hero stagger      — badge → headline → subtext → CTAs with spring easing
- *  4. Headline rotation — AnimatePresence fade+blur between 3 headlines
- *  5. Scroll reveals    — AnimatedSection wraps every content block
- *  6. Stagger cards     — motion.div staggerChildren for feature + testimonial cards
- *  7. Card hovers       — whileHover lift + per-card glow shadow
- *  8. GSAP counter      — AnimatedCounter for live stats section
- *  9. MagneticButton    — primary CTA pulls gently toward cursor
+ *  1. Hero stagger      — headline → subtext → CTAs fade up on mount (no scroll trigger)
+ *  2. Headline rotation — AnimatePresence opacity cross-fade between 3 headlines
+ *  3. Scroll reveals    — AnimatedSection (whileInView) for below-fold content blocks
+ *  4. Stagger cards     — motion.div staggerChildren for feature + testimonial cards
+ *  5. Card hovers       — whileHover lift + per-card glow shadow
+ *  6. GSAP counter      — AnimatedCounter for live stats section (ScrollTrigger)
  */
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -167,8 +164,12 @@ export default function HomePage() {
 
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative text-center">
 
-          {/* Rotating headline — AnimatePresence cross-fades with blur */}
-          <AnimatedSection variants={fadeUp} delay={0.1}>
+          {/* Rotating headline — mounts immediately (no scroll trigger for above-fold) */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          >
             <div className="min-h-[200px] md:min-h-[280px] flex items-center justify-center mb-4">
               <AnimatePresence mode="sync">
                 <motion.h1
@@ -199,10 +200,14 @@ export default function HomePage() {
                 />
               ))}
             </div>
-          </AnimatedSection>
+          </motion.div>
 
           {/* Sub-copy */}
-          <AnimatedSection variants={fadeUp} delay={0.22}>
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
+          >
             <p className="text-lg md:text-xl text-slate-400 mb-4 leading-relaxed max-w-2xl mx-auto">
               Fake vials. Useless compounds. Thousands wasted. We couldn't find a single
               legitimate peptide supplier in India, so we went directly to GMP manufacturers,
@@ -211,12 +216,13 @@ export default function HomePage() {
             <p className="text-slate-500 text-sm italic mb-10">
               That's the whole story. Everything else is just good products at honest prices.
             </p>
-          </AnimatedSection>
+          </motion.div>
 
           {/* CTAs */}
-          <AnimatedSection
-            variants={fadeUp}
-            delay={0.34}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.34, ease: [0.16, 1, 0.3, 1] }}
             className="flex flex-col sm:flex-row gap-3 justify-center mb-16"
           >
             {/* Primary CTA */}
@@ -243,7 +249,7 @@ export default function HomePage() {
             >
               Read Our Story
             </motion.button>
-          </AnimatedSection>
+          </motion.div>
 
         </div>
 
@@ -462,9 +468,9 @@ export default function HomePage() {
               <Button
                 className="bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 px-7"
                 endContent={<ArrowRight className="w-4 h-4" />}
-                onPress={() => navigate('/reviews')}
+                onPress={() => navigate('/proof')}
               >
-                Read All 5-Star Reviews →
+                See Field Reports →
               </Button>
             </motion.div>
           </AnimatedSection>

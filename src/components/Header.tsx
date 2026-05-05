@@ -198,8 +198,8 @@ export default function Header() {
                 )}
               </div>
 
-              {/* Sign In / Avatar */}
-              {user ? (
+              {/* Avatar (logged-in only) */}
+              {user && (
                 <div className="relative" ref={avatarRef}>
                   {/* Mobile: tap → go straight to /account */}
                   <button
@@ -238,24 +238,6 @@ export default function Header() {
                     </div>
                   )}
                 </div>
-              ) : (
-                <>
-                  {/* Mobile: icon-only button */}
-                  <button
-                    onClick={() => navigate('/signin')}
-                    aria-label="Sign in"
-                    className="md:hidden p-2 rounded-lg text-white/50 hover:text-white hover:bg-white/8 transition-all duration-200"
-                  >
-                    <UserCircle2 className="w-5 h-5" />
-                  </button>
-                  {/* Desktop: pill with text */}
-                  <button
-                    onClick={() => navigate('/signin')}
-                    className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-white/60 hover:text-white border border-white/10 hover:border-white/25 hover:bg-white/5 transition-all duration-200"
-                  >
-                    Sign In
-                  </button>
-                </>
               )}
 
               {/* Cart */}
@@ -365,8 +347,8 @@ export default function Header() {
                   )}
                 </button>
 
-                {/* Auth row */}
-                {user ? (
+                {/* Auth row — only shown when logged in */}
+                {user && (
                   <div className="flex gap-2">
                     <button
                       onClick={() => { setOpen(false); navigate('/account'); }}
@@ -382,13 +364,6 @@ export default function Header() {
                       <LogOut className="w-4 h-4" />
                     </button>
                   </div>
-                ) : (
-                  <button
-                    onClick={() => { setOpen(false); navigate('/signin'); }}
-                    className="w-full flex items-center justify-center gap-2 border border-white/10 text-white/60 hover:text-white hover:bg-white/6 font-semibold px-4 py-3 rounded-xl transition-all duration-200 text-sm"
-                  >
-                    Sign In / Register
-                  </button>
                 )}
               </div>
             </nav>
