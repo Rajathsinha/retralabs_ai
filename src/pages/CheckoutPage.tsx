@@ -465,7 +465,7 @@ export default function CheckoutPage() {
             <div className="flex-1">
               <h3 className="text-base font-extrabold text-emerald-900">🎉 5% Off — On Every Order.</h3>
               <p className="text-sm text-emerald-700 mt-0.5">
-                No codes needed. Spend ₹9,000+ on peptides and 5% comes off automatically — always.
+                Add 2+ different peptides worth ₹9,000+ and 5% comes off automatically. No codes needed.
               </p>
             </div>
             <Chip color="success" variant="flat" className="font-black text-sm flex-shrink-0">
