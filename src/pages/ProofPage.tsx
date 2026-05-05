@@ -106,7 +106,7 @@ const SCREENSHOTS: { file: string; quote: string; tag: string; pos?: string }[] 
   {
     file: 'IMG_8260.JPG',
     quote: '"Going good now. Effects at 2mg, 3rd dose."',
-    tag: 'Retatrutide',
+    tag: 'GHK-CU',
     pos: '0 35%',
   },
   {
