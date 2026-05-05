@@ -22,12 +22,9 @@ import {
   FlaskConical, ShieldCheck, ArrowRight, Star,
   CheckCircle2, MessageCircle, AlertTriangle,
 } from 'lucide-react';
-import HeroParticles from '../components/HeroParticles';
 import AnimatedSection from '../components/AnimatedSection';
-import MagneticButton from '../components/MagneticButton';
 import {
-  fadeUp, fadeDown, scaleIn, staggerMedium, staggerFast,
-  orbFloat, orbFloat2,
+  fadeUp, scaleIn, staggerMedium, staggerFast,
 } from '../animations/variants';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -164,20 +161,8 @@ export default function HomePage() {
       {/* ════════════════════ HERO ════════════════════ */}
       <section className="relative overflow-hidden bg-slate-950 pt-16 pb-0">
 
-        {/* Rising canvas particles */}
-        <HeroParticles />
-
-        {/* Framer Motion floating orbs */}
         <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
           <div className="absolute inset-0 bg-dot-pattern bg-dot-sm opacity-[0.04]" />
-          <motion.div
-            className="absolute top-1/4 -left-56 w-[600px] h-[600px] bg-accent-500/10 rounded-full blur-3xl"
-            animate={orbFloat.animate}
-          />
-          <motion.div
-            className="absolute bottom-1/3 -right-56 w-[600px] h-[600px] bg-brand-500/10 rounded-full blur-3xl"
-            animate={orbFloat2.animate}
-          />
         </div>
 
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative text-center">
@@ -185,14 +170,12 @@ export default function HomePage() {
           {/* Rotating headline — AnimatePresence cross-fades with blur */}
           <AnimatedSection variants={fadeUp} delay={0.1}>
             <div className="min-h-[200px] md:min-h-[280px] flex items-center justify-center mb-4">
-              <AnimatePresence mode="wait">
+              <AnimatePresence mode="sync">
                 <motion.h1
                   key={heroIndex}
-                  initial={{ opacity: 0, y: 22, filter: 'blur(6px)' }}
-                  animate={{ opacity: 1, y: 0,  filter: 'blur(0px)',
-                    transition: { duration: 0.58, ease: [0.16, 1, 0.3, 1] } }}
-                  exit={{   opacity: 0, y: -18, filter: 'blur(4px)',
-                    transition: { duration: 0.28, ease: 'easeIn' } }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1, transition: { duration: 0.35, ease: 'easeOut' } }}
+                  exit={{   opacity: 0, transition: { duration: 0.2,  ease: 'easeIn'  } }}
                   className="text-5xl md:text-7xl font-bold text-white tracking-tight leading-[1.05] text-center"
                 >
                   {HERO_HEADLINES[heroIndex].jsx}
@@ -236,25 +219,18 @@ export default function HomePage() {
             delay={0.34}
             className="flex flex-col sm:flex-row gap-3 justify-center mb-16"
           >
-            {/* Primary — magnetic pull toward cursor */}
-            <MagneticButton strength={20}>
-              <motion.button
-                type="button"
-                onClick={() => navigate('/catalogue')}
-                className="inline-flex items-center justify-center gap-2 bg-cyan-400 text-slate-900 font-extrabold text-base px-8 py-3.5 rounded-2xl shadow-lg shadow-cyan-400/20"
-                whileHover={{ scale: 1.05, boxShadow: '0 8px 36px rgba(34,211,238,0.45)', backgroundColor: 'rgb(103,232,249)' }}
-                whileTap={{ scale: 0.97 }}
-                transition={{ duration: 0.2, ease: 'easeOut' }}
-              >
-                Shop the Real Stuff
-                <motion.span
-                  animate={{ x: [0, 4, 0] }}
-                  transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}
-                >
-                  <ArrowRight className="w-4 h-4" />
-                </motion.span>
-              </motion.button>
-            </MagneticButton>
+            {/* Primary CTA */}
+            <motion.button
+              type="button"
+              onClick={() => navigate('/catalogue')}
+              className="inline-flex items-center justify-center gap-2 bg-cyan-400 text-slate-900 font-extrabold text-base px-8 py-3.5 rounded-2xl shadow-lg shadow-cyan-400/20"
+              whileHover={{ scale: 1.05, boxShadow: '0 8px 36px rgba(34,211,238,0.45)', backgroundColor: 'rgb(103,232,249)' }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+            >
+              Shop the Real Stuff
+              <ArrowRight className="w-4 h-4" />
+            </motion.button>
 
             {/* Secondary */}
             <motion.button

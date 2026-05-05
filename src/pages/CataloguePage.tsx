@@ -487,8 +487,8 @@ export default function CataloguePage() {
             {[...Array(6)].map((_, i) => <SkeletonCard key={i} />)}
           </div>
         ) : filteredProducts.length > 0 ? (
-          <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <AnimatePresence mode="popLayout" initial={false}>
+          <motion.div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <AnimatePresence mode="sync" initial={false}>
               {filteredProducts.map((product, index) => {
                 const startingPrice = getStartingPrice(product);
                 const purity        = PURITY_MAP[product.name] || '99%+';
@@ -498,11 +498,10 @@ export default function CataloguePage() {
                 return (
                   <motion.div
                     key={product.id}
-                    layout
                     initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                    exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.18 } }}
+                    exit={{ opacity: 0, transition: { duration: 0.18 } }}
                     className="cursor-pointer group"
                     onClick={() => navigate(`/product/${product.id}`)}
                   >
@@ -514,7 +513,7 @@ export default function CataloguePage() {
                           <img
                             src={getProductImageUrl(product.image_url, product.name)}
                             alt={`${product.name} research peptide${isBacWater ? '' : ' vial India'}`}
-                            className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+                            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ease-out"
                             onError={(e) => {
                               const t = e.target as HTMLImageElement;
                               const n = product.name.toLowerCase();
