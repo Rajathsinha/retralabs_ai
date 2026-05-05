@@ -1,71 +1,65 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, ArrowRight } from 'lucide-react';
-import AnimatedSection from '../components/AnimatedSection';
+import { X, ArrowRight, MessageCircle, CheckCircle2 } from 'lucide-react';
 
-// ── Curated screenshots — real WhatsApp conversations ─────────────────────────
-// Images are served from /public/testimonials/
-const SCREENSHOTS = [
+// ── Curated screenshots — only clean positive feedback ────────────────────────
+// object-position controls which part of the screenshot is shown in the card.
+// "top" = skip keyboard/input bar at bottom; percentage tweaks skip the chat header.
+const SCREENSHOTS: { file: string; quote: string; tag: string; pos?: string }[] = [
   {
     file: 'IMG_8272.JPG',
+    quote: '"The quality is top-notch!"',
     tag: 'Retatrutide',
-    highlight: '"The quality is top-notch!"',
+    pos: '0 0%',
   },
   {
     file: 'IMG_8265.jpg',
+    quote: '"Bro the stuff is bomb"',
     tag: 'Retatrutide',
-    highlight: '"Bro the stuff is bomb"',
-  },
-  {
-    file: 'IMG_8269.JPG',
-    tag: 'Retatrutide',
-    highlight: '"reta is sort of magical now"',
+    pos: '0 25%',
   },
   {
     file: 'IMG_8263.jpg',
+    quote: '"Down 2 kgs in a week"',
     tag: 'Retatrutide',
-    highlight: '"Down 2 kgs in a week"',
+    pos: '0 10%',
   },
   {
     file: 'IMG_8254.JPG',
+    quote: '"It\'s really effective"',
     tag: 'Retatrutide',
-    highlight: '"It\'s really effective"',
+    pos: '0 0%',
   },
   {
     file: 'IMG_8261.JPG',
+    quote: '"Food suppression is crazzy bro"',
     tag: 'Retatrutide',
-    highlight: '"Food suppression is crazzy bro"',
-  },
-  {
-    file: 'IMG_8256.JPG',
-    tag: 'Retatrutide',
-    highlight: '"Dude it works like a charm"',
+    pos: '0 30%',
   },
   {
     file: 'IMG_8266.jpg',
+    quote: '"BPC and TB are doing wonders"',
     tag: 'BPC-157 + TB-500',
-    highlight: '"BPC and TB are doing wonders"',
+    pos: '0 10%',
   },
   {
-    file: 'IMG_8264.JPG',
+    file: 'IMG_8269.JPG',
+    quote: '"reta is sort of magical now"',
     tag: 'Retatrutide',
-    highlight: '"It is actually working pretty great"',
+    pos: '0 20%',
   },
   {
     file: 'IMG_8274.jpg',
+    quote: '"food noise is gone"',
     tag: 'Retatrutide',
-    highlight: '"food noise is gone"',
+    pos: '0 20%',
   },
   {
-    file: 'IMG_8271.jpg',
+    file: 'IMG_8264.JPG',
+    quote: '"It is actually working pretty great"',
     tag: 'Retatrutide',
-    highlight: '"reta is anyway a long journey"',
-  },
-  {
-    file: 'IMG_8262.jpg',
-    tag: 'Retatrutide',
-    highlight: '"I don\'t feel that hungry"',
+    pos: '0 30%',
   },
 ];
 
@@ -75,92 +69,92 @@ export default function ProofPage() {
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-slate-50">
 
-      {/* ── Hero ── */}
-      <section className="pt-16 pb-12 px-4 text-center">
-        <AnimatedSection>
-          <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-1.5 mb-6">
-            <MessageCircle className="w-3.5 h-3.5 text-green-400" />
-            <span className="text-xs font-bold uppercase tracking-widest text-slate-400">
-              Real WhatsApp Conversations
+      {/* ── Hero ─────────────────────────────────────────────────────────── */}
+      <section className="bg-white border-b border-slate-100 pt-14 pb-12 px-4 text-center">
+        <div className="inline-flex items-center gap-2 bg-green-50 border border-green-200 rounded-full px-4 py-1.5 mb-5">
+          <MessageCircle className="w-3.5 h-3.5 text-green-600" />
+          <span className="text-xs font-bold uppercase tracking-widest text-green-700">
+            Real WhatsApp Chats · Unedited
+          </span>
+        </div>
+
+        <h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight mb-4 leading-tight">
+          Don't Take Our Word For It.<br />
+          <span className="text-gradient">Read Their Texts.</span>
+        </h1>
+
+        <p className="text-slate-500 text-base max-w-lg mx-auto mb-2">
+          Real customers. Real conversations. Names and numbers blurred for privacy.
+          Every message is genuine — zero scripts, zero paid promotions.
+        </p>
+
+        {/* Trust chips */}
+        <div className="flex flex-wrap justify-center gap-2 mt-6">
+          {[
+            '3,000+ Orders Shipped',
+            '100% Real Customers',
+            '0 Paid Promotions',
+          ].map(t => (
+            <span
+              key={t}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-full"
+            >
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+              {t}
             </span>
-          </div>
-          <h1 className="text-4xl md:text-6xl font-bold text-white tracking-tight mb-4 max-w-3xl mx-auto leading-tight">
-            We Don't Ask You to<br />
-            <span className="text-gradient">Trust Us. Read This.</span>
-          </h1>
-          <p className="text-slate-400 text-lg max-w-xl mx-auto mb-3">
-            Unedited WhatsApp screenshots from real customers.
-            No actors, no scripts, no paid promotions.
-          </p>
-          <p className="text-slate-600 text-sm italic">
-            Names and numbers blurred for privacy. Messages are real.
-          </p>
-        </AnimatedSection>
+          ))}
+        </div>
       </section>
 
-      {/* ── Stats strip ── */}
-      <AnimatedSection>
-        <div className="max-w-3xl mx-auto px-4 mb-14">
-          <div className="grid grid-cols-3 gap-4 text-center border border-white/8 rounded-2xl bg-white/3 py-6">
-            {[
-              { val: '3,000+', label: 'Orders shipped' },
-              { val: '100%',   label: 'Real customers' },
-              { val: '0',      label: 'Paid reviews' },
-            ].map(s => (
-              <div key={s.label}>
-                <p className="text-2xl md:text-3xl font-black text-white">{s.val}</p>
-                <p className="text-xs text-slate-500 uppercase tracking-widest mt-1">{s.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </AnimatedSection>
-
-      {/* ── Masonry grid ── */}
-      <section className="max-w-6xl mx-auto px-4 pb-20">
-        <div
-          className="columns-1 sm:columns-2 lg:columns-3 gap-4"
-          style={{ columnFill: 'balance' }}
-        >
+      {/* ── Screenshot grid ──────────────────────────────────────────────── */}
+      <section className="max-w-5xl mx-auto px-4 py-14">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {SCREENSHOTS.map((s, i) => (
             <motion.div
               key={s.file}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '0px 0px -40px 0px' }}
-              transition={{ duration: 0.4, delay: (i % 3) * 0.08, ease: [0.16, 1, 0.3, 1] }}
-              className="break-inside-avoid mb-4"
+              transition={{ duration: 0.4, delay: (i % 3) * 0.07, ease: [0.16, 1, 0.3, 1] }}
             >
+              {/* Card */}
               <div
-                className="relative group cursor-zoom-in rounded-2xl overflow-hidden border border-white/8 shadow-xl"
+                className="group bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 cursor-zoom-in border border-slate-100"
                 onClick={() => setLightboxSrc(`/testimonials/${s.file}`)}
               >
-                <img
-                  src={`/testimonials/${s.file}`}
-                  alt={s.highlight}
-                  className="w-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
-                  loading="lazy"
-                />
-                {/* hover overlay */}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-end">
-                  <div className="p-4 translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                    <span className="inline-block bg-green-500/90 text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full mb-1.5">
-                      {s.tag}
-                    </span>
-                    <p className="text-white text-sm font-semibold leading-snug drop-shadow">
-                      {s.highlight}
-                    </p>
-                  </div>
+                {/* Screenshot — fixed height, smart crop */}
+                <div className="relative h-[340px] overflow-hidden bg-slate-100">
+                  <img
+                    src={`/testimonials/${s.file}`}
+                    alt={s.quote}
+                    loading="lazy"
+                    className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
+                    style={{ objectPosition: s.pos ?? '0 15%' }}
+                  />
+                  {/* Bottom fade — hides the keyboard/input bar cutoff */}
+                  <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+                </div>
+
+                {/* Caption */}
+                <div className="px-4 py-3 flex items-start justify-between gap-2">
+                  <p className="text-sm font-semibold text-slate-700 leading-snug">{s.quote}</p>
+                  <span className="flex-shrink-0 text-[10px] font-bold uppercase tracking-wide bg-green-100 text-green-700 border border-green-200 px-2 py-0.5 rounded-full">
+                    {s.tag}
+                  </span>
                 </div>
               </div>
             </motion.div>
           ))}
         </div>
+
+        <p className="text-center text-xs text-slate-400 mt-8 italic">
+          Tap any screenshot to view full size · Names/numbers blurred for privacy
+        </p>
       </section>
 
-      {/* ── Lightbox ── */}
+      {/* ── Lightbox ──────────────────────────────────────────────────────── */}
       <AnimatePresence>
         {lightboxSrc && (
           <motion.div
@@ -168,51 +162,48 @@ export default function ProofPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-modal bg-black/90 flex items-center justify-center p-4"
+            className="fixed inset-0 z-modal bg-black/85 flex items-center justify-center p-4"
             onClick={() => setLightboxSrc(null)}
           >
             <button
-              className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
-              onClick={() => setLightboxSrc(null)}
+              className="absolute top-4 right-4 p-2 rounded-full bg-white/15 hover:bg-white/25 text-white transition-colors"
               aria-label="Close"
             >
               <X className="w-5 h-5" />
             </button>
             <motion.img
               src={lightboxSrc}
-              alt="Screenshot"
-              initial={{ scale: 0.9 }}
+              alt="WhatsApp chat screenshot"
+              initial={{ scale: 0.92 }}
               animate={{ scale: 1 }}
-              exit={{ scale: 0.9 }}
+              exit={{ scale: 0.92 }}
               transition={{ duration: 0.2 }}
-              className="max-h-[90vh] max-w-full rounded-2xl shadow-2xl"
+              className="max-h-[92vh] max-w-full rounded-2xl shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             />
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* ── CTA ── */}
-      <section className="py-16 bg-slate-900 border-t border-white/8 text-center px-4">
-        <AnimatedSection>
-          <p className="text-slate-400 text-sm uppercase tracking-widest font-bold mb-3">
-            Seen enough?
-          </p>
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-            Join 3,000+ Researchers Who Already Trust Us
-          </h2>
-          <motion.button
-            type="button"
-            onClick={() => navigate('/catalogue')}
-            className="inline-flex items-center gap-2 bg-cyan-400 text-slate-900 font-extrabold text-base px-8 py-3.5 rounded-2xl shadow-lg shadow-cyan-400/20"
-            whileHover={{ scale: 1.05, boxShadow: '0 8px 36px rgba(34,211,238,0.45)' }}
-            whileTap={{ scale: 0.97 }}
-            transition={{ duration: 0.2 }}
-          >
-            Shop Now
-            <ArrowRight className="w-4 h-4" />
-          </motion.button>
-        </AnimatedSection>
+      {/* ── CTA ───────────────────────────────────────────────────────────── */}
+      <section className="bg-slate-900 py-16 text-center px-4">
+        <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-3">
+          Seen enough?
+        </p>
+        <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight">
+          Join 3,000+ Customers<br />Who Already Trust Us
+        </h2>
+        <motion.button
+          type="button"
+          onClick={() => navigate('/catalogue')}
+          className="inline-flex items-center gap-2 bg-cyan-400 text-slate-900 font-extrabold text-base px-8 py-3.5 rounded-2xl shadow-lg shadow-cyan-400/20"
+          whileHover={{ scale: 1.05, boxShadow: '0 8px 36px rgba(34,211,238,0.45)' }}
+          whileTap={{ scale: 0.97 }}
+          transition={{ duration: 0.2 }}
+        >
+          Shop Now
+          <ArrowRight className="w-4 h-4" />
+        </motion.button>
       </section>
 
     </div>
