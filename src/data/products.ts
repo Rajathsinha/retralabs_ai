@@ -153,8 +153,8 @@ export const PRODUCTS: ProductWithVariants[] = [
   },
   {
     id: '13',
-    name: 'CJC-1295 + Ipamorelin Stack',
-    description: 'Pre-combined CJC-1295 and Ipamorelin (5mg each) in a single vial — the gold standard GHRH/GHRP research stack for GH secretion and body composition studies.',
+    name: 'CJC-1295 (No DAC) + Ipamorelin Stack',
+    description: 'Pre-combined CJC-1295 without DAC and Ipamorelin (5mg each) in a single vial — the gold standard GHRH/GHRP research stack for GH secretion and body composition studies.',
     category: 'research-peptide',
     image_url: '/CJC1295+Ipamorelin.png',
     created_at: new Date().toISOString(),
