@@ -9,9 +9,9 @@
  *  5. Card hovers       — whileHover lift + per-card glow shadow
  *  6. GSAP counter      — AnimatedCounter for live stats section (ScrollTrigger)
  */
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Button, Chip } from '@heroui/react';
@@ -25,6 +25,26 @@ import {
 } from '../animations/variants';
 
 gsap.registerPlugin(ScrollTrigger);
+
+// ── Rotating hero headlines ────────────────────────────────────────────────────
+const HERO_HEADLINES = [
+  <>
+    We Built RetraLabs<br />
+    <span className="text-gradient">Because We Got</span><br />
+    <span className="text-gradient">Scammed.</span>
+  </>,
+  <>
+    India's Peptide Market<br />
+    <span className="text-gradient">Was a Mess.</span><br />
+    We Fixed It.
+    <span className="block text-2xl md:text-3xl text-slate-500 font-normal italic mt-3">(You're welcome.)</span>
+  </>,
+  <>
+    India's Only Trusted<br />
+    <span className="text-gradient">Research Peptide</span><br />
+    Supplier.
+  </>,
+];
 
 // ── GSAP-powered counter (ScrollTrigger fires once when in view) ──────────────
 function AnimatedCounter({ to, suffix = '' }: { to: number; suffix?: string }) {
@@ -104,6 +124,12 @@ const FEATURES = [
 // ─────────────────────────────────────────────────────────────────────────────
 export default function HomePage() {
   const navigate = useNavigate();
+  const [heroIndex, setHeroIndex] = useState(0);
+
+  useEffect(() => {
+    const t = setInterval(() => setHeroIndex(i => (i + 1) % HERO_HEADLINES.length), 5000);
+    return () => clearInterval(t);
+  }, []);
 
   return (
     <div className="min-h-screen">
@@ -117,17 +143,21 @@ export default function HomePage() {
 
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative text-center">
 
-          {/* Hero headline */}
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="text-5xl md:text-7xl font-bold text-white tracking-tight leading-[1.05] text-center mb-8"
-          >
-            We Built RetraLabs<br />
-            <span className="text-gradient">Because We Got</span><br />
-            <span className="text-gradient">Scammed.</span>
-          </motion.h1>
+          {/* Rotating headline — clean cross-fade, no position shift */}
+          <div className="min-h-[200px] md:min-h-[260px] flex items-center justify-center mb-8">
+            <AnimatePresence mode="wait">
+              <motion.h1
+                key={heroIndex}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4, ease: 'easeInOut' }}
+                className="text-5xl md:text-7xl font-bold text-white tracking-tight leading-[1.05] text-center"
+              >
+                {HERO_HEADLINES[heroIndex]}
+              </motion.h1>
+            </AnimatePresence>
+          </div>
 
           {/* Sub-copy */}
           <motion.div
