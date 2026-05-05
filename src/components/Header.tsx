@@ -16,7 +16,7 @@ import SearchModal from './SearchModal';
 const NAV_ITEMS = [
   { path: '/',          label: 'Home',      icon: Home },
   { path: '/catalogue', label: 'Catalogue', icon: FlaskConical },
-  { path: '/proof',     label: 'Real Proof', icon: MessageSquare },
+  { path: '/proof',     label: 'Field Reports', icon: MessageSquare },
   { path: '/about',     label: 'About',     icon: Users },
   { path: '/support',   label: 'Support',   icon: HelpCircle },
 ];

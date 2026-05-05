@@ -94,26 +94,31 @@ export default function ProofPage() {
         <div className="inline-flex items-center gap-2 bg-green-50 border border-green-200 rounded-full px-4 py-1.5 mb-5">
           <MessageCircle className="w-3.5 h-3.5 text-green-600" />
           <span className="text-xs font-bold uppercase tracking-widest text-green-700">
-            Real WhatsApp Chats · Unedited
+            Researcher Feedback · Unedited
           </span>
         </div>
 
         <h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight mb-4 leading-tight">
-          Don't Take Our Word For It.<br />
-          <span className="text-gradient">Read Their Texts.</span>
+          What Researchers Are<br />
+          <span className="text-gradient">Observing in the Field.</span>
         </h1>
 
-        <p className="text-slate-500 text-base max-w-lg mx-auto mb-2">
-          Real customers. Real conversations. Names and numbers blurred for privacy.
-          Every message is genuine — zero scripts, zero paid promotions.
+        <p className="text-slate-500 text-base max-w-xl mx-auto mb-2">
+          The following are unedited communications from independent researchers
+          who have sourced compounds from RetraLabs for in-vitro and analytical study.
+          All conversations are shared with consent. Names and numbers blurred for privacy.
+        </p>
+        <p className="text-slate-400 text-xs max-w-lg mx-auto italic">
+          These are anecdotal research observations only. Not intended as medical claims.
+          All products are strictly for research use — not for human consumption.
         </p>
 
         {/* Trust chips */}
         <div className="flex flex-wrap justify-center gap-2 mt-6">
           {[
-            '3,000+ Orders Shipped',
-            '100% Real Customers',
-            '0 Paid Promotions',
+            '3,000+ Research Orders',
+            'HPLC-Verified Compounds',
+            'GMP-Certified Source',
           ].map(t => (
             <span
               key={t}
@@ -168,7 +173,8 @@ export default function ProofPage() {
         </div>
 
         <p className="text-center text-xs text-slate-400 mt-8 italic">
-          Tap any screenshot to view full size · Names/numbers blurred for privacy
+          Tap any screenshot to view full size · Names/numbers blurred for privacy ·
+          Shared as anecdotal research observations only — not medical claims
         </p>
       </section>
 
@@ -206,10 +212,10 @@ export default function ProofPage() {
       {/* ── CTA ───────────────────────────────────────────────────────────── */}
       <section className="bg-slate-900 py-16 text-center px-4">
         <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-3">
-          Seen enough?
+          Ready to start your research?
         </p>
         <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight">
-          Join 3,000+ Customers<br />Who Already Trust Us
+          HPLC-Verified. GMP-Sourced.<br />COA Included on Every Order.
         </h2>
         <motion.button
           type="button"
