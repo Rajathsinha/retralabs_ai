@@ -175,7 +175,7 @@ export default function CartDrawer() {
                         <span className="text-base">🎉</span>
                         <div>
                           <p className="text-xs font-extrabold text-emerald-700 uppercase tracking-wide">5% Off — Applied!</p>
-                          <p className="text-[10px] text-emerald-600">Exclusive discount on every RetraLabs order</p>
+                          <p className="text-[10px] text-emerald-600">On all peptide orders above ₹9,000</p>
                         </div>
                       </div>
                       <span className="text-sm font-black text-emerald-600">−{format(getDiscountAmount())}</span>

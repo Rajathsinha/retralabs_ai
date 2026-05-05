@@ -107,9 +107,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       isBacWater(item.product.name) ? total : total + item.quantity
     , 0);
 
-  // Flat 5% discount on all peptide items — always applied
+  // 5% discount on peptide orders above ₹9,000
   const getDiscount = (): number => {
-    if (getDiscountableSubtotal() === 0) return 0;
+    if (getDiscountableSubtotal() < 9000) return 0;
     return 5;
   };
 
