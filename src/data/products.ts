@@ -10,9 +10,9 @@ export const PRODUCTS: ProductWithVariants[] = [
     created_at: new Date().toISOString(),
     variants: [
       { id: '1s', product_id: '1', dosage_mg: 10,  price_inr: 3500,  in_stock: true, vial_configuration: 'Starter vial',                    created_at: new Date().toISOString() },
-      { id: '1a', product_id: '1', dosage_mg: 20,  price_inr: 6000,  in_stock: true, vial_configuration: '10mg × 2',                         created_at: new Date().toISOString() },
-      { id: '1b', product_id: '1', dosage_mg: 50,  price_inr: 13000, in_stock: true, vial_configuration: '10mg x 5 vials',                   created_at: new Date().toISOString() },
-      { id: '1c', product_id: '1', dosage_mg: 100, price_inr: 21000, in_stock: true, vial_configuration: '10mg x 10 vials / 20mg x 5 vials', created_at: new Date().toISOString() },
+      { id: '1a', product_id: '1', dosage_mg: 20,  price_inr: 6400,  in_stock: true, vial_configuration: '10mg × 2',                         created_at: new Date().toISOString() },
+      { id: '1b', product_id: '1', dosage_mg: 50,  price_inr: 15000, in_stock: true, vial_configuration: '10mg x 5 vials',                   created_at: new Date().toISOString() },
+      { id: '1c', product_id: '1', dosage_mg: 100, price_inr: 26000, in_stock: true, vial_configuration: '10mg x 10 vials / 20mg x 5 vials', created_at: new Date().toISOString() },
     ],
   },
   {
@@ -77,10 +77,10 @@ export const PRODUCTS: ProductWithVariants[] = [
     image_url: '/BPC.png',
     created_at: new Date().toISOString(),
     variants: [
-      { id: '7a', product_id: '7', dosage_mg: 10,  price_inr: 2500,  in_stock: true, created_at: new Date().toISOString() },
-      { id: '7b', product_id: '7', dosage_mg: 20,  price_inr: 4000,  in_stock: true, created_at: new Date().toISOString() },
-      { id: '7c', product_id: '7', dosage_mg: 50,  price_inr: 7000,  in_stock: true, created_at: new Date().toISOString() },
-      { id: '7d', product_id: '7', dosage_mg: 100, price_inr: 13000, in_stock: true, created_at: new Date().toISOString() },
+      { id: '7a', product_id: '7', dosage_mg: 10,  price_inr: 2800,  in_stock: true, created_at: new Date().toISOString() },
+      { id: '7b', product_id: '7', dosage_mg: 20,  price_inr: 5000,  in_stock: true, created_at: new Date().toISOString() },
+      { id: '7c', product_id: '7', dosage_mg: 50,  price_inr: 9000,  in_stock: true, created_at: new Date().toISOString() },
+      { id: '7d', product_id: '7', dosage_mg: 100, price_inr: 16000, in_stock: true, created_at: new Date().toISOString() },
     ],
   },
   {
