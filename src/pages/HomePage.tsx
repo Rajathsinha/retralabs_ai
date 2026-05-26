@@ -121,6 +121,22 @@ const FEATURES = [
   },
 ];
 
+const PEPTIDE_ITEMS = [
+  { name: 'Retatrutide',         image: '/Retatrutide.jpg',             id: '1'  },
+  { name: 'Tirzepatide',         image: '/TIRZEPATIDE.jpg',             id: '2'  },
+  { name: 'GHK-Cu',              image: '/GHKCU.jpg',                   id: '3'  },
+  { name: 'Semax',               image: '/SEMAX.jpg',                   id: '4'  },
+  { name: 'Selank',              image: '/SELANK.jpg',                  id: '5'  },
+  { name: 'BPC-157',             image: '/BPC.jpg',                     id: '7'  },
+  { name: 'NAD+',                image: '/NAD+.jpg',                    id: '8'  },
+  { name: 'TB-500',              image: '/TB500.jpg',                   id: '9'  },
+  { name: 'Tesamorelin',         image: '/Tesa.jpg',                    id: '10' },
+  { name: 'MOT-C',               image: '/motc.jpg',                    id: '11' },
+  { name: 'Klow Blend',          image: '/KLOW.jpg',                    id: '12' },
+  { name: 'CJC-1295 + Ipa',     image: '/CJC1295+Ipamorelin.jpg',      id: '13' },
+  { name: 'Wolverine Stack',     image: '/THE WOLVERINE STACK.jpg',     id: '14' },
+];
+
 // ─────────────────────────────────────────────────────────────────────────────
 export default function HomePage() {
   const navigate = useNavigate();
@@ -236,6 +252,53 @@ export default function HomePage() {
                     </div>
                     <span className="text-cyan-500/25 text-sm select-none">◆</span>
                   </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Peptide image ticker ─────────────────────────────────────── */}
+        <div
+          className="relative overflow-hidden group"
+          style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
+        >
+          {/* Edge fades */}
+          <div className="absolute left-0 inset-y-0 w-20 sm:w-36 bg-gradient-to-r from-slate-950 to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 inset-y-0 w-20 sm:w-36 bg-gradient-to-l from-slate-950 to-transparent z-10 pointer-events-none" />
+
+          <div
+            className="flex will-change-transform group-hover:[animation-play-state:paused]"
+            style={{ animation: 'marquee-scroll 48s linear infinite' }}
+          >
+            {[0, 1].map(set => (
+              <div key={set} className="flex items-stretch shrink-0" aria-hidden={set === 1}>
+                {PEPTIDE_ITEMS.map((item, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => navigate(`/product/${item.id}`)}
+                    className="flex flex-col items-center justify-center gap-2.5 px-6 py-5 whitespace-nowrap group/card hover:bg-white/[0.03] transition-colors duration-200 outline-none"
+                  >
+                    {/* Product image */}
+                    <div className="relative w-[62px] h-[62px] rounded-2xl overflow-hidden bg-slate-900 border border-white/[0.08] shrink-0 group-hover/card:border-white/[0.18] group-hover/card:scale-105 transition-all duration-300">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        loading="lazy"
+                        decoding="async"
+                        className="w-full h-full object-cover"
+                      />
+                      {/* Subtle inner glow on hover */}
+                      <div className="absolute inset-0 rounded-2xl opacity-0 group-hover/card:opacity-100 transition-opacity duration-300"
+                        style={{ boxShadow: 'inset 0 0 12px rgba(34,211,238,0.15)' }}
+                      />
+                    </div>
+                    {/* Name */}
+                    <span className="text-[10.5px] font-semibold tracking-[0.08em] text-slate-500 group-hover/card:text-slate-300 transition-colors duration-200 uppercase">
+                      {item.name}
+                    </span>
+                  </button>
                 ))}
               </div>
             ))}

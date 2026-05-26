@@ -1,31 +1,25 @@
-// Bundled asset so the image URL is always correct (avoids public path issues)
-import bacWaterImage from '../assets/bac-water.png';
+import bacWaterImage from '../assets/bac-water.jpg';
 
-/** URL for Bacteriostatic Water image (use in onError fallback). */
 export const BAC_WATER_IMAGE_URL = bacWaterImage;
 
-/**
- * Maps product name keywords → local public-folder image paths.
- * Used as primary resolution when Supabase image_url is missing/broken.
- */
 const NAME_TO_LOCAL_IMAGE: Array<[string, string]> = [
   ['bacteriostatic', bacWaterImage],
   ['bac-water',      bacWaterImage],
-  ['retatrutide',    '/Retatrutide.png'],
-  ['tirzepatide',    '/TIRZEPATIDE.png'],
-  ['ghk-cu',         '/GHKCU.png'],
-  ['ghk cu',         '/GHKCU.png'],
-  ['semax',          '/SEMAX.png'],
-  ['selank',         '/SELANK.png'],
-  ['bpc',            '/BPC.png'],
-  ['nad+',           '/NAD+.png'],
-  ['nad ',           '/NAD+.png'],
-  ['tb-500',         '/TB500.png'],
-  ['tb500',          '/TB500.png'],
-  ['tesamorelin',    '/Tesa.png'],
-  ['mot-c',          '/motc.png'],
-  ['motc',           '/motc.png'],
-  ['mots-c',         '/motc.png'],
+  ['retatrutide',    '/Retatrutide.jpg'],
+  ['tirzepatide',    '/TIRZEPATIDE.jpg'],
+  ['ghk-cu',         '/GHKCU.jpg'],
+  ['ghk cu',         '/GHKCU.jpg'],
+  ['semax',          '/SEMAX.jpg'],
+  ['selank',         '/SELANK.jpg'],
+  ['bpc',            '/BPC.jpg'],
+  ['nad+',           '/NAD+.jpg'],
+  ['nad ',           '/NAD+.jpg'],
+  ['tb-500',         '/TB500.jpg'],
+  ['tb500',          '/TB500.jpg'],
+  ['tesamorelin',    '/Tesa.jpg'],
+  ['mot-c',          '/motc.jpg'],
+  ['motc',           '/motc.jpg'],
+  ['mots-c',         '/motc.jpg'],
 ];
 
 /**

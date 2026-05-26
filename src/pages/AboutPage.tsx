@@ -347,11 +347,9 @@ export default function AboutPage() {
             >
               <CardBody className="p-7 text-center">
                 <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto mb-3" />
-                <h3 className="font-bold text-emerald-900 mb-2">Request a COA Anytime</h3>
+                <h3 className="font-bold text-emerald-900 mb-2">COA with Every Order</h3>
                 <p className="text-sm text-emerald-700 leading-relaxed">
-                  Every order includes a Certificate of Analysis. If you'd like to verify a specific batch
-                  or request additional documentation before purchasing, contact our support team — we'll
-                  send it over within 24 hours.
+                  Every order ships with a full Certificate of Analysis — purity, molecular weight, and HPLC data included. No requests needed.
                 </p>
               </CardBody>
             </Card>

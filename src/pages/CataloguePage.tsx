@@ -1,24 +1,15 @@
-import { useEffect, useState, useRef, useMemo } from 'react';
+import { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Card,
-  CardBody,
-  CardFooter,
-  Chip,
-  Button,
-  Skeleton,
-  Divider,
-} from '@heroui/react';
+import { Chip, Button } from '@heroui/react';
 import { motion, AnimatePresence } from 'framer-motion';
-// Products are static — Supabase is used for orders only
 import { getProductImageUrl, BAC_WATER_IMAGE_URL } from '../utils/imageUrl';
 import { ProductWithVariants } from '../types';
 import { PRODUCTS } from '../data/products';
 import { useCurrency } from '../context/CurrencyContext';
 import { useSEO } from '../hooks/useSEO';
 import {
-  ShieldCheck, FlaskConical, FileCheck, Microscope, Sparkles,
-  ArrowRight, GraduationCap, Search, X, ChevronDown, Check,
+  ShieldCheck, FlaskConical, FileCheck, Sparkles,
+  ArrowRight, Search, X, ChevronDown, Check,
   Zap, Brain, Activity, Star, LayoutGrid,
 } from 'lucide-react';
 
@@ -40,20 +31,19 @@ const PURITY_MAP: Record<string, string> = {
   'Bacteriostatic Water (Pharma Grade)': 'Pharma',
 };
 
-const BADGE_MAP: Record<string, { label: string; color: 'warning' | 'primary' | 'secondary' }> = {
-  'Retatrutide': { label: 'BESTSELLER', color: 'warning' },
-  'Tirzepatide': { label: 'POPULAR',    color: 'primary' },
-  'BPC-157':     { label: 'NEW',        color: 'secondary' },
-  'NAD+':        { label: 'NEW',        color: 'secondary' },
-  'TB-500':      { label: 'NEW',        color: 'secondary' },
-  'Tesamorelin': { label: 'NEW',        color: 'secondary' },
-  'MOT-C':       { label: 'NEW',        color: 'secondary' },
-  'Klow Blend':                  { label: 'NEW', color: 'secondary' },
-  'CJC-1295 + Ipamorelin Stack': { label: 'NEW', color: 'secondary' },
-  'The Wolverine Stack':          { label: 'NEW', color: 'secondary' },
+const BADGE_MAP: Record<string, { label: string; style: string }> = {
+  'Retatrutide': { label: 'BESTSELLER', style: 'bg-amber-500/10 text-amber-400 border border-amber-500/25'  },
+  'Tirzepatide': { label: 'POPULAR',    style: 'bg-cyan-500/10  text-cyan-400  border border-cyan-500/25'   },
+  'BPC-157':     { label: 'NEW',        style: 'bg-white/[0.04] text-slate-500 border border-white/[0.08]'  },
+  'NAD+':        { label: 'NEW',        style: 'bg-white/[0.04] text-slate-500 border border-white/[0.08]'  },
+  'TB-500':      { label: 'NEW',        style: 'bg-white/[0.04] text-slate-500 border border-white/[0.08]'  },
+  'Tesamorelin': { label: 'NEW',        style: 'bg-white/[0.04] text-slate-500 border border-white/[0.08]'  },
+  'MOT-C':       { label: 'NEW',        style: 'bg-white/[0.04] text-slate-500 border border-white/[0.08]'  },
+  'Klow Blend':                  { label: 'NEW', style: 'bg-white/[0.04] text-slate-500 border border-white/[0.08]' },
+  'CJC-1295 + Ipamorelin Stack': { label: 'NEW', style: 'bg-white/[0.04] text-slate-500 border border-white/[0.08]' },
+  'The Wolverine Stack':         { label: 'NEW', style: 'bg-white/[0.04] text-slate-500 border border-white/[0.08]' },
 };
 
-// Research-area tag for each peptide (single tag per product for simplicity)
 const PRODUCT_TAG: Record<string, string> = {
   'Retatrutide':  'metabolic',
   'Tirzepatide':  'metabolic',
@@ -70,6 +60,37 @@ const PRODUCT_TAG: Record<string, string> = {
   'The Wolverine Stack':          'recovery',
 };
 
+const TAG_STYLE: Record<string, { dot: string; text: string; label: string }> = {
+  metabolic: { dot: 'bg-emerald-400', text: 'text-emerald-400', label: 'Metabolic' },
+  cognitive:  { dot: 'bg-violet-400',  text: 'text-violet-400',  label: 'Cognitive' },
+  recovery:   { dot: 'bg-rose-400',    text: 'text-rose-400',    label: 'Recovery'  },
+  longevity:  { dot: 'bg-amber-400',   text: 'text-amber-400',   label: 'Longevity' },
+};
+
+const WAS_PRICE_MAP: Record<string, number> = {
+  'Retatrutide':                  5500,
+  'Tirzepatide':                  4200,
+  'GHK-Cu':                       5000,
+  'Semax':                        4000,
+  'Selank':                       4000,
+  'BPC-157':                      4200,
+  'NAD+':                         6500,
+  'TB-500':                       6000,
+  'Tesamorelin':                  6500,
+  'MOT-C':                        4200,
+  'Klow Blend':                   7500,
+  'CJC-1295 + Ipamorelin Stack':  5500,
+  'The Wolverine Stack':          5500,
+};
+
+const GLOW_COLOR: Record<string, string> = {
+  metabolic: 'radial-gradient(circle, rgba(52,211,153,0.55) 0%, transparent 70%)',
+  cognitive: 'radial-gradient(circle, rgba(167,139,250,0.55) 0%, transparent 70%)',
+  recovery:  'radial-gradient(circle, rgba(251,113,133,0.50) 0%, transparent 70%)',
+  longevity: 'radial-gradient(circle, rgba(251,191,36,0.50)  0%, transparent 70%)',
+  default:   'radial-gradient(circle, rgba(148,163,184,0.35) 0%, transparent 70%)',
+};
+
 const RESEARCH_TAGS = [
   { key: 'all',       label: 'All Areas',  Icon: LayoutGrid },
   { key: 'metabolic', label: 'Metabolic',  Icon: Zap        },
@@ -79,10 +100,10 @@ const RESEARCH_TAGS = [
 ] as const;
 
 const SORT_OPTIONS = [
-  { key: 'default',    label: 'Featured'         },
+  { key: 'default',    label: 'Featured'          },
   { key: 'price-asc',  label: 'Price: Low → High' },
   { key: 'price-desc', label: 'Price: High → Low' },
-  { key: 'name-asc',   label: 'Name: A → Z'      },
+  { key: 'name-asc',   label: 'Name: A → Z'       },
 ] as const;
 
 type SortKey    = typeof SORT_OPTIONS[number]['key'];
@@ -93,24 +114,84 @@ type TagKey     = typeof RESEARCH_TAGS[number]['key'];
 
 function SkeletonCard() {
   return (
-    <Card shadow="sm" className="w-full">
-      <CardBody className="p-0">
-        <Skeleton className="w-full aspect-[4/3] rounded-none rounded-t-xl" />
-        <div className="p-5 space-y-3">
-          <Skeleton className="h-6 w-3/4 rounded-lg" />
-          <Skeleton className="h-4 w-full rounded-lg" />
-          <Skeleton className="h-4 w-2/3 rounded-lg" />
-          <div className="flex gap-2 pt-1">
-            <Skeleton className="h-6 w-20 rounded-full" />
-            <Skeleton className="h-6 w-20 rounded-full" />
+    <div className="rounded-3xl bg-[#080C14] border border-white/[0.06] overflow-hidden">
+      <div className="aspect-square bg-[#0d1220] animate-pulse" />
+      <div className="px-6 pt-2 pb-6 space-y-4">
+        <div className="h-2 w-14 bg-slate-800 rounded-full animate-pulse" />
+        <div className="h-5 w-2/3 bg-slate-800 rounded-lg animate-pulse" />
+        <div className="flex items-center justify-between pt-1">
+          <div className="space-y-1.5">
+            <div className="h-2 w-8 bg-slate-800 rounded animate-pulse" />
+            <div className="h-6 w-20 bg-slate-800 rounded-lg animate-pulse" />
           </div>
+          <div className="h-9 w-24 bg-slate-800 rounded-full animate-pulse" />
         </div>
-      </CardBody>
-      <CardFooter className="flex justify-between items-center px-5 pb-5 pt-0">
-        <Skeleton className="h-7 w-28 rounded-lg" />
-        <Skeleton className="h-9 w-24 rounded-xl" />
-      </CardFooter>
-    </Card>
+        <div className="h-px bg-slate-800/60 animate-pulse" />
+        <div className="h-2 w-32 bg-slate-800 rounded animate-pulse" />
+      </div>
+    </div>
+  );
+}
+
+// ─── Category pill ────────────────────────────────────────────────────────────
+
+type CatPillProps = {
+  id: FilterType; label: string; count: number;
+  activeFilter: FilterType; onSelect: (id: FilterType) => void;
+};
+
+function CatPill({ id, label, count, activeFilter, onSelect }: CatPillProps) {
+  const active = activeFilter === id;
+  return (
+    <motion.button
+      whileTap={{ scale: 0.94 }}
+      onClick={() => onSelect(id)}
+      className={`relative px-4 py-2 rounded-full text-sm font-semibold transition-colors select-none outline-none ${
+        active ? 'text-slate-900' : 'text-slate-400 hover:text-white'
+      }`}
+    >
+      {active && (
+        <motion.span
+          layoutId="cat-pill-bg"
+          className="absolute inset-0 rounded-full bg-white"
+          transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
+        />
+      )}
+      <span className="relative z-10">{label}</span>
+      <span className={`relative z-10 ml-1.5 text-xs font-bold ${active ? 'text-slate-500' : 'text-slate-600'}`}>
+        {count}
+      </span>
+    </motion.button>
+  );
+}
+
+// ─── Tag pill ─────────────────────────────────────────────────────────────────
+
+type TagPillProps = {
+  tag: typeof RESEARCH_TAGS[number];
+  activeTag: TagKey; onSelect: (key: TagKey) => void;
+};
+
+function TagPill({ tag, activeTag, onSelect }: TagPillProps) {
+  const active = activeTag === tag.key;
+  return (
+    <motion.button
+      whileTap={{ scale: 0.94 }}
+      onClick={() => onSelect(active ? 'all' : tag.key)}
+      className={`relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors select-none outline-none ${
+        active ? 'text-slate-900' : 'text-slate-400 hover:text-white border border-white/10 hover:border-white/20'
+      }`}
+    >
+      {active && (
+        <motion.span
+          layoutId={`tag-pill-bg-${tag.key}`}
+          className="absolute inset-0 rounded-full bg-white"
+          transition={{ type: 'spring', bounce: 0.2, duration: 0.35 }}
+        />
+      )}
+      <tag.Icon className={`relative z-10 w-3 h-3 ${active ? 'text-slate-600' : ''}`} />
+      <span className="relative z-10">{tag.label}</span>
+    </motion.button>
   );
 }
 
@@ -120,20 +201,18 @@ export default function CataloguePage() {
   const navigate = useNavigate();
   const { format } = useCurrency();
 
-  // Data
   const [products, setProducts] = useState<ProductWithVariants[]>([]);
   const [loading,  setLoading]  = useState(true);
 
-  // Filters
-  const [filter,       setFilter]       = useState<FilterType>('all');
-  const [activeTag,    setActiveTag]    = useState<TagKey>('all');
-  const [searchQuery,  setSearchQuery]  = useState('');
-  const [sortBy,       setSortBy]       = useState<SortKey>('default');
-  const [showSort,     setShowSort]     = useState(false);
-  const [searchFocus,  setSearchFocus]  = useState(false);
+  const [filter,      setFilter]      = useState<FilterType>('all');
+  const [activeTag,   setActiveTag]   = useState<TagKey>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy,      setSortBy]      = useState<SortKey>('default');
+  const [showSort,    setShowSort]    = useState(false);
+  const [searchFocus, setSearchFocus] = useState(false);
 
-  const sortRef    = useRef<HTMLDivElement>(null);
-  const searchRef  = useRef<HTMLInputElement>(null);
+  const sortRef   = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
 
   useSEO({
     title: 'Buy Research Peptides India | Retatrutide, Tirzepatide, GHK-Cu | RetraLabs',
@@ -145,28 +224,20 @@ export default function CataloguePage() {
 
   useEffect(() => { loadProducts(); }, []);
 
-  // Close sort dropdown on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (sortRef.current && !sortRef.current.contains(e.target as Node)) {
-        setShowSort(false);
-      }
+      if (sortRef.current && !sortRef.current.contains(e.target as Node)) setShowSort(false);
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // Keyboard shortcut: "/" focuses search
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === '/' && document.activeElement?.tagName !== 'INPUT') {
-        e.preventDefault();
-        searchRef.current?.focus();
+        e.preventDefault(); searchRef.current?.focus();
       }
-      if (e.key === 'Escape') {
-        setShowSort(false);
-        searchRef.current?.blur();
-      }
+      if (e.key === 'Escape') { setShowSort(false); searchRef.current?.blur(); }
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
@@ -180,99 +251,40 @@ export default function CataloguePage() {
   const getStartingPrice = (p: ProductWithVariants) =>
     p.variants.length ? Math.min(...p.variants.map(v => v.price_inr)) : null;
 
-  // ── Derived lists ──────────────────────────────────────────────────────────
+  const handleCatSelect = useCallback((id: FilterType) => {
+    setFilter(id); setActiveTag('all');
+  }, []);
+
   const filteredProducts = useMemo(() => {
     let list = products.filter(p => {
-      // Category
+      if (p.category !== 'research-peptide') return false;
       if (filter === 'peptide'  && p.category !== 'research-peptide') return false;
-      if (filter === 'supplies' && p.category === 'research-peptide')  return false;
-      // Research area tag
       if (activeTag !== 'all' && PRODUCT_TAG[p.name] !== activeTag) return false;
-      // Search
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         if (!p.name.toLowerCase().includes(q) && !p.description.toLowerCase().includes(q)) return false;
       }
       return true;
     });
-
-    // Sort
     if (sortBy === 'price-asc')  list = [...list].sort((a, b) => (getStartingPrice(a) ?? 0) - (getStartingPrice(b) ?? 0));
     if (sortBy === 'price-desc') list = [...list].sort((a, b) => (getStartingPrice(b) ?? 0) - (getStartingPrice(a) ?? 0));
     if (sortBy === 'name-asc')   list = [...list].sort((a, b) => a.name.localeCompare(b.name));
-
     return list;
   }, [products, filter, activeTag, searchQuery, sortBy]);
 
-  const peptideCount  = products.filter(p => p.category === 'research-peptide').length;
-  const suppliesCount = products.filter(p => p.category !== 'research-peptide').length;
+  const peptideCount = products.filter(p => p.category === 'research-peptide').length;
   const activeFilterCount = [
     filter !== 'all', activeTag !== 'all', searchQuery.trim() !== '', sortBy !== 'default',
   ].filter(Boolean).length;
 
-  const clearAll = () => {
-    setFilter('all');
-    setActiveTag('all');
-    setSearchQuery('');
-    setSortBy('default');
-  };
-
+  const clearAll = () => { setFilter('all'); setActiveTag('all'); setSearchQuery(''); setSortBy('default'); };
   const currentSortLabel = SORT_OPTIONS.find(s => s.key === sortBy)?.label ?? 'Featured';
 
-  // ── Category pill ──────────────────────────────────────────────────────────
-  const CatPill = ({ id, label, count }: { id: FilterType; label: string; count: number }) => (
-    <motion.button
-      whileTap={{ scale: 0.94 }}
-      onClick={() => { setFilter(id); setActiveTag('all'); }}
-      className={`relative px-4 py-2 rounded-full text-sm font-semibold transition-colors select-none outline-none ${
-        filter === id
-          ? 'text-slate-900'
-          : 'text-slate-400 hover:text-white'
-      }`}
-    >
-      {filter === id && (
-        <motion.span
-          layoutId="cat-pill-bg"
-          className="absolute inset-0 rounded-full bg-white"
-          transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
-        />
-      )}
-      <span className="relative z-10">{label}</span>
-      <span className={`relative z-10 ml-1.5 text-xs font-bold ${filter === id ? 'text-slate-500' : 'text-slate-600'}`}>
-        {count}
-      </span>
-    </motion.button>
-  );
-
-  // ── Tag pill ───────────────────────────────────────────────────────────────
-  const TagPill = ({ tag }: { tag: typeof RESEARCH_TAGS[number] }) => {
-    const active = activeTag === tag.key;
-    return (
-      <motion.button
-        whileTap={{ scale: 0.94 }}
-        onClick={() => setActiveTag(active ? 'all' : tag.key)}
-        className={`relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors select-none outline-none ${
-          active ? 'text-slate-900' : 'text-slate-400 hover:text-white border border-white/10 hover:border-white/20'
-        }`}
-      >
-        {active && (
-          <motion.span
-            layoutId={`tag-pill-bg-${tag.key}`}
-            className="absolute inset-0 rounded-full bg-white"
-            transition={{ type: 'spring', bounce: 0.2, duration: 0.35 }}
-          />
-        )}
-        <tag.Icon className={`relative z-10 w-3 h-3 ${active ? 'text-slate-600' : ''}`} />
-        <span className="relative z-10">{tag.label}</span>
-      </motion.button>
-    );
-  };
-
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#080D18]">
 
       {/* ─── PAGE HEADER ──────────────────────────────────────────────────── */}
-      <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 pb-8 border-b border-slate-700">
+      <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 pb-8 border-b border-slate-700/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12">
 
           {/* Title row */}
@@ -295,11 +307,9 @@ export default function CataloguePage() {
             </div>
           </div>
 
-          {/* ── Search bar ─────────────────────────────────────────────────── */}
+          {/* Search bar */}
           <div className="relative mb-4">
-            <motion.div
-              animate={searchFocus ? { scale: 1.01 } : { scale: 1 }}
-              transition={{ duration: 0.2 }}
+            <div
               className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl border transition-all duration-200 ${
                 searchFocus
                   ? 'bg-white/14 border-white/40 shadow-[0_0_0_3px_rgba(255,255,255,0.08)]'
@@ -331,44 +341,26 @@ export default function CataloguePage() {
                   </motion.button>
                 )}
               </AnimatePresence>
-              {/* Keyboard hint */}
               {!searchFocus && !searchQuery && (
                 <kbd className="hidden sm:flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/8 border border-white/12 text-slate-500 text-[11px] font-mono shrink-0">
                   /
                 </kbd>
               )}
-            </motion.div>
+            </div>
           </div>
 
-          {/* ── Filter + Sort row ───────────────────────────────────────────── */}
+          {/* Filter + Sort row */}
           <div className="flex flex-wrap items-center gap-2 min-h-[38px]">
-
-            {/* Category pills */}
             <div className="flex items-center gap-1 bg-white/6 rounded-full px-1 py-1">
-              <CatPill id="all"      label="All"      count={products.length} />
-              <CatPill id="peptide"  label="Peptides" count={peptideCount}    />
-              <CatPill id="supplies" label="Supplies" count={suppliesCount}   />
+              <CatPill id="all"     label="All"      count={peptideCount} activeFilter={filter} onSelect={handleCatSelect} />
+              <CatPill id="peptide" label="Peptides" count={peptideCount} activeFilter={filter} onSelect={handleCatSelect} />
             </div>
-
-            {/* Divider */}
             <div className="hidden sm:block w-px h-5 bg-white/15 mx-1" />
-
-            {/* Research-area tags (only visible for peptide / all) */}
-            <AnimatePresence>
-              {filter !== 'supplies' && (
-                <motion.div
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -8 }}
-                  transition={{ duration: 0.2 }}
-                  className="flex flex-wrap items-center gap-1.5"
-                >
-                  {RESEARCH_TAGS.map(t => <TagPill key={t.key} tag={t} />)}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Sort dropdown — pushed to the right */}
+            <div className="flex flex-wrap items-center gap-1.5">
+              {RESEARCH_TAGS.map(t => (
+                <TagPill key={t.key} tag={t} activeTag={activeTag} onSelect={setActiveTag} />
+              ))}
+            </div>
             <div ref={sortRef} className="ml-auto relative">
               <motion.button
                 whileTap={{ scale: 0.96 }}
@@ -384,13 +376,12 @@ export default function CataloguePage() {
                   <ChevronDown className="w-3.5 h-3.5" />
                 </motion.div>
               </motion.button>
-
               <AnimatePresence>
                 {showSort && (
                   <motion.div
                     initial={{ opacity: 0, y: -6, scale: 0.96 }}
-                    animate={{ opacity: 1, y: 0,  scale: 1    }}
-                    exit={{ opacity: 0,    y: -6, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -6, scale: 0.96 }}
                     transition={{ duration: 0.15, ease: 'easeOut' }}
                     className="absolute right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-30 min-w-[180px]"
                   >
@@ -418,237 +409,215 @@ export default function CataloguePage() {
       {/* ─── PRODUCT GRID ─────────────────────────────────────────────────── */}
       <section id="products" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
-        {/* Results / active filters bar */}
+        {/* Results bar */}
         {!loading && (
-          <motion.div
-            layout
-            className="flex flex-wrap items-center justify-between gap-3 mb-7"
-          >
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-7">
             <div className="flex items-center gap-3 flex-wrap">
               <motion.p
                 key={filteredProducts.length}
                 initial={{ opacity: 0, y: -6 }}
-                animate={{ opacity: 1,  y: 0  }}
+                animate={{ opacity: 1, y: 0 }}
                 className="text-sm text-slate-500"
               >
                 Showing{' '}
-                <span className="font-bold text-slate-900">{filteredProducts.length}</span>
+                <span className="font-bold text-white">{filteredProducts.length}</span>
                 {' '}of{' '}
-                <span className="font-semibold">{products.length}</span> products
+                <span className="font-semibold text-slate-400">{products.length}</span> products
               </motion.p>
-
-              {/* Active filter pills */}
               <AnimatePresence>
                 {searchQuery.trim() && (
                   <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }}>
-                    <Chip
-                      size="sm" variant="flat" color="primary"
-                      onClose={() => setSearchQuery('')}
-                      classNames={{ base: 'cursor-default' }}
-                    >
+                    <Chip size="sm" variant="flat" color="primary" onClose={() => setSearchQuery('')} classNames={{ base: 'cursor-default' }}>
                       "{searchQuery}"
                     </Chip>
                   </motion.div>
                 )}
                 {activeTag !== 'all' && (
                   <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }}>
-                    <Chip
-                      size="sm" variant="flat" color="secondary"
-                      onClose={() => setActiveTag('all')}
-                      classNames={{ base: 'cursor-default' }}
-                    >
+                    <Chip size="sm" variant="flat" color="secondary" onClose={() => setActiveTag('all')} classNames={{ base: 'cursor-default' }}>
                       {RESEARCH_TAGS.find(t => t.key === activeTag)?.label}
                     </Chip>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
-
-            {/* Clear all button */}
             <AnimatePresence>
               {activeFilterCount > 0 && (
                 <motion.button
-                  initial={{ opacity: 0, x: 10 }}
-                  animate={{ opacity: 1, x: 0  }}
-                  exit={{ opacity: 0,   x: 10  }}
+                  initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}
                   onClick={clearAll}
-                  className="text-xs font-semibold text-slate-400 hover:text-slate-700 transition-colors flex items-center gap-1"
+                  className="text-xs font-semibold text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-1"
                 >
                   <X className="w-3 h-3" /> Clear all
                 </motion.button>
               )}
             </AnimatePresence>
-          </motion.div>
+          </div>
         )}
 
         {/* Grid */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {[...Array(6)].map((_, i) => <SkeletonCard key={i} />)}
           </div>
         ) : filteredProducts.length > 0 ? (
-          <motion.div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <AnimatePresence mode="sync" initial={false}>
-              {filteredProducts.map((product, index) => {
-                const startingPrice = getStartingPrice(product);
-                const purity        = PURITY_MAP[product.name] || '98%+';
-                const badge         = BADGE_MAP[product.name];
-                const isBacWater    = product.name.toLowerCase().includes('bacteriostatic');
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {filteredProducts.map((product, index) => {
+              const startingPrice = getStartingPrice(product);
+              const purity        = PURITY_MAP[product.name] || '98%+';
+              const badge         = BADGE_MAP[product.name];
+              const isBacWater    = product.name.toLowerCase().includes('bacteriostatic');
+              const tagKey        = PRODUCT_TAG[product.name];
+              const tag           = tagKey ? TAG_STYLE[tagKey] : null;
+              const wasPrice      = WAS_PRICE_MAP[product.name];
+              const saving        = wasPrice && startingPrice ? wasPrice - startingPrice : 0;
 
-                return (
-                  <motion.div
-                    key={product.id}
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                    exit={{ opacity: 0, transition: { duration: 0.18 } }}
-                    className="cursor-pointer group"
-                    onClick={() => navigate(`/product/${product.id}`)}
-                  >
-                    <Card shadow="sm" className="w-full h-full hover:shadow-xl transition-shadow duration-300">
-                      <CardBody className="p-0 overflow-hidden">
+              return (
+                <div
+                  key={product.id}
+                  className="group relative flex flex-col rounded-3xl overflow-hidden cursor-pointer bg-[#080C14] border border-white/[0.06] transition-all duration-500 ease-out hover:-translate-y-2 hover:border-white/[0.11] hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.06)]"
+                  onClick={() => navigate(`/product/${product.id}`)}
+                >
 
-                        {/* Image */}
-                        <div className="relative aspect-[4/3] bg-slate-100 overflow-hidden">
-                          <img
-                            src={getProductImageUrl(product.image_url, product.name)}
-                            alt={`${product.name} research peptide${isBacWater ? '' : ' vial India'}`}
-                            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ease-out"
-                            onError={(e) => {
-                              const t = e.target as HTMLImageElement;
-                              const n = product.name.toLowerCase();
-                              if      (n.includes('retatrutide'))                  t.src = '/Retatrutide.png';
-                              else if (n.includes('tirzepatide'))                  t.src = '/TIRZEPATIDE.png';
-                              else if (n.includes('ghk'))                          t.src = '/GHKCU.png';
-                              else if (n.includes('semax'))                        t.src = '/SEMAX.png';
-                              else if (n.includes('selank'))                       t.src = '/SELANK.png';
-                              else if (n.includes('bpc'))                          t.src = '/BPC.png';
-                              else if (n.includes('nad'))                          t.src = '/NAD+.png';
-                              else if (n.includes('tb-500') || n.includes('tb500')) t.src = '/TB500.png';
-                              else if (n.includes('tesamorelin'))                  t.src = '/Tesa.png';
-                              else if (n.includes('mot'))                          t.src = '/motc.png';
-                              else                                                  t.src = BAC_WATER_IMAGE_URL;
-                            }}
-                          />
+                  {/* ── Floating badge ── */}
+                  {badge && (
+                    <div className="absolute top-4 left-4 z-20">
+                      <span className={`px-2.5 py-[5px] rounded-full text-[9px] font-bold tracking-[0.14em] uppercase backdrop-blur-md ${badge.style}`}>
+                        {badge.label}
+                      </span>
+                    </div>
+                  )}
 
-                          {/* BESTSELLER / POPULAR / NEW badge */}
-                          {badge && (
-                            <div className="absolute top-3 left-3 z-10">
-                              <Chip size="sm" color={badge.color} variant="solid" className="font-bold text-[11px] shadow-md">
-                                {badge.label}
-                              </Chip>
-                            </div>
-                          )}
+                  {/* ── Floating purity chip ── */}
+                  <div className="absolute top-4 right-4 z-20">
+                    <span className="flex items-center gap-1.5 px-2.5 py-[5px] rounded-full bg-black/50 backdrop-blur-md border border-white/[0.09] text-[9px] font-semibold text-slate-400 tracking-wide">
+                      <span className="w-1 h-1 rounded-full bg-emerald-400 shrink-0" />
+                      {purity}
+                    </span>
+                  </div>
 
-                          {/* Research-area tag badge — hidden on mobile to avoid badge collision */}
-                          {PRODUCT_TAG[product.name] && (
-                            <div className="hidden sm:block absolute bottom-3 left-3 z-10">
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-wide">
-                                {(() => {
-                                  const t = RESEARCH_TAGS.find(r => r.key === PRODUCT_TAG[product.name]);
-                                  return t ? <><t.Icon className="w-2.5 h-2.5" />{t.label}</> : null;
-                                })()}
-                              </span>
-                            </div>
-                          )}
+                  {/* ── Image area ── */}
+                  <div className="relative aspect-square overflow-hidden shrink-0 flex items-center justify-center p-7 sm:p-9 bg-[#080C14]">
 
-                          {/* Purity badge */}
-                          <div className="absolute top-3 right-3 z-10">
-                            <Chip
-                              size="sm" color="success" variant="flat"
-                              startContent={<ShieldCheck className="w-3 h-3" />}
-                              className="font-bold bg-white/90 backdrop-blur-sm shadow-sm"
-                            >
-                              {purity}
-                            </Chip>
+                    {/* Ambient glow orb — blooms on hover */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
+                      <div
+                        className="w-3/5 h-3/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-out"
+                        style={{ background: GLOW_COLOR[tagKey ?? 'default'], filter: 'blur(36px)' }}
+                      />
+                    </div>
+
+                    {/* Product image */}
+                    <img
+                      src={getProductImageUrl(product.image_url, product.name)}
+                      alt={`${product.name} research peptide${isBacWater ? '' : ' vial India'}`}
+                      loading={index < 3 ? 'eager' : 'lazy'}
+                      decoding="async"
+                      className="relative z-10 w-full h-full object-contain transition-transform duration-700 ease-out group-hover:scale-[1.07]"
+                      style={{ filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.65))' }}
+                      onError={(e) => {
+                        const t = e.target as HTMLImageElement;
+                        const n = product.name.toLowerCase();
+                        if      (n.includes('retatrutide'))                    t.src = '/Retatrutide.jpg';
+                        else if (n.includes('tirzepatide'))                    t.src = '/TIRZEPATIDE.jpg';
+                        else if (n.includes('ghk'))                            t.src = '/GHKCU.jpg';
+                        else if (n.includes('semax'))                          t.src = '/SEMAX.jpg';
+                        else if (n.includes('selank'))                         t.src = '/SELANK.jpg';
+                        else if (n.includes('bpc'))                            t.src = '/BPC.jpg';
+                        else if (n.includes('nad'))                            t.src = '/NAD+.jpg';
+                        else if (n.includes('tb-500') || n.includes('tb500')) t.src = '/TB500.jpg';
+                        else if (n.includes('tesamorelin'))                    t.src = '/Tesa.jpg';
+                        else if (n.includes('mot'))                            t.src = '/motc.jpg';
+                        else                                                    t.src = BAC_WATER_IMAGE_URL;
+                      }}
+                    />
+
+                    {/* Bottom cinematic fade — bleeds image into text */}
+                    <div
+                      className="absolute inset-x-0 bottom-0 h-3/5 pointer-events-none z-20"
+                      style={{ background: 'linear-gradient(to top, #080C14 30%, transparent 100%)' }}
+                    />
+                  </div>
+
+                  {/* ── Text section ── */}
+                  <div className="flex flex-col px-6 pb-6 -mt-5 relative z-30">
+
+                    {/* Category */}
+                    {tag && (
+                      <div className="flex items-center gap-1.5 mb-3">
+                        <span className={`w-[5px] h-[5px] rounded-full shrink-0 ${tag.dot}`} />
+                        <span className={`text-[9px] font-bold tracking-[0.2em] uppercase ${tag.text}`}>
+                          {tag.label}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Name */}
+                    <h3 className="text-[19px] font-bold text-white tracking-tight leading-tight mb-5">
+                      {product.name}
+                    </h3>
+
+                    {/* Price + CTA */}
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-[9px] text-slate-600 uppercase tracking-[0.14em] mb-0.5">From</p>
+                        {wasPrice && saving > 0 ? (
+                          <div className="flex items-baseline gap-2">
+                            <p className="text-[20px] font-bold text-white leading-none tracking-tight">
+                              {startingPrice ? format(startingPrice) : '—'}
+                            </p>
+                            <p className="text-[12px] font-medium text-slate-600 line-through leading-none">
+                              {format(wasPrice)}
+                            </p>
                           </div>
-
-                          {/* Hover overlay */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        </div>
-
-                        {/* Content */}
-                        <div className="px-5 py-4">
-                          {/* Highlight matching search text in name */}
-                          <h3 className="text-lg font-bold text-slate-900 mb-1.5 group-hover:text-primary-600 transition-colors duration-200">
-                            {product.name}
-                          </h3>
-                          <p className="text-sm text-slate-500 leading-relaxed line-clamp-2 mb-3">
-                            {product.description}
+                        ) : (
+                          <p className="text-[20px] font-bold text-white leading-none tracking-tight">
+                            {startingPrice ? format(startingPrice) : '—'}
                           </p>
-                          <div className="flex flex-wrap gap-1.5 mb-3">
-                            <Chip size="sm" variant="flat" color="success"  className="text-[11px] font-medium">
-                              <ShieldCheck className="w-3 h-3 mr-1 inline" />Lab verified
-                            </Chip>
-                            <Chip size="sm" variant="flat" color="primary"  className="text-[11px] font-medium">
-                              <Microscope className="w-3 h-3 mr-1 inline" />HPLC tested
-                            </Chip>
-                            {!isBacWater && (
-                              <Chip size="sm" variant="flat" color="warning" className="text-[11px] font-medium">
-                                <FileCheck className="w-3 h-3 mr-1 inline" />COA included
-                              </Chip>
-                            )}
-                          </div>
-                          <Divider className="my-2" />
-                        </div>
-                      </CardBody>
+                        )}
+                        {saving > 0 && (
+                          <p className="text-[9px] font-bold text-emerald-400 tracking-[0.1em] mt-1">
+                            SAVE {format(saving)}
+                          </p>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={e => { e.stopPropagation(); navigate(`/product/${product.id}`); }}
+                        className="group/cta shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-full border border-white/[0.18] text-white text-[12px] font-semibold whitespace-nowrap transition-all duration-300 ease-out hover:bg-white hover:text-slate-900 hover:border-transparent active:scale-95"
+                      >
+                        Order
+                        <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover/cta:translate-x-0.5" />
+                      </button>
+                    </div>
 
-                      <CardFooter className="px-5 pb-4 pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
-                        <div>
-                          {startingPrice && (
-                            <div className="flex items-baseline gap-1">
-                              <span className="text-xs text-slate-400 font-medium">From</span>
-                              <span className="text-xl font-bold text-slate-900">{format(startingPrice)}</span>
-                            </div>
-                          )}
-                          {(() => {
-                            if (product.variants.length < 2) return null;
-                            const base = Math.min(...product.variants.map(v => v.price_inr));
-                            const baseDosage = product.variants.find(v => v.price_inr === base)?.dosage_mg ?? 1;
-                            const maxSaving = Math.max(...product.variants.map(v => {
-                              const units = Math.round(v.dosage_mg / baseDosage);
-                              return units > 1 ? (base * units) - v.price_inr : 0;
-                            }));
-                            return maxSaving > 0 ? (
-                              <span className="inline-block text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5 mt-1">
-                                Save up to {format(maxSaving)} on bundles
-                              </span>
-                            ) : null;
-                          })()}
-                          <span className="flex items-center gap-1 mt-1 text-[10px] font-semibold text-indigo-500">
-                            <GraduationCap className="w-3 h-3" />Student discount available
-                          </span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={e => { e.stopPropagation(); navigate(`/product/${product.id}`); }}
-                          className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-700 active:bg-slate-800 text-white text-sm font-bold px-4 py-2 rounded-xl transition-colors shrink-0"
-                        >
-                          Order <ArrowRight className="w-3.5 h-3.5" />
-                        </button>
-                      </CardFooter>
-                    </Card>
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
-          </motion.div>
+                    {/* Minimal trust row */}
+                    <div className="mt-5 pt-4 border-t border-white/[0.05]">
+                      <p className="text-[9px] text-slate-700 tracking-[0.12em] uppercase font-medium">
+                        {isBacWater ? 'Pharma grade · Sterile · Benzyl alcohol' : 'HPLC verified · COA included · GMP source'}
+                      </p>
+                    </div>
+
+                  </div>
+                </div>
+              );
+            })}
+          </div>
 
         ) : (
-          /* ── Animated empty state ── */
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1,  y: 0  }}
+            animate={{ opacity: 1, y: 0 }}
             className="text-center py-24"
           >
             <motion.div
               animate={{ rotate: [0, -8, 8, -4, 4, 0] }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              <Search className="w-14 h-14 text-slate-200 mx-auto mb-5" />
+              <Search className="w-14 h-14 text-slate-700 mx-auto mb-5" />
             </motion.div>
-            <p className="text-slate-800 font-bold text-lg mb-2">No results found</p>
-            <p className="text-slate-400 text-sm mb-2 max-w-xs mx-auto">
+            <p className="text-white font-bold text-lg mb-2">No results found</p>
+            <p className="text-slate-500 text-sm mb-2 max-w-xs mx-auto">
               {searchQuery
                 ? `Nothing matches "${searchQuery}". Try a different keyword.`
                 : 'No products match the selected filters.'}
@@ -666,37 +635,33 @@ export default function CataloguePage() {
 
         {/* ─── BUNDLE DEAL PANEL ───────────────────────────────────────────── */}
         {!loading && (
-          <Card shadow="none" className="mt-14 bg-gradient-to-br from-slate-900 to-slate-800 border-0 overflow-hidden">
-            <CardBody className="p-8 md:p-10">
+          <div className="mt-14 rounded-2xl bg-slate-900 border border-white/[0.08] overflow-hidden">
+            <div className="p-8 md:p-10">
               <div className="flex flex-col md:flex-row items-center gap-8">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-3">
                     <Sparkles className="w-5 h-5 text-amber-400" />
                     <span className="text-amber-400 text-sm font-bold uppercase tracking-wider">Bundle Deal</span>
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-3">Order More of the Same. Pay Less.</h3>
+                  <h3 className="text-2xl font-bold text-white mb-3 tracking-tight">Order More. Pay Less.</h3>
                   <p className="text-slate-400 leading-relaxed mb-5">
-                    Buy the same peptide twice and get 10% off it. Buy three and get 20% off. Per peptide, not per cart.
+                    Buy the same peptide twice and get 10% off. Buy three and get 20% off. Per peptide, not per cart.
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    <Chip size="sm" variant="flat" color="success" className="font-semibold bg-white/10 text-emerald-300">Same peptide ×2 = 10% off</Chip>
-                    <Chip size="sm" variant="flat" color="success" className="font-semibold bg-white/10 text-emerald-300">Same peptide ×3 = 20% off</Chip>
-                    <Chip size="sm" variant="flat" color="warning" className="font-semibold bg-white/10 text-amber-300">Auto-applied at checkout</Chip>
+                    <span className="px-3 py-1 rounded-full bg-white/[0.07] border border-white/[0.1] text-emerald-300 text-xs font-semibold">×2 = 10% off</span>
+                    <span className="px-3 py-1 rounded-full bg-white/[0.07] border border-white/[0.1] text-emerald-300 text-xs font-semibold">×3 = 20% off</span>
+                    <span className="px-3 py-1 rounded-full bg-white/[0.07] border border-white/[0.1] text-amber-300 text-xs font-semibold">Auto-applied at checkout</span>
                   </div>
                 </div>
-                <Button
-                  size="lg" variant="solid"
-                  className="shrink-0 bg-white text-slate-900 font-bold shadow-lg hover:bg-slate-100"
-                  endContent={<ArrowRight className="w-4 h-4" />}
-                  onPress={() =>
-                    document.getElementById('products')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                  }
+                <button
+                  onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                  className="shrink-0 flex items-center gap-2 px-6 py-3.5 bg-white text-slate-900 font-bold rounded-xl hover:bg-slate-100 transition-colors text-sm"
                 >
-                  Browse the Catalogue →
-                </Button>
+                  Browse the Catalogue <ArrowRight className="w-4 h-4" />
+                </button>
               </div>
-            </CardBody>
-          </Card>
+            </div>
+          </div>
         )}
 
       </section>

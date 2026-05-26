@@ -71,7 +71,7 @@ const FAQ_MAP: Record<string, { q: string; a: string }[]> = {
     { q: 'What is Tirzepatide?', a: 'Tirzepatide is a dual GIP/GLP-1 receptor agonist. It is supplied for in vitro research and analytical applications only.' },
     { q: 'What purity can I expect?', a: 'Our Tirzepatide is HPLC-verified at 99.4% purity. The COA with full testing data is included with every order.' },
     { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Free standard shipping pan-India. Tier 1 &amp; 2 cities: 3–4 business days. Remote areas: 4–6 business days. Express 1–2 days for major cities (+₹800). Temperature-controlled packaging.' },
-    { q: 'Can I get a COA before ordering?', a: "Yes. Contact our support team via WhatsApp or email and we'll send you the batch COA within 24 hours." },
+    { q: 'When do I receive the COA?', a: "The Certificate of Analysis ships with your order — purity, HPLC data, and molecular weight included. COAs are not distributed prior to purchase." },
   ],
   'Klow Blend': [
     { q: 'What is the Klow Blend?', a: 'Klow Blend is a proprietary research-grade peptide blend formulated for advanced metabolic and body composition studies. Each vial is HPLC-verified and supplied with a full Certificate of Analysis.' },
@@ -95,7 +95,7 @@ const FAQ_MAP: Record<string, { q: string; a: string }[]> = {
     { q: 'What purity can I expect?', a: 'All our peptides are HPLC-verified with purity exceeding 98%. A Certificate of Analysis is included with every order.' },
     { q: 'What is included with my order?', a: 'Every order includes the compound in a sterile vial along with a Certificate of Analysis (COA) detailing purity and testing results.' },
     { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Standard delivery is 3–4 business days (standard, free) or 1 day (fast, +₹800). All peptides are shipped with temperature-controlled packaging.' },
-    { q: 'Can I get a COA before ordering?', a: "Yes. Contact our support team via WhatsApp or email and we'll send you the batch COA within 24 hours." },
+    { q: 'When do I receive the COA?', a: "The Certificate of Analysis ships with your order — purity, HPLC data, and molecular weight included. COAs are not distributed prior to purchase." },
     { q: 'What is your refund policy?', a: 'If your order arrives damaged or the product does not match the COA specifications, we offer a replacement. Contact support within 48 hours of receipt.' },
   ],
 };
@@ -475,16 +475,16 @@ export default function ProductDetailPage() {
                     onError={(e) => {
                       const t = e.target as HTMLImageElement;
                       const n = product.name.toLowerCase();
-                      if (n.includes('retatrutide'))      t.src = '/Retatrutide.png';
-                      else if (n.includes('tirzepatide')) t.src = '/TIRZEPATIDE.png';
-                      else if (n.includes('ghk'))         t.src = '/GHKCU.png';
-                      else if (n.includes('semax'))       t.src = '/SEMAX.png';
-                      else if (n.includes('selank'))      t.src = '/SELANK.png';
-                      else if (n.includes('bpc'))         t.src = '/BPC.png';
-                      else if (n.includes('nad'))         t.src = '/NAD+.png';
-                      else if (n.includes('tb-500') || n.includes('tb500')) t.src = '/TB500.png';
-                      else if (n.includes('tesamorelin')) t.src = '/Tesa.png';
-                      else if (n.includes('mot'))         t.src = '/motc.png';
+                      if (n.includes('retatrutide'))      t.src = '/Retatrutide.jpg';
+                      else if (n.includes('tirzepatide')) t.src = '/TIRZEPATIDE.jpg';
+                      else if (n.includes('ghk'))         t.src = '/GHKCU.jpg';
+                      else if (n.includes('semax'))       t.src = '/SEMAX.jpg';
+                      else if (n.includes('selank'))      t.src = '/SELANK.jpg';
+                      else if (n.includes('bpc'))         t.src = '/BPC.jpg';
+                      else if (n.includes('nad'))         t.src = '/NAD+.jpg';
+                      else if (n.includes('tb-500') || n.includes('tb500')) t.src = '/TB500.jpg';
+                      else if (n.includes('tesamorelin')) t.src = '/Tesa.jpg';
+                      else if (n.includes('mot'))         t.src = '/motc.jpg';
                       else                                t.src = BAC_WATER_IMAGE_URL;
                     }}
                   />
@@ -512,15 +512,9 @@ export default function ProductDetailPage() {
                         <Shield className="w-5 h-5 text-emerald-600" />
                         <div>
                           <p className="font-bold text-emerald-900 text-sm">{purity}% Purity Verified</p>
-                          <p className="text-xs text-emerald-700">HPLC Tested — COA Available</p>
+                          <p className="text-xs text-emerald-700">HPLC Tested — COA with every order</p>
                         </div>
                       </div>
-                      <button
-                        onClick={() => navigate('/support')}
-                        className="text-emerald-600 hover:text-emerald-700 text-xs font-semibold whitespace-nowrap"
-                      >
-                        Request COA
-                      </button>
                     </div>
                     <Progress
                       value={purityNum}

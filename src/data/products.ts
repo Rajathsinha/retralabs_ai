@@ -6,13 +6,12 @@ export const PRODUCTS: ProductWithVariants[] = [
     name: 'Retatrutide',
     description: 'Triple agonist peptide targeting GLP-1, GIP, and glucagon receptors for metabolic and obesity research.',
     category: 'research-peptide',
-    image_url: '/Retatrutide.png',
+    image_url: '/Retatrutide.jpg',
     created_at: new Date().toISOString(),
     variants: [
-      { id: '1s', product_id: '1', dosage_mg: 10,  price_inr: 3500,  in_stock: true, vial_configuration: 'Starter vial',                    created_at: new Date().toISOString() },
-      { id: '1a', product_id: '1', dosage_mg: 20,  price_inr: 6400,  in_stock: true, vial_configuration: '10mg × 2',                         created_at: new Date().toISOString() },
-      { id: '1b', product_id: '1', dosage_mg: 50,  price_inr: 15000, in_stock: true, vial_configuration: '10mg x 5 vials',                   created_at: new Date().toISOString() },
-      { id: '1c', product_id: '1', dosage_mg: 100, price_inr: 26000, in_stock: true, vial_configuration: '10mg x 10 vials / 20mg x 5 vials', created_at: new Date().toISOString() },
+      { id: '1s', product_id: '1', dosage_mg: 10,  price_inr: 3600,  in_stock: true, vial_configuration: 'Starter vial',  created_at: new Date().toISOString() },
+      { id: '1a', product_id: '1', dosage_mg: 20,  price_inr: 6400,  in_stock: true, vial_configuration: '10mg × 2',      created_at: new Date().toISOString() },
+      { id: '1b', product_id: '1', dosage_mg: 50,  price_inr: 15000, in_stock: true, vial_configuration: '10mg x 5 vials', created_at: new Date().toISOString() },
     ],
   },
   {
@@ -20,7 +19,7 @@ export const PRODUCTS: ProductWithVariants[] = [
     name: 'Tirzepatide',
     description: 'Dual GIP and GLP-1 receptor agonist for metabolic research and analytical applications.',
     category: 'research-peptide',
-    image_url: '/TIRZEPATIDE.png',
+    image_url: '/TIRZEPATIDE.jpg',
     created_at: new Date().toISOString(),
     variants: [
       { id: '2x', product_id: '2', dosage_mg: 10, price_inr: 2800, in_stock: true, vial_configuration: 'Single vial',  created_at: new Date().toISOString() },
@@ -33,7 +32,7 @@ export const PRODUCTS: ProductWithVariants[] = [
     name: 'GHK-Cu',
     description: 'Copper peptide complex for skin regeneration, wound healing, and anti-aging research applications.',
     category: 'research-peptide',
-    image_url: '/GHKCU.png',
+    image_url: '/GHKCU.jpg',
     created_at: new Date().toISOString(),
     variants: [
       { id: '3a', product_id: '3', dosage_mg: 50,  price_inr: 3500,  in_stock: true, vial_configuration: '50mg Single',  created_at: new Date().toISOString() },
@@ -48,12 +47,12 @@ export const PRODUCTS: ProductWithVariants[] = [
     name: 'Semax',
     description: 'Synthetic ACTH analogue nootropic peptide for cognitive function, neuroprotection, and CNS research.',
     category: 'research-peptide',
-    image_url: '/SEMAX.png',
+    image_url: '/SEMAX.jpg',
     created_at: new Date().toISOString(),
     variants: [
       { id: '4a', product_id: '4', dosage_mg: 10, price_inr: 2500, in_stock: true, vial_configuration: 'Single vial', created_at: new Date().toISOString() },
       { id: '4b', product_id: '4', dosage_mg: 20, price_inr: 4900, in_stock: true, vial_configuration: '10mg × 2',   created_at: new Date().toISOString() },
-      { id: '4c', product_id: '4', dosage_mg: 50, price_inr: 9400, in_stock: true, vial_configuration: '10mg × 5',   created_at: new Date().toISOString() },
+      { id: '4c', product_id: '4', dosage_mg: 50, price_inr: 12000, in_stock: true, vial_configuration: '10mg × 5',   created_at: new Date().toISOString() },
     ],
   },
   {
@@ -61,12 +60,12 @@ export const PRODUCTS: ProductWithVariants[] = [
     name: 'Selank',
     description: 'Anxiolytic and nootropic heptapeptide derived from tuftsin, researched for anti-anxiety and cognitive enhancement.',
     category: 'research-peptide',
-    image_url: '/SELANK.png',
+    image_url: '/SELANK.jpg',
     created_at: new Date().toISOString(),
     variants: [
       { id: '5a', product_id: '5', dosage_mg: 10, price_inr: 2500, in_stock: true, vial_configuration: 'Single vial', created_at: new Date().toISOString() },
       { id: '5b', product_id: '5', dosage_mg: 20, price_inr: 4900, in_stock: true, vial_configuration: '10mg × 2',   created_at: new Date().toISOString() },
-      { id: '5c', product_id: '5', dosage_mg: 50, price_inr: 9400, in_stock: true, vial_configuration: '10mg × 5',   created_at: new Date().toISOString() },
+      { id: '5c', product_id: '5', dosage_mg: 50, price_inr: 12000, in_stock: true, vial_configuration: '10mg × 5',   created_at: new Date().toISOString() },
     ],
   },
   {
@@ -74,12 +73,12 @@ export const PRODUCTS: ProductWithVariants[] = [
     name: 'BPC-157',
     description: 'Body protection compound derived from human gastric juice, researched for tissue repair, gut health, and injury recovery.',
     category: 'research-peptide',
-    image_url: '/BPC.png',
+    image_url: '/BPC.jpg',
     created_at: new Date().toISOString(),
     variants: [
-      { id: '7a', product_id: '7', dosage_mg: 10,  price_inr: 2800,  in_stock: true, created_at: new Date().toISOString() },
+      { id: '7a', product_id: '7', dosage_mg: 10,  price_inr: 2700,  in_stock: true, created_at: new Date().toISOString() },
       { id: '7b', product_id: '7', dosage_mg: 20,  price_inr: 5000,  in_stock: true, created_at: new Date().toISOString() },
-      { id: '7c', product_id: '7', dosage_mg: 50,  price_inr: 9000,  in_stock: true, created_at: new Date().toISOString() },
+      { id: '7c', product_id: '7', dosage_mg: 50,  price_inr: 12000, in_stock: true, created_at: new Date().toISOString() },
       { id: '7d', product_id: '7', dosage_mg: 100, price_inr: 16000, in_stock: true, created_at: new Date().toISOString() },
     ],
   },
@@ -88,7 +87,7 @@ export const PRODUCTS: ProductWithVariants[] = [
     name: 'NAD+',
     description: 'Nicotinamide adenine dinucleotide coenzyme for cellular energy metabolism, DNA repair, and longevity research.',
     category: 'research-peptide',
-    image_url: '/NAD+.png',
+    image_url: '/NAD+.jpg',
     created_at: new Date().toISOString(),
     variants: [
       { id: '8a', product_id: '8', dosage_mg: 10,  price_inr: 4500,  in_stock: true, created_at: new Date().toISOString() },
@@ -102,7 +101,7 @@ export const PRODUCTS: ProductWithVariants[] = [
     name: 'TB-500',
     description: 'Synthetic analogue of Thymosin Beta-4, studied for tissue regeneration, wound healing, and inflammation modulation.',
     category: 'research-peptide',
-    image_url: '/TB500.png',
+    image_url: '/TB500.jpg',
     created_at: new Date().toISOString(),
     variants: [
       { id: '9a', product_id: '9', dosage_mg: 10,  price_inr: 4000,  in_stock: true, created_at: new Date().toISOString() },
@@ -116,7 +115,7 @@ export const PRODUCTS: ProductWithVariants[] = [
     name: 'Tesamorelin',
     description: 'GHRH analogue that stimulates growth hormone release, researched for metabolic regulation and body composition studies.',
     category: 'research-peptide',
-    image_url: '/Tesa.png',
+    image_url: '/Tesa.jpg',
     created_at: new Date().toISOString(),
     variants: [
       { id: '10a', product_id: '10', dosage_mg: 5,  price_inr: 4300,  in_stock: true, vial_configuration: '1×5mg',  created_at: new Date().toISOString() },
@@ -130,7 +129,7 @@ export const PRODUCTS: ProductWithVariants[] = [
     name: 'MOT-C',
     description: 'MOTS-c mitochondrial-derived peptide studied for metabolic regulation, insulin sensitivity, and cellular homeostasis.',
     category: 'research-peptide',
-    image_url: '/motc.png',
+    image_url: '/motc.jpg',
     created_at: new Date().toISOString(),
     variants: [
       { id: '11a', product_id: '11', dosage_mg: 10, price_inr: 2800,  in_stock: true, vial_configuration: 'Single vial', created_at: new Date().toISOString() },
@@ -143,7 +142,7 @@ export const PRODUCTS: ProductWithVariants[] = [
     name: 'Klow Blend',
     description: 'Proprietary peptide blend formulated for advanced metabolic and body composition research. HPLC-verified, lyophilised, COA included.',
     category: 'research-peptide',
-    image_url: '/KLOW.png',
+    image_url: '/KLOW.jpg',
     created_at: new Date().toISOString(),
     variants: [
       { id: '12a', product_id: '12', dosage_mg: 80,  price_inr: 5200,  in_stock: true, vial_configuration: '1×80mg', created_at: new Date().toISOString() },
@@ -156,7 +155,7 @@ export const PRODUCTS: ProductWithVariants[] = [
     name: 'CJC-1295 (No DAC) + Ipamorelin Stack',
     description: 'Pre-combined CJC-1295 without DAC and Ipamorelin (5mg each) in a single vial — the gold standard GHRH/GHRP research stack for GH secretion and body composition studies.',
     category: 'research-peptide',
-    image_url: '/CJC1295+Ipamorelin.png',
+    image_url: '/CJC1295+Ipamorelin.jpg',
     created_at: new Date().toISOString(),
     variants: [
       { id: '13a', product_id: '13', dosage_mg: 10,  price_inr: 3700,  in_stock: true, vial_configuration: '1 vial (5mg+5mg)',  created_at: new Date().toISOString() },
@@ -169,7 +168,7 @@ export const PRODUCTS: ProductWithVariants[] = [
     name: 'The Wolverine Stack',
     description: 'BPC-157 + TB-500 pre-combined blend (5mg each) — the ultimate tissue repair and recovery research stack. Lyophilised, COA included.',
     category: 'research-peptide',
-    image_url: '/THE WOLVERINE STACK.png',
+    image_url: '/THE WOLVERINE STACK.jpg',
     created_at: new Date().toISOString(),
     variants: [
       { id: '14a', product_id: '14', dosage_mg: 10,  price_inr: 3900,  in_stock: true, vial_configuration: '1 vial (5mg+5mg)',  created_at: new Date().toISOString() },
@@ -182,7 +181,7 @@ export const PRODUCTS: ProductWithVariants[] = [
     name: 'Bacteriostatic Water (Pharma Grade)',
     description: 'Pharmaceutical grade bacteriostatic water for reconstituting peptides. Sterile, 0.9% benzyl alcohol.',
     category: 'Medical Supplies',
-    image_url: '/bac-water.png',
+    image_url: '/bac-water.jpg',
     created_at: new Date().toISOString(),
     variants: [
       { id: '6a', product_id: '6', dosage_mg: 10,  price_inr: 400,  in_stock: true, vial_configuration: '1×10ML',  created_at: new Date().toISOString() },

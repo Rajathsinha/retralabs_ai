@@ -16,10 +16,6 @@ const QUICK_MESSAGES = [
     label: 'Product inquiry',
     text: "Hi! I'm interested in ordering from RetraLabs. Can you help me choose the right compound for my research?",
   },
-  {
-    label: 'Request COA / batch info',
-    text: "Hi! I'd like to request a Certificate of Analysis (COA) for a product before ordering. Can you send it over?",
-  },
 ];
 
 export default function WhatsAppButton() {

@@ -1,4 +1,4 @@
-import { Component, ReactNode, useEffect } from 'react';
+import { lazy, Suspense, Component, ReactNode, useEffect } from 'react';
 import { Routes, Route, Outlet, useLocation, Navigate, useNavigate } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
 import { useAuth } from './context/AuthContext';
@@ -7,25 +7,26 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import WhatsAppButton from './components/WhatsAppButton';
 import CartDrawer from './components/CartDrawer';
-import HomePage from './pages/HomePage';
-import CataloguePage from './pages/CataloguePage';
-import ProductDetailPage from './pages/ProductDetailPage';
-import CheckoutPage from './pages/CheckoutPage';
-import AboutPage from './pages/AboutPage';
-import ContactPage from './pages/ContactPage';
-import SupportPage from './pages/SupportPage';
-import OrderTrackingPage from './pages/OrderTrackingPage';
-import PaymentSuccessPage from './pages/PaymentSuccessPage';
-import PaymentFailedPage from './pages/PaymentFailedPage';
-import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
-import TermsPage from './pages/TermsPage';
-import RefundPolicyPage from './pages/RefundPolicyPage';
-import SignInPage from './pages/SignInPage';
-import SignUpPage from './pages/SignUpPage';
-import ForgotPasswordPage from './pages/ForgotPasswordPage';
-import ResetPasswordPage from './pages/ResetPasswordPage';
-import AccountPage from './pages/AccountPage';
-import ProofPage from './pages/ProofPage';
+
+const HomePage           = lazy(() => import('./pages/HomePage'));
+const CataloguePage      = lazy(() => import('./pages/CataloguePage'));
+const ProductDetailPage  = lazy(() => import('./pages/ProductDetailPage'));
+const CheckoutPage       = lazy(() => import('./pages/CheckoutPage'));
+const AboutPage          = lazy(() => import('./pages/AboutPage'));
+const ContactPage        = lazy(() => import('./pages/ContactPage'));
+const SupportPage        = lazy(() => import('./pages/SupportPage'));
+const OrderTrackingPage  = lazy(() => import('./pages/OrderTrackingPage'));
+const PaymentSuccessPage = lazy(() => import('./pages/PaymentSuccessPage'));
+const PaymentFailedPage  = lazy(() => import('./pages/PaymentFailedPage'));
+const PrivacyPolicyPage  = lazy(() => import('./pages/PrivacyPolicyPage'));
+const TermsPage          = lazy(() => import('./pages/TermsPage'));
+const RefundPolicyPage   = lazy(() => import('./pages/RefundPolicyPage'));
+const SignInPage         = lazy(() => import('./pages/SignInPage'));
+const SignUpPage         = lazy(() => import('./pages/SignUpPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
+const ResetPasswordPage  = lazy(() => import('./pages/ResetPasswordPage'));
+const AccountPage        = lazy(() => import('./pages/AccountPage'));
+const ProofPage          = lazy(() => import('./pages/ProofPage'));
 
 // ─── Error Boundary ───────────────────────────────────────────────────────────
 interface ErrorBoundaryState { hasError: boolean; error?: Error }
@@ -114,13 +115,24 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
+// ─── Page loading spinner ─────────────────────────────────────────────────────
+function PageLoader() {
+  return (
+    <div className="min-h-[60vh] flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-slate-200 border-t-slate-900 rounded-full animate-spin" />
+    </div>
+  );
+}
+
 // ─── Root layout ──────────────────────────────────────────────────────────────
 function RootLayout() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Header />
       <main className="flex-1">
-        <Outlet />
+        <Suspense fallback={<PageLoader />}>
+          <Outlet />
+        </Suspense>
       </main>
       <Footer />
       <WhatsAppButton />
