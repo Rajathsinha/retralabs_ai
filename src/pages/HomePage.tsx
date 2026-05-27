@@ -497,7 +497,8 @@ export default function HomePage() {
       </section>
 
       {/* ════════════════ TRUSTPILOT REVIEWS ════════════════ */}
-      <Suspense fallback={<div className="py-24 bg-[#040812]" />}>
+      {/* Height matches TrustpilotSection to prevent CLS when it lazy-loads */}
+      <Suspense fallback={<div className="bg-[#040812]" style={{ height: '560px' }} />}>
         <TrustpilotSection />
       </Suspense>
 
