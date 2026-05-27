@@ -1014,17 +1014,17 @@ export default function CataloguePage() {
               <div className="flex flex-col md:flex-row items-center gap-8">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-3">
-                    <Sparkles className="w-5 h-5 text-amber-400" />
+                    <span className="text-xl">🎉</span>
                     <span className="text-amber-400 text-sm font-bold uppercase tracking-wider">Bundle Deal</span>
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-3 tracking-tight">Order More. Pay Less.</h3>
+                  <h3 className="text-2xl font-bold text-white mb-3 tracking-tight">5% Off — Mix &amp; Save</h3>
                   <p className="text-slate-400 leading-relaxed mb-5">
-                    Buy the same peptide twice and get 10% off. Buy three and get 20% off. Per peptide, not per cart.
+                    Order 2 or more <em>different</em> peptides and spend ₹9,000 or more to unlock 5% off your entire order.
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    <span className="px-3 py-1 rounded-full bg-white/[0.07] border border-white/[0.1] text-emerald-300 text-xs font-semibold">×2 = 10% off</span>
-                    <span className="px-3 py-1 rounded-full bg-white/[0.07] border border-white/[0.1] text-emerald-300 text-xs font-semibold">×3 = 20% off</span>
-                    <span className="px-3 py-1 rounded-full bg-white/[0.07] border border-white/[0.1] text-amber-300 text-xs font-semibold">Auto-applied at checkout</span>
+                    <span className="px-3 py-1 rounded-full bg-white/[0.07] border border-white/[0.1] text-emerald-300 text-xs font-semibold">2+ different peptides</span>
+                    <span className="px-3 py-1 rounded-full bg-white/[0.07] border border-white/[0.1] text-emerald-300 text-xs font-semibold">₹9,000+ spend</span>
+                    <span className="px-3 py-1 rounded-full bg-white/[0.07] border border-white/[0.1] text-amber-300 text-xs font-semibold">5% off applied at checkout</span>
                   </div>
                 </div>
                 <button
