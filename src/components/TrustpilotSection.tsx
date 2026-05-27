@@ -141,6 +141,26 @@ const REVIEWS = [
     initial: 'S',
     gradient: 'from-purple-400 to-pink-500',
   },
+  {
+    id: 12,
+    name: 'Elephants World',
+    location: 'India',
+    text: 'Seriously the product was authentic. Services are top notch, communication is up to the standards and amazing results.',
+    product: 'Retatrutide',
+    date: 'May 23, 2026',
+    initial: 'E',
+    gradient: 'from-lime-400 to-green-500',
+  },
+  {
+    id: 13,
+    name: 'Shubham Singla',
+    location: 'India',
+    text: 'Trustworthy to buy and very effective after consumption. It was very effective in my weight loss journey.',
+    product: 'Retatrutide',
+    date: 'May 1, 2026',
+    initial: 'S',
+    gradient: 'from-slate-400 to-blue-500',
+  },
 ];
 
 type Review = typeof REVIEWS[number];
@@ -314,7 +334,7 @@ export default function TrustpilotSection() {
           </span>
         </div>
 
-        {/* 5 large stars */}
+        {/* Stars — 4 filled + 1 dim = 4.3 */}
         <div className="flex justify-center gap-2 mb-5">
           {[1, 2, 3, 4, 5].map(i => (
             <motion.div
@@ -328,19 +348,25 @@ export default function TrustpilotSection() {
                 ease: [0.34, 1.56, 0.64, 1],
               }}
             >
-              <TpStar className="w-9 h-9" />
+              {i <= 4 ? (
+                <TpStar className="w-9 h-9" />
+              ) : (
+                <svg viewBox="0 0 105 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-9 h-9" aria-hidden="true">
+                  <path d="M52.5 0L64.6 36.5H103.1L71.8 59.1L83.9 95.5L52.5 72.9L21.1 95.5L33.2 59.1L1.9 36.5H40.4L52.5 0Z" fill="#1e3a2e" />
+                </svg>
+              )}
             </motion.div>
           ))}
         </div>
 
-        {/* "Excellent" heading */}
+        {/* "Great" heading */}
         <h2 className="text-5xl md:text-6xl font-bold text-white tracking-tight leading-none mb-3">
-          Excellent
+          Great
         </h2>
 
         {/* Score · count · link */}
         <p className="text-sm text-slate-600">
-          <span className="text-slate-300 font-semibold tabular-nums">5.0</span>
+          <span className="text-slate-300 font-semibold tabular-nums">4.3</span>
           <span className="mx-2 text-slate-800">·</span>
           <a
             href="https://www.trustpilot.com/review/retralabs.in"
