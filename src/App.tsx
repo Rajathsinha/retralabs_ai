@@ -27,6 +27,7 @@ const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
 const ResetPasswordPage  = lazy(() => import('./pages/ResetPasswordPage'));
 const AccountPage        = lazy(() => import('./pages/AccountPage'));
 const ProofPage          = lazy(() => import('./pages/ProofPage'));
+const HeroUIWrapper      = lazy(() => import('./providers/HeroUIWrapper'));
 
 // ─── Error Boundary ───────────────────────────────────────────────────────────
 interface ErrorBoundaryState { hasError: boolean; error?: Error }
@@ -128,15 +129,21 @@ function PageLoader() {
 function RootLayout() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
+      {/* Header has no HeroUI or Framer → paints immediately after vendor chunk */}
       <Header />
-      <main className="flex-1">
-        <Suspense fallback={<PageLoader />}>
-          <Outlet />
-        </Suspense>
-      </main>
-      <Footer />
-      <WhatsAppButton />
-      <CartDrawer />
+      {/* HeroUI loads lazily after first paint; pages/footer wait inside it */}
+      <Suspense fallback={<div className="flex-1" style={{ minHeight: '100vh' }} />}>
+        <HeroUIWrapper>
+          <main className="flex-1">
+            <Suspense fallback={<PageLoader />}>
+              <Outlet />
+            </Suspense>
+          </main>
+          <Footer />
+          <WhatsAppButton />
+          <CartDrawer />
+        </HeroUIWrapper>
+      </Suspense>
     </div>
   );
 }
