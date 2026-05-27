@@ -1,5 +1,5 @@
 /**
- * HomePage — animated with Framer Motion + GSAP scroll counters.
+ * HomePage — animated with Framer Motion, pure-React scroll counters.
  *
  * Animation layers:
  *  1. Hero stagger      — headline → subtext → CTAs fade up on mount (no scroll trigger)
@@ -7,15 +7,12 @@
  *  3. Scroll reveals    — AnimatedSection (whileInView) for below-fold content blocks
  *  4. Stagger cards     — motion.div staggerChildren for feature + testimonial cards
  *  5. Card hovers       — whileHover lift + per-card glow shadow
- *  6. GSAP counter      — AnimatedCounter for live stats section (ScrollTrigger)
+ *  6. RAF counter       — AnimatedCounter via IntersectionObserver + rAF (no GSAP needed)
  */
-import { useState, useEffect, useRef } from 'react';
+import { lazy, Suspense, useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Button, Chip } from '@heroui/react';
-import TrustpilotSection from '../components/TrustpilotSection';
 import {
   FlaskConical, ShieldCheck, ArrowRight, Star,
   CheckCircle2, MessageCircle, AlertTriangle,
@@ -25,7 +22,8 @@ import {
   fadeUp, scaleIn, staggerMedium, staggerFast,
 } from '../animations/variants';
 
-gsap.registerPlugin(ScrollTrigger);
+// Below-the-fold section — lazy loaded so it never blocks initial render
+const TrustpilotSection = lazy(() => import('../components/TrustpilotSection'));
 
 // ── Rotating hero headlines ────────────────────────────────────────────────────
 const HERO_HEADLINES = [
@@ -47,36 +45,36 @@ const HERO_HEADLINES = [
   </>,
 ];
 
-// ── GSAP-powered counter (ScrollTrigger fires once when in view) ──────────────
+// ── Pure-React counter — IntersectionObserver + rAF, no GSAP needed ──────────
 function AnimatedCounter({ to, suffix = '' }: { to: number; suffix?: string }) {
+  const [value, setValue] = useState(0);
   const elRef = useRef<HTMLSpanElement>(null);
+  const started = useRef(false);
 
   useEffect(() => {
     const el = elRef.current;
     if (!el) return;
-
-    const obj = { val: 0 };
-    const tween = gsap.to(obj, {
-      val: to,
-      duration: 1.8,
-      ease: 'power2.out',
-      paused: true,
-      onUpdate() {
-        if (el) el.textContent = Math.round(obj.val) + suffix;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting || started.current) return;
+        started.current = true;
+        const duration = 1800;
+        const startTime = performance.now();
+        const tick = (now: number) => {
+          const t = Math.min((now - startTime) / duration, 1);
+          const eased = 1 - Math.pow(1 - t, 2); // power2.out
+          setValue(Math.round(eased * to));
+          if (t < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
       },
-    });
+      { threshold: 0.1 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [to]);
 
-    const trigger = ScrollTrigger.create({
-      trigger: el,
-      start: 'top 85%',
-      once: true,
-      onEnter: () => tween.play(),
-    });
-
-    return () => { tween.kill(); trigger.kill(); };
-  }, [to, suffix]);
-
-  return <span ref={elRef}>0{suffix}</span>;
+  return <span ref={elRef}>{value}{suffix}</span>;
 }
 
 // ── Data ──────────────────────────────────────────────────────────────────────
@@ -499,7 +497,9 @@ export default function HomePage() {
       </section>
 
       {/* ════════════════ TRUSTPILOT REVIEWS ════════════════ */}
-      <TrustpilotSection />
+      <Suspense fallback={<div className="py-24 bg-[#040812]" />}>
+        <TrustpilotSection />
+      </Suspense>
 
       {/* ════════════════ DISCLAIMER ════════════════ */}
       <section className="py-12 bg-slate-50 border-t border-slate-200">
