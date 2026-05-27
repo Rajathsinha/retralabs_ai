@@ -5,8 +5,8 @@ import { useAuth } from './context/AuthContext';
 import { supabase } from './lib/supabase';
 import Header from './components/Header';
 import Footer from './components/Footer';
-import WhatsAppButton from './components/WhatsAppButton';
-import CartDrawer from './components/CartDrawer';
+const WhatsAppButton = lazy(() => import('./components/WhatsAppButton'));
+const CartDrawer     = lazy(() => import('./components/CartDrawer'));
 
 const HomePage           = lazy(() => import('./pages/HomePage'));
 const CataloguePage      = lazy(() => import('./pages/CataloguePage'));
