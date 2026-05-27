@@ -1,9 +1,9 @@
 import { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Chip, Button } from '@heroui/react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
 import { getProductImageUrl, BAC_WATER_IMAGE_URL } from '../utils/imageUrl';
-import { ProductWithVariants } from '../types';
+import { ProductWithVariants, ProductVariant } from '../types';
 import { PRODUCTS } from '../data/products';
 import { useCurrency } from '../context/CurrencyContext';
 import { useSEO } from '../hooks/useSEO';
@@ -13,6 +13,7 @@ import {
   Zap, Brain, Activity, Star, LayoutGrid,
 } from 'lucide-react';
 
+// ─── Data maps ────────────────────────────────────────────────────────────────
 
 const PURITY_MAP: Record<string, string> = {
   'Retatrutide': '99.2%',
@@ -29,10 +30,10 @@ const PURITY_MAP: Record<string, string> = {
   'CJC-1295 + Ipamorelin Stack': '99.1%',
   'The Wolverine Stack': '99.1%',
   'Bacteriostatic Water (Pharma Grade)': 'Pharma',
-  'AOD 9604':     '99.1%',
-  'Epithalon':    '99.2%',
+  'AOD 9604':      '99.1%',
+  'Epithalon':     '99.2%',
   'Kisspeptin-10': '99.1%',
-  'SS-31':        '99.0%',
+  'SS-31':         '99.0%',
 };
 
 const BADGE_MAP: Record<string, { label: string; style: string }> = {
@@ -46,10 +47,10 @@ const BADGE_MAP: Record<string, { label: string; style: string }> = {
   'Klow Blend':                  { label: 'NEW', style: 'bg-white/[0.04] text-slate-500 border border-white/[0.08]' },
   'CJC-1295 + Ipamorelin Stack': { label: 'NEW', style: 'bg-white/[0.04] text-slate-500 border border-white/[0.08]' },
   'The Wolverine Stack':         { label: 'NEW', style: 'bg-white/[0.04] text-slate-500 border border-white/[0.08]' },
-  'AOD 9604':     { label: 'NEW', style: 'bg-white/[0.04] text-slate-500 border border-white/[0.08]' },
-  'Epithalon':    { label: 'NEW', style: 'bg-white/[0.04] text-slate-500 border border-white/[0.08]' },
+  'AOD 9604':      { label: 'NEW', style: 'bg-white/[0.04] text-slate-500 border border-white/[0.08]' },
+  'Epithalon':     { label: 'NEW', style: 'bg-white/[0.04] text-slate-500 border border-white/[0.08]' },
   'Kisspeptin-10': { label: 'NEW', style: 'bg-white/[0.04] text-slate-500 border border-white/[0.08]' },
-  'SS-31':        { label: 'NEW', style: 'bg-white/[0.04] text-slate-500 border border-white/[0.08]' },
+  'SS-31':         { label: 'NEW', style: 'bg-white/[0.04] text-slate-500 border border-white/[0.08]' },
 };
 
 const PRODUCT_TAG: Record<string, string> = {
@@ -121,6 +122,9 @@ const SORT_OPTIONS = [
   { key: 'price-desc', label: 'Price: High → Low' },
   { key: 'name-asc',   label: 'Name: A → Z'       },
 ] as const;
+
+// Easing curve: Apple-ish decelerate
+const SPRING_LAYOUT = { duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] };
 
 type SortKey    = typeof SORT_OPTIONS[number]['key'];
 type FilterType = 'all' | 'peptide' | 'supplies';
@@ -211,14 +215,488 @@ function TagPill({ tag, activeTag, onSelect }: TagPillProps) {
   );
 }
 
+// ─── Product card (with hover tilt + image parallax) ─────────────────────────
+
+type ProductCardProps = {
+  product:     ProductWithVariants;
+  index:       number;
+  onSelect:    (p: ProductWithVariants) => void;
+  isSelected:  boolean;
+  anySelected: boolean;
+  format:      (n: number) => string;
+  navigate:    (path: string) => void;
+};
+
+function ProductCard({
+  product, index, onSelect, isSelected, anySelected, format, navigate,
+}: ProductCardProps) {
+  // Per-card tilt springs
+  const tiltX = useMotionValue(0);
+  const tiltY = useMotionValue(0);
+  const rotX  = useSpring(tiltX, { stiffness: 400, damping: 30 });
+  const rotY  = useSpring(tiltY, { stiffness: 400, damping: 30 });
+
+  // Image parallax springs
+  const imgX  = useMotionValue(0);
+  const imgY  = useMotionValue(0);
+  const sImgX = useSpring(imgX, { stiffness: 200, damping: 25 });
+  const sImgY = useSpring(imgY, { stiffness: 200, damping: 25 });
+
+  const startingPrice = product.variants.length ? Math.min(...product.variants.map(v => v.price_inr)) : null;
+  const purity        = PURITY_MAP[product.name] || '98%+';
+  const badge         = BADGE_MAP[product.name];
+  const isBacWater    = product.name.toLowerCase().includes('bacteriostatic');
+  const tagKey        = PRODUCT_TAG[product.name];
+  const tag           = tagKey ? TAG_STYLE[tagKey] : null;
+  const wasPrice      = WAS_PRICE_MAP[product.name];
+  const saving        = wasPrice && startingPrice ? wasPrice - startingPrice : 0;
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (anySelected) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const nx = (e.clientX - cx) / (rect.width / 2);
+    const ny = (e.clientY - cy) / (rect.height / 2);
+    tiltX.set(-ny * 5);
+    tiltY.set(nx * 5);
+    imgX.set(nx * 10);
+    imgY.set(ny * 10);
+  };
+
+  const handleMouseLeave = () => {
+    tiltX.set(0); tiltY.set(0);
+    imgX.set(0);  imgY.set(0);
+  };
+
+  return (
+    <motion.div
+      layoutId={`card-${product.id}`}
+      onClick={() => !anySelected && onSelect(product)}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className="group relative flex flex-col rounded-3xl overflow-hidden cursor-pointer bg-[#080C14] border border-white/[0.06]"
+      style={{
+        rotateX: rotX,
+        rotateY: rotY,
+        opacity:       isSelected ? 0 : 1,
+        filter:        anySelected && !isSelected ? 'blur(3px) brightness(0.45) saturate(0.5)' : 'none',
+        pointerEvents: (anySelected && !isSelected) ? 'none' : 'auto',
+        willChange:    'transform',
+        zIndex:        isSelected ? 0 : 1,
+      }}
+      whileHover={!anySelected ? {
+        y: -8,
+        boxShadow: '0 40px 80px -20px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.06)',
+        borderColor: 'rgba(255,255,255,0.11)',
+      } : {}}
+      transition={{
+        layout:    SPRING_LAYOUT,
+        opacity:   { duration: 0.2 },
+        filter:    { duration: 0.3 },
+        y:         { type: 'spring', stiffness: 400, damping: 30 },
+        boxShadow: { duration: 0.3 },
+      }}
+    >
+      {/* ── Floating badge ── */}
+      {badge && (
+        <div className="absolute top-4 left-4 z-20">
+          <span className={`px-2.5 py-[5px] rounded-full text-[9px] font-bold tracking-[0.14em] uppercase backdrop-blur-md ${badge.style}`}>
+            {badge.label}
+          </span>
+        </div>
+      )}
+
+      {/* ── Floating purity chip ── */}
+      <div className="absolute top-4 right-4 z-20">
+        <span className="flex items-center gap-1.5 px-2.5 py-[5px] rounded-full bg-black/50 backdrop-blur-md border border-white/[0.09] text-[9px] font-semibold text-slate-400 tracking-wide">
+          <span className="w-1 h-1 rounded-full bg-emerald-400 shrink-0" />
+          {purity}
+        </span>
+      </div>
+
+      {/* ── Image area ── */}
+      <div className="relative aspect-square overflow-hidden shrink-0 flex items-center justify-center p-7 sm:p-9 bg-[#080C14]">
+        {/* Ambient glow orb */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
+          <div
+            className="w-3/5 h-3/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-out"
+            style={{ background: GLOW_COLOR[tagKey ?? 'default'], filter: 'blur(36px)' }}
+          />
+        </div>
+
+        {/* Product image with parallax */}
+        <motion.img
+          src={getProductImageUrl(product.image_url, product.name)}
+          alt={`${product.name} research peptide${isBacWater ? '' : ' vial India'}`}
+          loading={index < 3 ? 'eager' : 'lazy'}
+          decoding="async"
+          className="relative z-10 w-full h-full object-contain"
+          style={{ x: sImgX, y: sImgY, filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.65))' }}
+          onError={(e) => {
+            const t = e.target as HTMLImageElement;
+            const n = product.name.toLowerCase();
+            if      (n.includes('retatrutide'))                    t.src = '/Retatrutide.jpg';
+            else if (n.includes('tirzepatide'))                    t.src = '/TIRZEPATIDE.jpg';
+            else if (n.includes('ghk'))                            t.src = '/GHKCU.jpg';
+            else if (n.includes('semax'))                          t.src = '/SEMAX.jpg';
+            else if (n.includes('selank'))                         t.src = '/SELANK.jpg';
+            else if (n.includes('bpc'))                            t.src = '/BPC.jpg';
+            else if (n.includes('nad'))                            t.src = '/NAD+.jpg';
+            else if (n.includes('tb-500') || n.includes('tb500')) t.src = '/TB500.jpg';
+            else if (n.includes('tesamorelin'))                    t.src = '/Tesa.jpg';
+            else if (n.includes('mot'))                            t.src = '/motc.jpg';
+            else                                                    t.src = BAC_WATER_IMAGE_URL;
+          }}
+        />
+
+        {/* Bottom cinematic fade */}
+        <div
+          className="absolute inset-x-0 bottom-0 h-3/5 pointer-events-none z-20"
+          style={{ background: 'linear-gradient(to top, #080C14 30%, transparent 100%)' }}
+        />
+      </div>
+
+      {/* ── Text section ── */}
+      <div className="flex flex-col px-6 pb-6 -mt-5 relative z-30">
+        {/* Category */}
+        {tag && (
+          <div className="flex items-center gap-1.5 mb-3">
+            <span className={`w-[5px] h-[5px] rounded-full shrink-0 ${tag.dot}`} />
+            <span className={`text-[9px] font-bold tracking-[0.2em] uppercase ${tag.text}`}>
+              {tag.label}
+            </span>
+          </div>
+        )}
+
+        {/* Name */}
+        <h3 className="text-[19px] font-bold text-white tracking-tight leading-tight mb-5">
+          {product.name}
+        </h3>
+
+        {/* Price + CTA */}
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-[9px] text-slate-600 uppercase tracking-[0.14em] mb-0.5">From</p>
+            {wasPrice && saving > 0 ? (
+              <div className="flex items-baseline gap-2">
+                <p className="text-[20px] font-bold text-white leading-none tracking-tight">
+                  {startingPrice ? format(startingPrice) : '—'}
+                </p>
+                <p className="text-[12px] font-medium text-slate-600 line-through leading-none">
+                  {format(wasPrice)}
+                </p>
+              </div>
+            ) : (
+              <p className="text-[20px] font-bold text-white leading-none tracking-tight">
+                {startingPrice ? format(startingPrice) : '—'}
+              </p>
+            )}
+            {saving > 0 && (
+              <p className="text-[9px] font-bold text-emerald-400 tracking-[0.1em] mt-1">
+                SAVE {format(saving)}
+              </p>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={e => { e.stopPropagation(); navigate(`/product/${product.id}`); }}
+            className="group/cta shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-full border border-white/[0.18] text-white text-[12px] font-semibold whitespace-nowrap transition-all duration-300 ease-out hover:bg-white hover:text-slate-900 hover:border-transparent active:scale-95"
+          >
+            Order
+            <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover/cta:translate-x-0.5" />
+          </button>
+        </div>
+
+        {/* Minimal trust row */}
+        <div className="mt-5 pt-4 border-t border-white/[0.05]">
+          <p className="text-[9px] text-slate-700 tracking-[0.12em] uppercase font-medium">
+            {isBacWater ? 'Pharma grade · Sterile · Benzyl alcohol' : 'HPLC verified · COA included · GMP source'}
+          </p>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// ─── Expanded product view ────────────────────────────────────────────────────
+
+type ExpandedProps = {
+  product:  ProductWithVariants;
+  onClose:  () => void;
+  format:   (n: number) => string;
+  navigate: (path: string) => void;
+};
+
+function ProductExpandedView({ product, onClose, format, navigate }: ExpandedProps) {
+  const [variant, setVariant] = useState<ProductVariant | null>(null);
+
+  // Image parallax
+  const imgX  = useMotionValue(0);
+  const imgY  = useMotionValue(0);
+  const sImgX = useSpring(imgX, { stiffness: 80, damping: 20 });
+  const sImgY = useSpring(imgY, { stiffness: 80, damping: 20 });
+
+  // Init variant to cheapest
+  useEffect(() => {
+    const v = [...product.variants].sort((a, b) => a.price_inr - b.price_inr)[0] ?? null;
+    setVariant(v);
+  }, [product]);
+
+  // Scroll lock
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
+  // ESC to close
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, [onClose]);
+
+  const tagKey     = PRODUCT_TAG[product.name];
+  const tag        = tagKey ? TAG_STYLE[tagKey] : null;
+  const purity     = PURITY_MAP[product.name] || '98%+';
+  const badge      = BADGE_MAP[product.name];
+  const wasPrice   = WAS_PRICE_MAP[product.name];
+  const livePrice  = variant?.price_inr ?? (product.variants.length ? Math.min(...product.variants.map(v => v.price_inr)) : null);
+  const saving     = wasPrice && livePrice ? wasPrice - livePrice : 0;
+  const isBacWater = product.name.toLowerCase().includes('bacteriostatic');
+
+  const handleImgMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    imgX.set(((e.clientX - rect.left) / rect.width  - 0.5) * 20);
+    imgY.set(((e.clientY - rect.top)  / rect.height - 0.5) * 20);
+  };
+
+  // Staggered content delay helper
+  const s = (i: number) => ({ initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0 }, transition: { delay: 0.28 + i * 0.06, duration: 0.35, ease: 'easeOut' } });
+
+  return (
+    <>
+      {/* ── Backdrop ── */}
+      <motion.div
+        key="backdrop"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3 }}
+        className="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm"
+        onClick={onClose}
+      />
+
+      {/* ── Centered container (pointer-events-none so backdrop click works) ── */}
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 pointer-events-none">
+        <motion.div
+          key="expanded"
+          layoutId={`card-${product.id}`}
+          className="relative w-full max-w-[900px] bg-[#080C14] rounded-3xl overflow-hidden shadow-[0_60px_120px_-20px_rgba(0,0,0,0.95)] pointer-events-auto"
+          style={{ maxHeight: '92vh' }}
+          transition={{ layout: SPRING_LAYOUT }}
+        >
+          {/* Close button */}
+          <motion.button
+            {...s(0)}
+            onClick={onClose}
+            className="absolute top-4 right-4 z-30 w-8 h-8 rounded-full bg-white/[0.08] backdrop-blur-md border border-white/[0.12] flex items-center justify-center hover:bg-white/[0.16] transition-colors"
+            aria-label="Close"
+          >
+            <X className="w-3.5 h-3.5 text-white" />
+          </motion.button>
+
+          {/* ── Grid layout: image | details ── */}
+          <div className="flex flex-col lg:grid lg:grid-cols-[1fr_380px] overflow-y-auto lg:overflow-hidden" style={{ maxHeight: '92vh' }}>
+
+            {/* ── Image panel ── */}
+            <div
+              className="relative flex items-center justify-center p-8 sm:p-12 lg:p-14 bg-[#080C14] min-h-[260px] sm:min-h-[320px] lg:min-h-0"
+              onMouseMove={handleImgMove}
+              onMouseLeave={() => { imgX.set(0); imgY.set(0); }}
+            >
+              {/* Ambient glow — bigger and always visible in expanded */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.6 }}
+                className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                aria-hidden="true"
+              >
+                <div
+                  className="w-4/5 h-4/5 rounded-full"
+                  style={{ background: GLOW_COLOR[tagKey ?? 'default'], filter: 'blur(70px)', opacity: 0.9 }}
+                />
+              </motion.div>
+
+              {/* Mesh gradient overlay for depth */}
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{ background: 'radial-gradient(ellipse at 50% 120%, rgba(8,12,20,0.8) 0%, transparent 70%)' }}
+              />
+
+              {/* Product image */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.88 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.2, duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+                className="relative z-10 w-full max-w-[240px] sm:max-w-[300px]"
+              >
+                <motion.img
+                  src={getProductImageUrl(product.image_url, product.name)}
+                  alt={product.name}
+                  className="w-full h-auto object-contain select-none"
+                  style={{
+                    x: sImgX,
+                    y: sImgY,
+                    filter: 'drop-shadow(0 30px 60px rgba(0,0,0,0.85))',
+                  }}
+                  draggable={false}
+                  onError={(e) => {
+                    const t = e.target as HTMLImageElement;
+                    const n = product.name.toLowerCase();
+                    if      (n.includes('retatrutide'))                    t.src = '/Retatrutide.jpg';
+                    else if (n.includes('tirzepatide'))                    t.src = '/TIRZEPATIDE.jpg';
+                    else if (n.includes('ghk'))                            t.src = '/GHKCU.jpg';
+                    else if (n.includes('semax'))                          t.src = '/SEMAX.jpg';
+                    else if (n.includes('selank'))                         t.src = '/SELANK.jpg';
+                    else if (n.includes('bpc'))                            t.src = '/BPC.jpg';
+                    else if (n.includes('nad'))                            t.src = '/NAD+.jpg';
+                    else if (n.includes('tb-500') || n.includes('tb500')) t.src = '/TB500.jpg';
+                    else if (n.includes('tesamorelin'))                    t.src = '/Tesa.jpg';
+                    else if (n.includes('mot'))                            t.src = '/motc.jpg';
+                    else                                                    t.src = BAC_WATER_IMAGE_URL;
+                  }}
+                />
+              </motion.div>
+
+              {/* Floating purity in image area */}
+              <motion.div {...s(1)} className="absolute bottom-5 left-5">
+                <span className="flex items-center gap-1.5 px-2.5 py-[5px] rounded-full bg-black/60 backdrop-blur-md border border-white/[0.1] text-[9px] font-semibold text-slate-400 tracking-wide">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0 animate-pulse" />
+                  {purity} purity
+                </span>
+              </motion.div>
+            </div>
+
+            {/* ── Details panel ── */}
+            <div className="overflow-y-auto p-6 sm:p-8 bg-[#080c14] border-t lg:border-t-0 lg:border-l border-white/[0.05] flex flex-col gap-5">
+
+              {/* Category + badge row */}
+              <motion.div {...s(1)} className="flex items-center justify-between">
+                {tag ? (
+                  <div className="flex items-center gap-1.5">
+                    <span className={`w-[5px] h-[5px] rounded-full shrink-0 ${tag.dot}`} />
+                    <span className={`text-[9px] font-bold tracking-[0.2em] uppercase ${tag.text}`}>{tag.label}</span>
+                  </div>
+                ) : <div />}
+                {badge && (
+                  <span className={`px-2.5 py-[5px] rounded-full text-[9px] font-bold tracking-[0.14em] uppercase ${badge.style}`}>
+                    {badge.label}
+                  </span>
+                )}
+              </motion.div>
+
+              {/* Product name */}
+              <motion.h2 {...s(2)} className="text-[26px] sm:text-[30px] font-bold text-white tracking-tight leading-tight">
+                {product.name}
+              </motion.h2>
+
+              {/* Description */}
+              <motion.p {...s(3)} className="text-[13px] text-slate-400 leading-relaxed">
+                {product.description}
+              </motion.p>
+
+              {/* Variant selector */}
+              <motion.div {...s(4)}>
+                <p className="text-[9px] text-slate-600 uppercase tracking-[0.14em] mb-3">Select dosage</p>
+                <div className="flex flex-wrap gap-2">
+                  {product.variants.map(v => (
+                    <button
+                      key={v.id}
+                      onClick={() => setVariant(v)}
+                      className={`px-3.5 py-2 rounded-xl text-[11px] font-semibold transition-all duration-200 border ${
+                        variant?.id === v.id
+                          ? 'bg-white text-slate-900 border-white shadow-lg'
+                          : 'bg-white/[0.04] text-slate-400 border-white/[0.1] hover:border-white/[0.3] hover:text-white'
+                      }`}
+                    >
+                      {v.vial_configuration || `${v.dosage_mg}mg`}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+
+              {/* Price block */}
+              <motion.div {...s(5)} className="pt-1">
+                <p className="text-[9px] text-slate-600 uppercase tracking-[0.14em] mb-2">Price</p>
+                {wasPrice && saving > 0 ? (
+                  <div className="flex items-baseline gap-3">
+                    <span className="text-[32px] font-bold text-white leading-none tracking-tight">
+                      {livePrice ? format(livePrice) : '—'}
+                    </span>
+                    <span className="text-[15px] font-medium text-slate-600 line-through leading-none">
+                      {format(wasPrice)}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-[32px] font-bold text-white leading-none tracking-tight">
+                    {livePrice ? format(livePrice) : '—'}
+                  </span>
+                )}
+                {saving > 0 && (
+                  <p className="text-[9px] font-bold text-emerald-400 tracking-[0.1em] mt-2">
+                    YOU SAVE {format(saving)}
+                  </p>
+                )}
+              </motion.div>
+
+              {/* CTA buttons */}
+              <motion.div {...s(6)} className="flex flex-col gap-3 mt-auto pt-2">
+                <motion.button
+                  whileHover={{ scale: 1.02, boxShadow: '0 0 30px rgba(255,255,255,0.12)' }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                  onClick={() => navigate(`/product/${product.id}`)}
+                  className="w-full py-4 rounded-2xl bg-white text-slate-900 font-bold text-[13px] tracking-tight flex items-center justify-center gap-2 hover:bg-slate-50 transition-colors"
+                >
+                  Order Now
+                  <ArrowRight className="w-4 h-4" />
+                </motion.button>
+                <button
+                  onClick={() => navigate(`/product/${product.id}`)}
+                  className="w-full py-3 rounded-2xl border border-white/[0.1] text-slate-500 hover:text-white text-[11px] font-semibold transition-all hover:border-white/[0.2]"
+                >
+                  View Full Details →
+                </button>
+              </motion.div>
+
+              {/* Trust row */}
+              <motion.div {...s(7)} className="border-t border-white/[0.05] pt-4">
+                <p className="text-[8px] text-slate-700 tracking-[0.12em] uppercase font-medium text-center">
+                  {isBacWater
+                    ? 'Pharma grade · Sterile · Benzyl alcohol'
+                    : 'HPLC verified · COA with every order · GMP source · India-wide shipping'}
+                </p>
+              </motion.div>
+
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </>
+  );
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function CataloguePage() {
   const navigate = useNavigate();
   const { format } = useCurrency();
 
-  const [products, setProducts] = useState<ProductWithVariants[]>([]);
-  const [loading,  setLoading]  = useState(true);
+  const [products,         setProducts]         = useState<ProductWithVariants[]>([]);
+  const [loading,          setLoading]          = useState(true);
+  const [selectedProduct,  setSelectedProduct]  = useState<ProductWithVariants | null>(null);
 
   const [filter,      setFilter]      = useState<FilterType>('all');
   const [activeTag,   setActiveTag]   = useState<TagKey>('all');
@@ -270,6 +748,8 @@ export default function CataloguePage() {
   const handleCatSelect = useCallback((id: FilterType) => {
     setFilter(id); setActiveTag('all');
   }, []);
+
+  const closeProduct = useCallback(() => setSelectedProduct(null), []);
 
   const filteredProducts = useMemo(() => {
     let list = products.filter(p => {
@@ -418,7 +898,6 @@ export default function CataloguePage() {
               </AnimatePresence>
             </div>
           </div>
-
         </div>
       </section>
 
@@ -478,146 +957,18 @@ export default function CataloguePage() {
           </div>
         ) : filteredProducts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filteredProducts.map((product, index) => {
-              const startingPrice = getStartingPrice(product);
-              const purity        = PURITY_MAP[product.name] || '98%+';
-              const badge         = BADGE_MAP[product.name];
-              const isBacWater    = product.name.toLowerCase().includes('bacteriostatic');
-              const tagKey        = PRODUCT_TAG[product.name];
-              const tag           = tagKey ? TAG_STYLE[tagKey] : null;
-              const wasPrice      = WAS_PRICE_MAP[product.name];
-              const saving        = wasPrice && startingPrice ? wasPrice - startingPrice : 0;
-
-              return (
-                <div
-                  key={product.id}
-                  className="group relative flex flex-col rounded-3xl overflow-hidden cursor-pointer bg-[#080C14] border border-white/[0.06] transition-all duration-500 ease-out hover:-translate-y-2 hover:border-white/[0.11] hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.06)]"
-                  onClick={() => navigate(`/product/${product.id}`)}
-                >
-
-                  {/* ── Floating badge ── */}
-                  {badge && (
-                    <div className="absolute top-4 left-4 z-20">
-                      <span className={`px-2.5 py-[5px] rounded-full text-[9px] font-bold tracking-[0.14em] uppercase backdrop-blur-md ${badge.style}`}>
-                        {badge.label}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* ── Floating purity chip ── */}
-                  <div className="absolute top-4 right-4 z-20">
-                    <span className="flex items-center gap-1.5 px-2.5 py-[5px] rounded-full bg-black/50 backdrop-blur-md border border-white/[0.09] text-[9px] font-semibold text-slate-400 tracking-wide">
-                      <span className="w-1 h-1 rounded-full bg-emerald-400 shrink-0" />
-                      {purity}
-                    </span>
-                  </div>
-
-                  {/* ── Image area ── */}
-                  <div className="relative aspect-square overflow-hidden shrink-0 flex items-center justify-center p-7 sm:p-9 bg-[#080C14]">
-
-                    {/* Ambient glow orb — blooms on hover */}
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
-                      <div
-                        className="w-3/5 h-3/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-out"
-                        style={{ background: GLOW_COLOR[tagKey ?? 'default'], filter: 'blur(36px)' }}
-                      />
-                    </div>
-
-                    {/* Product image */}
-                    <img
-                      src={getProductImageUrl(product.image_url, product.name)}
-                      alt={`${product.name} research peptide${isBacWater ? '' : ' vial India'}`}
-                      loading={index < 3 ? 'eager' : 'lazy'}
-                      decoding="async"
-                      className="relative z-10 w-full h-full object-contain transition-transform duration-700 ease-out group-hover:scale-[1.07]"
-                      style={{ filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.65))' }}
-                      onError={(e) => {
-                        const t = e.target as HTMLImageElement;
-                        const n = product.name.toLowerCase();
-                        if      (n.includes('retatrutide'))                    t.src = '/Retatrutide.jpg';
-                        else if (n.includes('tirzepatide'))                    t.src = '/TIRZEPATIDE.jpg';
-                        else if (n.includes('ghk'))                            t.src = '/GHKCU.jpg';
-                        else if (n.includes('semax'))                          t.src = '/SEMAX.jpg';
-                        else if (n.includes('selank'))                         t.src = '/SELANK.jpg';
-                        else if (n.includes('bpc'))                            t.src = '/BPC.jpg';
-                        else if (n.includes('nad'))                            t.src = '/NAD+.jpg';
-                        else if (n.includes('tb-500') || n.includes('tb500')) t.src = '/TB500.jpg';
-                        else if (n.includes('tesamorelin'))                    t.src = '/Tesa.jpg';
-                        else if (n.includes('mot'))                            t.src = '/motc.jpg';
-                        else                                                    t.src = BAC_WATER_IMAGE_URL;
-                      }}
-                    />
-
-                    {/* Bottom cinematic fade — bleeds image into text */}
-                    <div
-                      className="absolute inset-x-0 bottom-0 h-3/5 pointer-events-none z-20"
-                      style={{ background: 'linear-gradient(to top, #080C14 30%, transparent 100%)' }}
-                    />
-                  </div>
-
-                  {/* ── Text section ── */}
-                  <div className="flex flex-col px-6 pb-6 -mt-5 relative z-30">
-
-                    {/* Category */}
-                    {tag && (
-                      <div className="flex items-center gap-1.5 mb-3">
-                        <span className={`w-[5px] h-[5px] rounded-full shrink-0 ${tag.dot}`} />
-                        <span className={`text-[9px] font-bold tracking-[0.2em] uppercase ${tag.text}`}>
-                          {tag.label}
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Name */}
-                    <h3 className="text-[19px] font-bold text-white tracking-tight leading-tight mb-5">
-                      {product.name}
-                    </h3>
-
-                    {/* Price + CTA */}
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-[9px] text-slate-600 uppercase tracking-[0.14em] mb-0.5">From</p>
-                        {wasPrice && saving > 0 ? (
-                          <div className="flex items-baseline gap-2">
-                            <p className="text-[20px] font-bold text-white leading-none tracking-tight">
-                              {startingPrice ? format(startingPrice) : '—'}
-                            </p>
-                            <p className="text-[12px] font-medium text-slate-600 line-through leading-none">
-                              {format(wasPrice)}
-                            </p>
-                          </div>
-                        ) : (
-                          <p className="text-[20px] font-bold text-white leading-none tracking-tight">
-                            {startingPrice ? format(startingPrice) : '—'}
-                          </p>
-                        )}
-                        {saving > 0 && (
-                          <p className="text-[9px] font-bold text-emerald-400 tracking-[0.1em] mt-1">
-                            SAVE {format(saving)}
-                          </p>
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={e => { e.stopPropagation(); navigate(`/product/${product.id}`); }}
-                        className="group/cta shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-full border border-white/[0.18] text-white text-[12px] font-semibold whitespace-nowrap transition-all duration-300 ease-out hover:bg-white hover:text-slate-900 hover:border-transparent active:scale-95"
-                      >
-                        Order
-                        <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover/cta:translate-x-0.5" />
-                      </button>
-                    </div>
-
-                    {/* Minimal trust row */}
-                    <div className="mt-5 pt-4 border-t border-white/[0.05]">
-                      <p className="text-[9px] text-slate-700 tracking-[0.12em] uppercase font-medium">
-                        {isBacWater ? 'Pharma grade · Sterile · Benzyl alcohol' : 'HPLC verified · COA included · GMP source'}
-                      </p>
-                    </div>
-
-                  </div>
-                </div>
-              );
-            })}
+            {filteredProducts.map((product, index) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                index={index}
+                onSelect={setSelectedProduct}
+                isSelected={selectedProduct?.id === product.id}
+                anySelected={selectedProduct !== null}
+                format={format}
+                navigate={navigate}
+              />
+            ))}
           </div>
 
         ) : (
@@ -681,6 +1032,20 @@ export default function CataloguePage() {
         )}
 
       </section>
+
+      {/* ─── EXPANDED PRODUCT VIEW ────────────────────────────────────────── */}
+      <AnimatePresence>
+        {selectedProduct && (
+          <ProductExpandedView
+            key={selectedProduct.id}
+            product={selectedProduct}
+            onClose={closeProduct}
+            format={format}
+            navigate={navigate}
+          />
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }
