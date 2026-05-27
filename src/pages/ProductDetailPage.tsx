@@ -14,6 +14,7 @@ import {
 } from '@heroui/react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { getProductImageUrl, BAC_WATER_IMAGE_URL } from '../utils/imageUrl';
+import TrustpilotWidget from '../components/TrustpilotWidget';
 import { ProductWithVariants, ProductVariant } from '../types';
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
@@ -576,6 +577,16 @@ export default function ProductDetailPage() {
                     </CardBody>
                   </Card>
                 ))}
+              </div>
+
+              {/* Trustpilot badge */}
+              <div className="flex justify-center py-1">
+                <TrustpilotWidget
+                  template="microReview"
+                  height="24px"
+                  width="200px"
+                  theme="light"
+                />
               </div>
 
               {/* WhatsApp support */}

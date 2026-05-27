@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Chip, Button } from '@heroui/react';
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
 import { getProductImageUrl, BAC_WATER_IMAGE_URL } from '../utils/imageUrl';
+import TrustpilotWidget from '../components/TrustpilotWidget';
 import { ProductWithVariants, ProductVariant } from '../types';
 import { PRODUCTS } from '../data/products';
 import { useCurrency } from '../context/CurrencyContext';
@@ -796,10 +797,16 @@ export default function CataloguePage() {
                 No fake B2B listings. No counterfeit labels. Just compounds that pass HPLC every time.
               </p>
             </div>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-3 items-center">
               <Chip startContent={<ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />} color="success" variant="flat" classNames={{ base: 'bg-emerald-400/15 border border-emerald-400/25', content: 'text-emerald-300 font-semibold' }}>COA Included</Chip>
               <Chip startContent={<FlaskConical className="w-3.5 h-3.5 text-blue-400" />} color="primary" variant="flat" classNames={{ base: 'bg-blue-400/15 border border-blue-400/25', content: 'text-blue-300 font-semibold' }}>98%+ Purity</Chip>
               <Chip startContent={<FileCheck className="w-3.5 h-3.5 text-amber-400" />} color="warning" variant="flat" classNames={{ base: 'bg-amber-400/15 border border-amber-400/25', content: 'text-amber-300 font-semibold' }}>HPLC Verified</Chip>
+              <TrustpilotWidget
+                template="microCombo"
+                height="20px"
+                width="150px"
+                theme="dark"
+              />
             </div>
           </div>
 

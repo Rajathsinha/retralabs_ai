@@ -2,6 +2,7 @@ import { Divider, Chip, Link } from '@heroui/react';
 import { Link as RouterLink } from 'react-router-dom';
 import { Mail, ArrowUpRight, MessageCircle, ShieldCheck, Globe, FileCheck, FlaskConical } from 'lucide-react';
 import Logo from './Logo';
+import TrustpilotWidget from './TrustpilotWidget';
 import { WHATSAPP_NUMBER } from '../constants/config';
 
 const TRUST_BADGES = [
@@ -76,6 +77,16 @@ export default function Footer() {
                 </Chip>
               );
             })}
+
+            {/* Trustpilot star badge */}
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+              <TrustpilotWidget
+                template="microCombo"
+                height="20px"
+                width="140px"
+                theme="dark"
+              />
+            </div>
           </div>
         </div>
       </div>

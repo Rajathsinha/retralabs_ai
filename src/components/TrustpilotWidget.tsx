@@ -1,75 +1,65 @@
 import { useEffect, useRef } from 'react';
 
-// Trustpilot TrustBox widget template IDs
-export const TRUSTPILOT_TEMPLATES = {
-  micro: '5406e65db0d04a09e042d5fc',   // Micro TrustBox (compact stars + score)
-  slider: '53aa8807dec7e10d38f59f33',  // Review slider (carousel of review cards)
-  mini: '53aa8807dec7e10d38f59f33',    // Alias for slider
+const BUSINESS_UNIT_ID = '6979766a0f4152620862a8e6';
+const TRUSTPILOT_URL   = 'https://www.trustpilot.com/review/retralabs.in';
+
+/**
+ * Trustpilot TrustBox template IDs.
+ *
+ * microStar   — just 5 stars,        ~20 px tall  (smallest, footer)
+ * microCombo  — stars + wordmark,    ~20 px tall  (catalogue header)
+ * microReview — stars + review count ~24 px tall  (product detail)
+ * mini        — score + stars + count ~150 px tall (homepage)
+ */
+export const TP_TEMPLATES = {
+  microStar:   '5419b637fa0340045cd0c936',
+  microCombo:  '5419b732fbfb950b10de65e5',
+  microReview: '5419b6ffb0d04a076446a9af',
+  mini:        '53aa8807dec7e10d38f59f32',
 } as const;
 
-const BUSINESS_UNIT_ID = '6979766a0f4152620862a8e6';
+type TemplateKey = keyof typeof TP_TEMPLATES;
 
 interface TrustpilotWidgetProps {
-  templateId: string;
-  height?: string;
-  theme?: 'light' | 'dark';
-  stars?: string;
-  locale?: string;
+  template?:  TemplateKey;
+  height?:    string;
+  width?:     string;
+  theme?:     'dark' | 'light';
+  className?: string;
 }
 
 export default function TrustpilotWidget({
-  templateId,
-  height = '400px',
-  theme = 'light',
-  stars = '1,2,3,4,5',
-  locale = 'en-IN',
+  template  = 'microCombo',
+  height    = '24px',
+  width     = '160px',
+  theme     = 'dark',
+  className = '',
 }: TrustpilotWidgetProps) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const loadWidget = () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if ((window as any).Trustpilot && ref.current) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (window as any).Trustpilot.loadFromElement(ref.current, true);
-      }
-    };
-
-    const existingScript = document.querySelector(
-      'script[src*="trustpilot.com/bootstrap"]'
-    );
-
-    if (existingScript) {
-      loadWidget();
-    } else {
-      const script = document.createElement('script');
-      script.src =
-        '//widget.trustpilot.com/bootstrap/v5/tp.widget.bootstrap.min.js';
-      script.async = true;
-      script.onload = loadWidget;
-      document.head.appendChild(script);
+    const el = ref.current;
+    if (!el) return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const tp = (window as any).Trustpilot;
+    if (tp) {
+      tp.loadFromElement(el, true);
     }
   }, []);
 
   return (
     <div
       ref={ref}
-      className="trustpilot-widget"
-      data-locale={locale}
-      data-template-id={templateId}
+      className={`trustpilot-widget ${className}`}
+      data-locale="en-US"
+      data-template-id={TP_TEMPLATES[template]}
       data-businessunit-id={BUSINESS_UNIT_ID}
       data-style-height={height}
-      data-style-width="100%"
+      data-style-width={width}
       data-theme={theme}
-      data-stars={stars}
     >
-      <a
-        href="https://www.trustpilot.com/review/retralabs.in"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-emerald-600 hover:text-emerald-700 font-medium text-sm"
-      >
-        View RetraLabs reviews on Trustpilot
+      <a href={TRUSTPILOT_URL} target="_blank" rel="noopener noreferrer">
+        Trustpilot
       </a>
     </div>
   );

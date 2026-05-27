@@ -15,6 +15,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Button, Chip } from '@heroui/react';
+import TrustpilotWidget from '../components/TrustpilotWidget';
 import {
   FlaskConical, ShieldCheck, ArrowRight, Star,
   CheckCircle2, MessageCircle, AlertTriangle,
@@ -196,7 +197,7 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.34, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-col sm:flex-row gap-3 justify-center mb-16"
+            className="flex flex-col sm:flex-row gap-3 justify-center mb-8"
           >
             {/* Primary CTA */}
             <motion.button
@@ -222,6 +223,21 @@ export default function HomePage() {
             >
               Read Our Story
             </motion.button>
+          </motion.div>
+
+          {/* Trustpilot badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.48, ease: 'easeOut' }}
+            className="flex justify-center mb-14"
+          >
+            <TrustpilotWidget
+              template="microReview"
+              height="24px"
+              width="220px"
+              theme="dark"
+            />
           </motion.div>
 
         </div>
