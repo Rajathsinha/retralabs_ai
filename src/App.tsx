@@ -5,8 +5,9 @@ import { useAuth } from './context/AuthContext';
 import { supabase } from './lib/supabase';
 import Header from './components/Header';
 import Footer from './components/Footer';
-import WhatsAppButton from './components/WhatsAppButton';
-import CartDrawer from './components/CartDrawer';
+// Floating widgets — lazy so HeroUI never blocks initial paint
+const WhatsAppButton = lazy(() => import('./components/WhatsAppButton'));
+const CartDrawer     = lazy(() => import('./components/CartDrawer'));
 
 const HomePage           = lazy(() => import('./pages/HomePage'));
 const CataloguePage      = lazy(() => import('./pages/CataloguePage'));
@@ -135,8 +136,8 @@ function RootLayout() {
         </Suspense>
       </main>
       <Footer />
-      <WhatsAppButton />
-      <CartDrawer />
+      <Suspense fallback={null}><WhatsAppButton /></Suspense>
+      <Suspense fallback={null}><CartDrawer /></Suspense>
     </div>
   );
 }

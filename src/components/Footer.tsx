@@ -1,4 +1,3 @@
-import { Divider, Chip, Link } from '@heroui/react';
 import { Link as RouterLink } from 'react-router-dom';
 import { Mail, ArrowUpRight, MessageCircle, ShieldCheck, Globe, FileCheck, FlaskConical } from 'lucide-react';
 import Logo from './Logo';
@@ -6,9 +5,9 @@ import TrustpilotWidget from './TrustpilotWidget';
 import { WHATSAPP_NUMBER } from '../constants/config';
 
 const TRUST_BADGES = [
-  { icon: ShieldCheck, label: 'COA Verified', color: 'text-emerald-400', chipColor: 'success' as const },
-  { icon: Globe, label: 'GMP Sourced', color: 'text-accent-400', chipColor: 'warning' as const },
-  { icon: FileCheck, label: 'HPLC Tested', color: 'text-blue-400', chipColor: 'primary' as const },
+  { icon: ShieldCheck, label: 'COA Verified', iconColor: 'text-emerald-400', badgeClass: 'border-emerald-800/50 text-emerald-300' },
+  { icon: Globe,       label: 'GMP Sourced',  iconColor: 'text-amber-400',   badgeClass: 'border-amber-800/50 text-amber-300'   },
+  { icon: FileCheck,   label: 'HPLC Tested',  iconColor: 'text-blue-400',    badgeClass: 'border-blue-800/50 text-blue-300'     },
 ];
 
 const COMPANY_LINKS = [
@@ -62,19 +61,13 @@ export default function Footer() {
             {TRUST_BADGES.map((badge) => {
               const Icon = badge.icon;
               return (
-                <Chip
+                <span
                   key={badge.label}
-                  variant="flat"
-                  color={badge.chipColor}
-                  size="sm"
-                  startContent={<Icon className={`w-3.5 h-3.5 ${badge.color} ml-1`} />}
-                  classNames={{
-                    base: 'bg-white/5 border border-white/10 px-3 py-4',
-                    content: 'text-slate-400 text-xs font-medium',
-                  }}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border ${badge.badgeClass} text-xs font-medium`}
                 >
+                  <Icon className={`w-3.5 h-3.5 ${badge.iconColor}`} />
                   {badge.label}
-                </Chip>
+                </span>
               );
             })}
 
@@ -105,13 +98,13 @@ export default function Footer() {
               directly from GMP-certified manufacturers.
             </p>
             <div className="flex flex-col gap-3">
-              <Link
+              <a
                 href="mailto:support@retralabs.in"
                 className="inline-flex items-center gap-2 text-sm text-accent-400 hover:text-accent-300 transition-colors"
               >
                 <Mail className="w-4 h-4 flex-shrink-0" />
                 support@retralabs.in
-              </Link>
+              </a>
               <a
                 href={WA_DEFAULT}
                 target="_blank"
@@ -170,7 +163,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <Divider className="bg-slate-800/50 mb-8" />
+        <hr className="border-slate-800/50 mb-8" />
 
         {/* Bottom Bar */}
         <div className="pr-20 md:pr-24">

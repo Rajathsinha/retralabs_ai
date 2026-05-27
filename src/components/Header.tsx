@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useDisclosure } from '@heroui/react';
 import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   ShoppingCart, Calculator, Menu, X,
@@ -105,7 +104,9 @@ export default function Header() {
         .split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase()
     : '';
 
-  const { isOpen: calcOpen, onOpen: openCalc, onClose: closeCalc } = useDisclosure();
+  const [calcOpen, setCalcOpen] = useState(false);
+  const openCalc  = () => setCalcOpen(true);
+  const closeCalc = () => setCalcOpen(false);
 
   /* ── Scroll blur ── */
   useEffect(() => {
