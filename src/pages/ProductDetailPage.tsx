@@ -58,6 +58,10 @@ const PURITY_MAP: Record<string, string> = {
   'Klow Blend': '99.0',
   'CJC-1295 + Ipamorelin Stack': '99.1',
   'The Wolverine Stack': '99.1',
+  'AOD 9604':      '99.1',
+  'Epithalon':     '99.2',
+  'Kisspeptin-10': '99.1',
+  'SS-31':         '99.0',
 };
 
 const FAQ_MAP: Record<string, { q: string; a: string }[]> = {
@@ -90,6 +94,30 @@ const FAQ_MAP: Record<string, { q: string; a: string }[]> = {
     { q: 'Why combine BPC-157 and TB-500?', a: 'BPC-157 targets local tissue healing while TB-500 promotes systemic repair and cell migration. Together they cover complementary repair pathways. Pre-blending ensures accurate dosing every time.' },
     { q: 'What purity can I expect?', a: 'Both BPC-157 and TB-500 are independently HPLC-verified at 99.1%+ purity. Full COA included with every order.' },
     { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Free standard shipping pan-India. Tier 1 &amp; 2 cities: 3–4 business days. Remote areas: 4–6 business days. Express 1–2 days for major cities (+₹800). Temperature-controlled packaging.' },
+  ],
+  'AOD 9604': [
+    { q: 'What is AOD 9604?', a: 'AOD 9604 is a synthetic fragment of human growth hormone (amino acids 176-191) studied for its role in fat metabolism and adipose tissue regulation, without the insulin-like or growth-promoting effects of full hGH.' },
+    { q: 'What is included with my order?', a: 'Every order includes the peptide in a sterile lyophilised vial along with a Certificate of Analysis (COA) detailing purity, molecular weight, and HPLC testing results.' },
+    { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Free standard shipping pan-India. Tier 1 & 2 cities: 3–4 business days. Remote areas: 4–6 business days. Express delivery (+₹800) available for major cities.' },
+    { q: 'When do I receive the COA?', a: 'The Certificate of Analysis ships with your order — purity, HPLC data, and molecular weight included. COAs are not distributed prior to purchase.' },
+  ],
+  'Epithalon': [
+    { q: 'What is Epithalon?', a: 'Epithalon (Epitalon) is a synthetic tetrapeptide (Ala-Glu-Asp-Gly) derived from the pineal gland polypeptide epithalamin. It is studied for telomere regulation, antioxidant activity, and longevity research.' },
+    { q: 'What is included with my order?', a: 'Every order includes the peptide in a sterile lyophilised vial along with a Certificate of Analysis (COA) detailing purity, molecular weight, and HPLC testing results.' },
+    { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Free standard shipping pan-India. Tier 1 & 2 cities: 3–4 business days. Remote areas: 4–6 business days. Express delivery (+₹800) available for major cities.' },
+    { q: 'When do I receive the COA?', a: 'The Certificate of Analysis ships with your order — purity, HPLC data, and molecular weight included. COAs are not distributed prior to purchase.' },
+  ],
+  'Kisspeptin-10': [
+    { q: 'What is Kisspeptin-10?', a: 'Kisspeptin-10 is a 10-amino acid neuropeptide that acts as a key regulator of GnRH (gonadotropin-releasing hormone) secretion. It is studied in the context of reproductive hormone pathways and metabolic signalling research.' },
+    { q: 'What is included with my order?', a: 'Every order includes the peptide in a sterile lyophilised vial along with a Certificate of Analysis (COA) detailing purity, molecular weight, and HPLC testing results.' },
+    { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Free standard shipping pan-India. Tier 1 & 2 cities: 3–4 business days. Remote areas: 4–6 business days. Express delivery (+₹800) available for major cities.' },
+    { q: 'When do I receive the COA?', a: 'The Certificate of Analysis ships with your order — purity, HPLC data, and molecular weight included. COAs are not distributed prior to purchase.' },
+  ],
+  'SS-31': [
+    { q: 'What is SS-31?', a: 'SS-31 (Elamipeptide, D-Arg-dimethylTyr-Lys-Phe-NH2) is a mitochondria-targeting tetrapeptide studied for its role in reducing oxidative stress, supporting cellular energy production, and aging research.' },
+    { q: 'What is included with my order?', a: 'Every order includes the peptide in a sterile lyophilised vial along with a Certificate of Analysis (COA) detailing purity, molecular weight, and HPLC testing results.' },
+    { q: 'Do you ship across India?', a: 'Yes, we ship pan-India. Free standard shipping pan-India. Tier 1 & 2 cities: 3–4 business days. Remote areas: 4–6 business days. Express delivery (+₹800) available for major cities.' },
+    { q: 'When do I receive the COA?', a: 'The Certificate of Analysis ships with your order — purity, HPLC data, and molecular weight included. COAs are not distributed prior to purchase.' },
   ],
   'default': [
     { q: 'What purity can I expect?', a: 'All our peptides are HPLC-verified with purity exceeding 98%. A Certificate of Analysis is included with every order.' },

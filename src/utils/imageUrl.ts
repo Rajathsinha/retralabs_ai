@@ -20,6 +20,11 @@ const NAME_TO_LOCAL_IMAGE: Array<[string, string]> = [
   ['mot-c',          '/motc.jpg'],
   ['motc',           '/motc.jpg'],
   ['mots-c',         '/motc.jpg'],
+  ['aod',            '/AOD.webp'],
+  ['epithalon',      '/Epithalone.webp'],
+  ['kisspeptin',     '/KISSPEPTIN.webp'],
+  ['ss-31',          '/SS-31.webp'],
+  ['ss31',           '/SS-31.webp'],
 ];
 
 /**

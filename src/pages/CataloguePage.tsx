@@ -29,6 +29,10 @@ const PURITY_MAP: Record<string, string> = {
   'CJC-1295 + Ipamorelin Stack': '99.1%',
   'The Wolverine Stack': '99.1%',
   'Bacteriostatic Water (Pharma Grade)': 'Pharma',
+  'AOD 9604':     '99.1%',
+  'Epithalon':    '99.2%',
+  'Kisspeptin-10': '99.1%',
+  'SS-31':        '99.0%',
 };
 
 const BADGE_MAP: Record<string, { label: string; style: string }> = {
@@ -42,6 +46,10 @@ const BADGE_MAP: Record<string, { label: string; style: string }> = {
   'Klow Blend':                  { label: 'NEW', style: 'bg-white/[0.04] text-slate-500 border border-white/[0.08]' },
   'CJC-1295 + Ipamorelin Stack': { label: 'NEW', style: 'bg-white/[0.04] text-slate-500 border border-white/[0.08]' },
   'The Wolverine Stack':         { label: 'NEW', style: 'bg-white/[0.04] text-slate-500 border border-white/[0.08]' },
+  'AOD 9604':     { label: 'NEW', style: 'bg-white/[0.04] text-slate-500 border border-white/[0.08]' },
+  'Epithalon':    { label: 'NEW', style: 'bg-white/[0.04] text-slate-500 border border-white/[0.08]' },
+  'Kisspeptin-10': { label: 'NEW', style: 'bg-white/[0.04] text-slate-500 border border-white/[0.08]' },
+  'SS-31':        { label: 'NEW', style: 'bg-white/[0.04] text-slate-500 border border-white/[0.08]' },
 };
 
 const PRODUCT_TAG: Record<string, string> = {
@@ -58,6 +66,10 @@ const PRODUCT_TAG: Record<string, string> = {
   'Klow Blend':                  'metabolic',
   'CJC-1295 + Ipamorelin Stack': 'metabolic',
   'The Wolverine Stack':          'recovery',
+  'AOD 9604':      'metabolic',
+  'Epithalon':     'longevity',
+  'Kisspeptin-10': 'metabolic',
+  'SS-31':         'longevity',
 };
 
 const TAG_STYLE: Record<string, { dot: string; text: string; label: string }> = {
@@ -81,6 +93,10 @@ const WAS_PRICE_MAP: Record<string, number> = {
   'Klow Blend':                   7500,
   'CJC-1295 + Ipamorelin Stack':  5500,
   'The Wolverine Stack':          5500,
+  'AOD 9604':      4200,
+  'Epithalon':     2800,
+  'Kisspeptin-10': 5500,
+  'SS-31':         4200,
 };
 
 const GLOW_COLOR: Record<string, string> = {
