@@ -215,13 +215,13 @@ export default function HomePage() {
             {/* Secondary */}
             <motion.button
               type="button"
-              onClick={() => navigate('/about')}
+              onClick={() => window.open('https://www.trustpilot.com/review/retralabs.in', '_blank', 'noopener,noreferrer')}
               className="inline-flex items-center justify-center gap-2 bg-white/8 border border-white/15 text-white font-semibold text-base px-8 py-3.5 rounded-2xl backdrop-blur-sm"
               whileHover={{ scale: 1.03, backgroundColor: 'rgba(255,255,255,0.13)', borderColor: 'rgba(255,255,255,0.3)' }}
               whileTap={{ scale: 0.97 }}
               transition={{ duration: 0.2 }}
             >
-              Read Our Story
+              Read Our Reviews ↗
             </motion.button>
           </motion.div>
 
