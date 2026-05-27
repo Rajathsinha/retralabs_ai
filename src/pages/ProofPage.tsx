@@ -171,6 +171,21 @@ export default function ProofPage() {
             </span>
           ))}
         </div>
+
+        {/* Trustpilot CTA */}
+        <div className="mt-6">
+          <a
+            href="https://www.trustpilot.com/review/retralabs.in"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-[#00b67a] hover:bg-[#00a36c] text-white text-sm font-bold px-5 py-2.5 rounded-full transition-colors duration-200"
+          >
+            <svg viewBox="0 0 105 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" aria-hidden="true">
+              <path d="M52.5 0L64.6 36.5H103.1L71.8 59.1L83.9 95.5L52.5 72.9L21.1 95.5L33.2 59.1L1.9 36.5H40.4L52.5 0Z" fill="white" />
+            </svg>
+            Read Our Reviews on Trustpilot ↗
+          </a>
+        </div>
       </section>
 
       {/* ── Screenshot grid ──────────────────────────────────────────────── */}
