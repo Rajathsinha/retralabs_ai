@@ -8,8 +8,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           'vendor':   ['react', 'react-dom', 'react-router-dom'],
-          'framer':   ['framer-motion'],
-          'heroui':   ['@heroui/react'],
+          'ui':       ['@heroui/react', 'framer-motion'],
           'supabase': ['@supabase/supabase-js'],
         },
       },
