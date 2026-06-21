@@ -195,6 +195,7 @@ export default function CheckoutPage() {
   const [orderSent,   setOrderSent]   = useState(false); // step 3: done
   const [savedOrderId, setSavedOrderId] = useState<string | null>(null); // Supabase order ID
   const [showQrModal, setShowQrModal] = useState(false);
+  const [orderSnapshot, setOrderSnapshot] = useState<{ items: string; total: number } | null>(null);
   const orderSaving = useRef(false); // prevent double-save
 
   // coupon input state
@@ -329,6 +330,8 @@ export default function CheckoutPage() {
       // non-blocking
     }
 
+      const snap = cart.map(i => `${i.product.name} ${i.variant.dosage_mg}mg x${i.quantity}`).join(', ');
+      setOrderSnapshot({ items: snap, total: grandTotal });
       clearCart();
       localStorage.removeItem('rl_checkout_form');
       setOrderSent(true);
@@ -393,6 +396,8 @@ export default function CheckoutPage() {
       // non-blocking
     }
 
+    const snap = cart.map(i => `${i.product.name} ${i.variant.dosage_mg}mg x${i.quantity}`).join(', ');
+    setOrderSnapshot({ items: snap, total: grandTotal });
     clearCart();
     localStorage.removeItem('rl_checkout_form');
     setShowQrModal(false);
@@ -490,33 +495,31 @@ export default function CheckoutPage() {
             </div>
           )}
 
-          {!authLoading && !user && (
-            <div className="bg-white rounded-2xl border border-slate-200 p-5 mb-5">
-              <p className="text-sm font-bold text-slate-900 mb-1">Track this order easily</p>
-              <p className="text-xs text-slate-500 mb-4 leading-relaxed">
-                Create a free account to view order history and faster checkout next time.
-              </p>
-              <div className="space-y-2">
-                <button onClick={() => navigate('/register')} className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-700 text-white font-bold py-3 rounded-xl text-sm transition-colors">
-                  <UserPlus className="w-4 h-4" /> Create Account
-                </button>
-                <button onClick={() => navigate('/signin')} className="w-full flex items-center justify-center gap-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold py-3 rounded-xl text-sm transition-all">
-                  <LogIn className="w-4 h-4" /> Sign In
-                </button>
-              </div>
-            </div>
-          )}
+
+          {/* Tracking note */}
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 mb-4 text-center">
+            <p className="text-sm font-semibold text-amber-900">Need a tracking ID?</p>
+            <p className="text-xs text-amber-700 mt-1">Contact WhatsApp Support below — we'll share your tracking details on priority.</p>
+          </div>
 
           {/* WhatsApp support nudge */}
           <a
-            href={`https://wa.me/${WHATSAPP_SUPPORT_NUMBER}?text=${encodeURIComponent('Hi, I just placed an order and need help with it.')}`}
+            href={`https://wa.me/${WHATSAPP_SUPPORT_NUMBER}?text=${encodeURIComponent(
+              `Hi, I just placed an order on RetraLabs and need support.\n\n` +
+              `*Name:* ${formData.customer_name}\n` +
+              `*Phone:* ${formData.customer_phone}\n` +
+              `*Email:* ${formData.customer_email}\n` +
+              `*Address:* ${formData.shipping_address}, PIN: ${formData.pincode}\n` +
+              (orderSnapshot ? `*Items:* ${orderSnapshot.items}\n*Total:* ₹${orderSnapshot.total.toLocaleString('en-IN')}\n` : '') +
+              `\nPlease help me with my order.`
+            )}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full flex items-center justify-center gap-2.5 bg-green-500 hover:bg-green-400 text-white font-bold py-4 rounded-2xl transition-colors mb-3"
+            className="w-full flex items-center justify-center gap-2.5 bg-green-500 hover:bg-green-400 text-white font-bold py-4 rounded-2xl transition-colors mb-2"
             style={{ textDecoration: 'none' }}
           >
             <MessageCircle className="w-5 h-5" />
-            Issue with your order? WhatsApp Support
+            Contact WhatsApp Support
           </a>
           <p className="text-center text-xs text-slate-400 mb-4">We respond within minutes for priority order queries.</p>
 
