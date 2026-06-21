@@ -1,203 +1,164 @@
-import { useState, useEffect } from 'react';
-import { X, CheckCircle, RotateCcw, MessageCircle } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { X, CheckCircle, MessageCircle, Upload, Copy } from 'lucide-react';
 
-const TOTAL_SECONDS = 120;
-const RADIUS = 42;
-const CIRCUMFERENCE = 2 * Math.PI * RADIUS; // ≈ 263.9
+const UPI_ID = '7019917927@superyes';
 
 interface UpiQrModalProps {
   isOpen: boolean;
   onClose: () => void;
-  /** Grand total in INR */
   amount: number;
-  /** Called when user confirms payment — saves order & navigates */
-  onConfirm: () => Promise<void>;
-  /** Fallback WhatsApp URL if the user prefers to order that way */
+  onConfirm: (txnRef: string, screenshot: File | null) => Promise<void>;
   whatsappUrl: string;
 }
 
-export default function UpiQrModal({
-  isOpen,
-  onClose,
-  amount,
-  onConfirm,
-  whatsappUrl,
-}: UpiQrModalProps) {
-  const [timeLeft,     setTimeLeft]     = useState(TOTAL_SECONDS);
-  const [timerExpired, setTimerExpired] = useState(false);
-  /** Increment to force a timer restart while modal stays open */
-  const [timerKey,     setTimerKey]     = useState(0);
-  const [confirming,   setConfirming]   = useState(false);
-
-  // Reset + run timer whenever modal opens, or when timerKey changes (restart)
-  useEffect(() => {
-    if (!isOpen) {
-      setTimeLeft(TOTAL_SECONDS);
-      setTimerExpired(false);
-      setConfirming(false);
-      return;
-    }
-    setTimeLeft(TOTAL_SECONDS);
-    setTimerExpired(false);
-
-    const interval = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          setTimerExpired(true);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [isOpen, timerKey]);
+export default function UpiQrModal({ isOpen, onClose, amount, onConfirm, whatsappUrl }: UpiQrModalProps) {
+  const [txnRef, setTxnRef] = useState('');
+  const [screenshot, setScreenshot] = useState<File | null>(null);
+  const [confirming, setConfirming] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const handleConfirm = async () => {
-    if (confirming) return;
+    if (!txnRef.trim() || confirming) return;
     setConfirming(true);
     try {
-      await onConfirm();
+      await onConfirm(txnRef.trim(), screenshot);
     } finally {
       setConfirming(false);
     }
   };
 
-  const handleRestart = () => setTimerKey(k => k + 1);
-
-  const minutes     = Math.floor(timeLeft / 60);
-  const seconds     = timeLeft % 60;
-  const timerColor  = timeLeft > 60 ? '#22c55e' : timeLeft > 30 ? '#f59e0b' : '#ef4444';
-  const strokeOffset = CIRCUMFERENCE * (1 - timeLeft / TOTAL_SECONDS);
+  const copyUpiId = () => {
+    navigator.clipboard.writeText(UPI_ID);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-
+    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
       {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
-      />
+      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(6px)' }} onClick={onClose} />
 
-      {/* Modal card */}
-      <div className="relative z-10 w-full max-w-sm bg-white rounded-3xl overflow-hidden shadow-2xl">
-
-        {/* ── Purple PhonePe header ── */}
-        <div className="bg-[#5f259f] px-5 pt-5 pb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2.5">
-              {/* "Pe" logo mark */}
-              <div className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-sm">
-                <span className="text-[#5f259f] font-black text-sm leading-none">Pe</span>
+      {/* Modal */}
+      <div style={{
+        position: 'relative', zIndex: 1, width: '100%', maxWidth: 400,
+        background: '#040C1E', border: '1px solid rgba(255,255,255,0.1)',
+        borderRadius: 24, overflow: 'hidden', boxShadow: '0 32px 100px rgba(0,0,0,0.8)',
+      }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 20px 0' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+              <div style={{ background: 'linear-gradient(135deg,#00C896,#00A3FF)', borderRadius: 8, width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ color: '#fff', fontWeight: 900, fontSize: 11 }}>RL</span>
               </div>
-              <div>
-                <p className="text-white font-bold text-sm leading-none">PhonePe</p>
-                <p className="text-purple-300 text-[10px] leading-none mt-0.5">BHIM UPI</p>
-              </div>
+              <span style={{ color: '#fff', fontWeight: 800, fontSize: 15 }}>RetraLabs</span>
+              <span style={{ background: 'rgba(0,200,150,0.15)', color: '#00C896', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 99, border: '1px solid rgba(0,200,150,0.3)' }}>UPI · VERIFIED</span>
             </div>
-            <button
-              onClick={onClose}
-              className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
-              aria-label="Close"
-            >
-              <X className="w-4 h-4 text-white" />
-            </button>
+            <p style={{ color: '#64748b', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>Scan to Pay</p>
           </div>
-          <p className="text-purple-300 text-xs uppercase tracking-widest mb-1 font-medium">
-            Amount to Pay
-          </p>
-          <p className="text-white text-3xl font-black tracking-tight">
+          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: 8, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#94a3b8' }}>
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Amount */}
+        <div style={{ padding: '12px 20px 0' }}>
+          <p style={{ color: '#94a3b8', fontSize: 12, margin: '0 0 4px' }}>Complete your payment securely</p>
+          <p style={{ color: '#fff', fontSize: 32, fontWeight: 900, margin: 0, letterSpacing: '-0.02em' }}>
             ₹{amount.toLocaleString('en-IN')}
           </p>
         </div>
 
-        {/* ── Body ── */}
-        <div className="px-5 py-5">
-
-          {/* QR code */}
-          <div className="flex flex-col items-center mb-5">
-            <div className="bg-white rounded-2xl border-2 border-slate-100 p-3 shadow-sm">
-              <img
-                src="/ypay.jpeg"
-                alt="PhonePe UPI QR Code — Mahalakshmistore"
-                className="w-56 h-56 object-contain rounded-xl"
-              />
-            </div>
-            <p className="text-xs text-slate-400 mt-2 font-medium">
-              Mahalakshmistore · Terminal 17
-            </p>
+        {/* QR Code */}
+        <div style={{ padding: '16px 20px' }}>
+          <div style={{ background: '#fff', borderRadius: 16, padding: 12, textAlign: 'center' }}>
+            <img
+              src="/upi-qr.jpg"
+              alt="RetraLabs UPI QR"
+              style={{ width: '100%', maxWidth: 220, height: 'auto', display: 'block', margin: '0 auto', borderRadius: 8 }}
+              onError={(e) => {
+                // Fallback if image not yet saved
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
           </div>
 
-          {/* Countdown timer */}
-          <div className="flex flex-col items-center mb-5">
-            <div className="relative w-24 h-24">
-              <svg className="w-24 h-24 -rotate-90" viewBox="0 0 100 100">
-                {/* Track ring */}
-                <circle
-                  cx="50" cy="50" r={RADIUS}
-                  fill="none" stroke="#e2e8f0" strokeWidth="7"
-                />
-                {/* Progress ring */}
-                <circle
-                  cx="50" cy="50" r={RADIUS}
-                  fill="none"
-                  stroke={timerColor}
-                  strokeWidth="7"
-                  strokeLinecap="round"
-                  strokeDasharray={CIRCUMFERENCE}
-                  strokeDashoffset={strokeOffset}
-                  style={{ transition: 'stroke-dashoffset 1s linear, stroke 0.5s ease' }}
-                />
-              </svg>
-              {/* Digital readout */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-lg font-black text-slate-900 tabular-nums leading-none">
-                  {minutes}:{seconds.toString().padStart(2, '0')}
-                </span>
-                <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wide mt-0.5">
-                  left
-                </span>
-              </div>
+          {/* UPI ID */}
+          <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '12px 16px', marginTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <p style={{ color: '#64748b', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 2px' }}>UPI ID</p>
+              <p style={{ color: '#00C896', fontSize: 15, fontWeight: 700, margin: 0, fontFamily: 'monospace' }}>{UPI_ID}</p>
             </div>
-            <p className="text-xs text-slate-500 mt-2 text-center">
-              {timerExpired ? 'Timer ended' : 'Complete your UPI payment within this time'}
-            </p>
+            <button onClick={copyUpiId} style={{ background: 'rgba(0,200,150,0.1)', border: '1px solid rgba(0,200,150,0.3)', borderRadius: 8, padding: '6px 12px', cursor: 'pointer', color: '#00C896', fontSize: 12, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Copy size={12} />
+              {copied ? 'Copied!' : 'Copy'}
+            </button>
+          </div>
+        </div>
+
+        {/* Form */}
+        <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {/* Transaction ref input */}
+          <div>
+            <label style={{ color: '#94a3b8', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', display: 'block', marginBottom: 6 }}>
+              UPI Reference / UTR Number *
+            </label>
+            <input
+              type="text"
+              value={txnRef}
+              onChange={e => setTxnRef(e.target.value)}
+              placeholder="Paste your transaction reference here"
+              style={{
+                width: '100%', padding: '12px 14px', borderRadius: 10, boxSizing: 'border-box',
+                background: 'rgba(255,255,255,0.05)', border: `1.5px solid ${txnRef ? 'rgba(0,200,150,0.5)' : 'rgba(255,255,255,0.1)'}`,
+                color: '#fff', fontSize: 14, outline: 'none',
+              }}
+            />
           </div>
 
-          {/* Timer-expired warning */}
-          {timerExpired && (
-            <div className="mb-4 bg-amber-50 border border-amber-200 rounded-xl p-3.5 text-center">
-              <p className="text-sm font-bold text-amber-800 mb-1">
-                Time's up — but don't worry!
-              </p>
-              <p className="text-xs text-amber-700 mb-2.5 leading-relaxed">
-                If you already paid, tap Confirm below. Your order will still be saved.
-              </p>
-              <button
-                onClick={handleRestart}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 hover:text-amber-900 transition-colors"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                Restart Timer
-              </button>
-            </div>
-          )}
+          {/* Screenshot upload */}
+          <div>
+            <label style={{ color: '#94a3b8', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', display: 'block', marginBottom: 6 }}>
+              Payment Screenshot (optional)
+            </label>
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              style={{
+                width: '100%', padding: '10px 14px', borderRadius: 10, boxSizing: 'border-box',
+                background: 'rgba(255,255,255,0.03)', border: '1.5px dashed rgba(255,255,255,0.12)',
+                color: screenshot ? '#00C896' : '#64748b', fontSize: 13, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              }}
+            >
+              <Upload size={14} />
+              {screenshot ? screenshot.name : 'Upload screenshot'}
+            </button>
+            <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => setScreenshot(e.target.files?.[0] || null)} />
+          </div>
 
-          {/* ── Confirm payment button ── */}
+          {/* Confirm button */}
           <button
             onClick={handleConfirm}
-            disabled={confirming}
-            className="w-full flex items-center justify-center gap-2.5 bg-[#5f259f] hover:bg-[#4e1d84] active:bg-[#3d1668] disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl transition-colors"
+            disabled={!txnRef.trim() || confirming}
+            style={{
+              width: '100%', padding: '14px', borderRadius: 12, border: 'none',
+              background: txnRef.trim() ? 'linear-gradient(135deg,#00C896,#00A3FF)' : 'rgba(255,255,255,0.08)',
+              color: txnRef.trim() ? '#fff' : '#475569',
+              fontWeight: 800, fontSize: 15, cursor: txnRef.trim() ? 'pointer' : 'not-allowed',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              transition: 'all 0.2s',
+            }}
           >
             {confirming ? (
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <div style={{ width: 18, height: 18, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
             ) : (
               <>
-                <CheckCircle className="w-5 h-5" />
-                I've Completed the Payment
+                <CheckCircle size={18} />
+                Confirm Payment
               </>
             )}
           </button>
@@ -205,13 +166,12 @@ export default function UpiQrModal({
           {/* WhatsApp fallback */}
           <button
             onClick={() => { window.open(whatsappUrl, '_blank'); onClose(); }}
-            className="w-full mt-2.5 flex items-center justify-center gap-2 text-sm text-slate-400 hover:text-slate-600 transition-colors py-2"
+            style={{ background: 'none', border: 'none', color: '#475569', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '4px 0' }}
           >
-            <MessageCircle className="w-4 h-4" />
+            <MessageCircle size={14} />
             Having trouble? Order via WhatsApp instead
           </button>
         </div>
-
       </div>
     </div>
   );

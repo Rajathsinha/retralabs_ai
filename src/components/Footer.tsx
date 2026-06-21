@@ -1,8 +1,102 @@
+import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link as RouterLink } from 'react-router-dom';
-import { Mail, ArrowUpRight, MessageCircle, ShieldCheck, Globe, FileCheck, FlaskConical } from 'lucide-react';
+import { Mail, ArrowUpRight, MessageCircle, ShieldCheck, Globe, FileCheck, FlaskConical, X, CheckCircle2 } from 'lucide-react';
 import Logo from './Logo';
 import TrustpilotWidget from './TrustpilotWidget';
 import { WHATSAPP_NUMBER } from '../constants/config';
+
+const DISCLAIMER_ITEMS = [
+  'These products are for research use only — not for personal consumption.',
+  'RetraLabs does not provide medical advice or guidance of any kind.',
+  'I will not request dosage information — no dosage guidance will be provided.',
+] as const;
+
+function WADisclaimerModal({ waUrl, onClose }: { waUrl: string; onClose: () => void }) {
+  const [checks, setChecks] = useState([false, false, false]);
+  const allChecked = checks.every(Boolean);
+  const toggle = (i: number) => setChecks(prev => prev.map((v, j) => j === i ? !v : v));
+
+  return createPortal(
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 9999,
+      background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
+    }} onClick={onClose}>
+      <div style={{
+        background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)',
+        borderRadius: 20, padding: 28, maxWidth: 440, width: '100%',
+        boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
+      }} onClick={e => e.stopPropagation()}>
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
+          <div>
+            <p style={{ color: '#f59e0b', fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 4 }}>
+              Before we chat
+            </p>
+            <h3 style={{ color: '#fff', fontSize: 18, fontWeight: 800, margin: 0 }}>
+              Please confirm the following
+            </h3>
+          </div>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: 4 }}>
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Checkboxes */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+          {DISCLAIMER_ITEMS.map((label, i) => (
+            <button key={i} type="button" onClick={() => toggle(i)} style={{
+              display: 'flex', alignItems: 'flex-start', gap: 12,
+              background: checks[i] ? 'rgba(16,185,129,0.08)' : 'rgba(255,255,255,0.03)',
+              border: `1.5px solid ${checks[i] ? '#10b981' : 'rgba(255,255,255,0.1)'}`,
+              borderRadius: 12, padding: '12px 14px', cursor: 'pointer', textAlign: 'left', width: '100%',
+              transition: 'all 0.18s',
+            }}>
+              <div style={{
+                width: 20, height: 20, borderRadius: 5, flexShrink: 0, marginTop: 1,
+                background: checks[i] ? '#10b981' : 'transparent',
+                border: `2px solid ${checks[i] ? '#10b981' : '#475569'}`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'all 0.18s',
+              }}>
+                {checks[i] && (
+                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+                    <path d="M2 6l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                )}
+              </div>
+              <span style={{ fontSize: 13, color: checks[i] ? '#d1fae5' : '#94a3b8', fontWeight: 500, lineHeight: 1.5 }}>
+                {label}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <a
+          href={allChecked ? waUrl : undefined}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={e => { if (!allChecked) e.preventDefault(); }}
+          style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            width: '100%', padding: '13px', borderRadius: 12,
+            background: allChecked ? '#25D366' : '#1e293b',
+            color: allChecked ? '#fff' : '#475569',
+            fontWeight: 800, fontSize: 15, textDecoration: 'none',
+            cursor: allChecked ? 'pointer' : 'not-allowed',
+            transition: 'all 0.2s',
+          }}
+        >
+          <MessageCircle size={18} />
+          {allChecked ? 'Open WhatsApp' : 'Tick all boxes to continue'}
+        </a>
+      </div>
+    </div>,
+    document.body
+  );
+}
 
 const TRUST_BADGES = [
   { icon: ShieldCheck, label: 'COA Verified', iconColor: 'text-emerald-400', badgeClass: 'border-emerald-800/50 text-emerald-300' },
@@ -51,7 +145,9 @@ function FooterLink({ href, children, external = false }: {
 }
 
 export default function Footer() {
+  const [showWAModal, setShowWAModal] = useState(false);
   return (
+    <>
     <footer className="bg-slate-950 text-slate-400 mt-auto">
 
       {/* Trust Badges Bar */}
@@ -105,15 +201,14 @@ export default function Footer() {
                 <Mail className="w-4 h-4 flex-shrink-0" />
                 support@retralabs.in
               </a>
-              <a
-                href={WA_DEFAULT}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-sm text-emerald-400 hover:text-emerald-300 transition-colors"
+              <button
+                type="button"
+                onClick={() => setShowWAModal(true)}
+                className="flex items-center gap-2 text-sm text-emerald-400 hover:text-emerald-300 transition-colors bg-transparent border-none p-0 cursor-pointer"
               >
                 <MessageCircle className="w-4 h-4 flex-shrink-0" />
                 WhatsApp Support
-              </a>
+              </button>
             </div>
           </div>
 
@@ -155,9 +250,13 @@ export default function Footer() {
                 <FooterLink href="/track-order">Track Order</FooterLink>
               </li>
               <li>
-                <FooterLink href={WA_DEFAULT} external>
+                <button
+                  type="button"
+                  onClick={() => setShowWAModal(true)}
+                  className="text-sm text-slate-400 hover:text-white transition-colors bg-transparent border-none p-0 cursor-pointer"
+                >
                   WhatsApp Support
-                </FooterLink>
+                </button>
               </li>
             </ul>
           </div>
@@ -176,5 +275,9 @@ export default function Footer() {
         </div>
       </div>
     </footer>
+    {showWAModal && (
+      <WADisclaimerModal waUrl={WA_DEFAULT} onClose={() => setShowWAModal(false)} />
+    )}
+    </>
   );
 }

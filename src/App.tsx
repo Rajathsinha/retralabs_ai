@@ -29,6 +29,7 @@ const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
 const ResetPasswordPage  = lazy(() => import('./pages/ResetPasswordPage'));
 const AccountPage        = lazy(() => import('./pages/AccountPage'));
 const ProofPage          = lazy(() => import('./pages/ProofPage'));
+const AdminPage          = lazy(() => import('./pages/AdminPage'));
 const HeroUIWrapper      = lazy(() => import('./providers/HeroUIWrapper'));
 
 // ─── Error Boundary ───────────────────────────────────────────────────────────
@@ -181,6 +182,8 @@ export default function App() {
             <Route path="/reset-password"  element={<ResetPasswordPage />} />
             <Route path="/account"         element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
           </Route>
+          {/* Admin — no header/footer */}
+          <Route path="/admin" element={<Suspense fallback={<div style={{ minHeight: '100vh', background: '#040C1E' }} />}><AdminPage /></Suspense>} />
         </Routes>
       </CartProvider>
     </ErrorBoundary>

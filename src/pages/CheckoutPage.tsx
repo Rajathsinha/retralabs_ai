@@ -15,9 +15,104 @@ import { useAuth } from '../context/AuthContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { OrderFormData } from '../types';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
-// import UpiQrModal from '../components/UpiQrModal'; // 💳 UPI QR — commented out, re-enable when ready
+import UpiQrModal from '../components/UpiQrModal';
 
 const FAST_DELIVERY_CHARGE = 800;
+const WHATSAPP_SUPPORT_NUMBER = '918217824384';
+
+// ── Airtable ────────────────────────────────────────────────────────────────
+async function saveToAirtable(payload: Record<string, unknown>): Promise<string | null> {
+  const token  = import.meta.env.VITE_AIRTABLE_TOKEN;
+  const baseId = import.meta.env.VITE_AIRTABLE_BASE_ID;
+  const table  = import.meta.env.VITE_AIRTABLE_TABLE  || 'Orders';
+  if (!token || !baseId) return null;
+  const res = await fetch(`https://api.airtable.com/v0/${baseId}/${encodeURIComponent(table)}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fields: payload }),
+  });
+  const json = await res.json();
+  return json.id || null;
+}
+
+async function uploadScreenshot(recordId: string, file: File) {
+  const token  = import.meta.env.VITE_AIRTABLE_TOKEN;
+  const baseId = import.meta.env.VITE_AIRTABLE_BASE_ID;
+  if (!token || !baseId) return;
+  const form = new FormData();
+  form.append('file', file, file.name);
+  form.append('filename', file.name);
+  form.append('contentType', file.type);
+  await fetch(
+    `https://content.airtable.com/v0/${baseId}/${recordId}/Screenshot/uploadAttachment`,
+    { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: form }
+  );
+}
+
+// ── Email HTML builder ────────────────────────────────────────────────────────
+function buildOrderEmailHtml(o: { name: string; phone: string; address: string; items: string; total: number; delivery: string; payment: string; txnRef?: string }) {
+  const itemRows = o.items.split('\n').map(line => `<li style="margin-bottom:4px">${line}</li>`).join('');
+  return `
+    <div style="font-family:sans-serif;max-width:560px;margin:0 auto;background:#f8fafc;padding:32px 16px">
+      <div style="background:#040C1E;border-radius:16px;padding:24px;margin-bottom:20px;text-align:center">
+        <span style="color:#00C896;font-weight:900;font-size:22px;letter-spacing:-0.03em">RetraLabs</span>
+        <p style="color:#94a3b8;font-size:13px;margin:4px 0 0">Order Confirmation</p>
+      </div>
+      <div style="background:#fff;border-radius:16px;padding:24px;margin-bottom:16px">
+        <p style="color:#0f172a;font-size:16px;font-weight:700;margin:0 0 4px">Hi ${o.name},</p>
+        <p style="color:#475569;font-size:14px;margin:0 0 20px">Your order has been received. We'll confirm and process it shortly.</p>
+        <hr style="border:none;border-top:1px solid #e2e8f0;margin:0 0 16px"/>
+        <p style="color:#64748b;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px">Items Ordered</p>
+        <ul style="color:#334155;font-size:14px;padding-left:20px;margin:0 0 16px">${itemRows}</ul>
+        <hr style="border:none;border-top:1px solid #e2e8f0;margin:0 0 12px"/>
+        <table style="width:100%;font-size:14px;color:#475569">
+          <tr><td>Delivery Address</td><td style="text-align:right;color:#0f172a;font-weight:600">${o.address}</td></tr>
+          <tr><td>Delivery Speed</td><td style="text-align:right;color:#0f172a;font-weight:600">${o.delivery}</td></tr>
+          <tr><td>Payment</td><td style="text-align:right;color:#0f172a;font-weight:600">${o.payment}</td></tr>
+          ${o.txnRef ? `<tr><td>Transaction Ref</td><td style="text-align:right;color:#0f172a;font-weight:600">${o.txnRef}</td></tr>` : ''}
+          <tr><td style="padding-top:12px;font-weight:700;color:#0f172a;font-size:16px">Total</td><td style="text-align:right;padding-top:12px;font-weight:900;color:#0f172a;font-size:18px">₹${o.total.toLocaleString('en-IN')}</td></tr>
+        </table>
+      </div>
+      <p style="color:#94a3b8;font-size:12px;text-align:center;margin:0">RetraLabs · Research Use Only · Not for Human Consumption</p>
+    </div>`;
+}
+
+// ── Resend email to customer ─────────────────────────────────────────────────
+async function sendResendEmail(to: string, subject: string, html: string) {
+  const key = import.meta.env.VITE_RESEND_API_KEY;
+  if (!key) return;
+  await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from: 'orders@retralabs.in', to, subject, html }),
+  });
+}
+
+// ── Interakt WhatsApp to customer ────────────────────────────────────────────
+async function sendInteraktWhatsApp(phone: string, bodyValues: string[]) {
+  const apiKey = import.meta.env.VITE_INTERAKT_API_KEY;
+  if (!apiKey) return;
+  // Strip country code — Interakt wants bare 10-digit number + countryCode separately
+  const bare = phone.replace(/^\+?91/, '').replace(/\D/g, '').slice(-10);
+  await fetch('https://api.interakt.ai/v1/public/message/', {
+    method: 'POST',
+    headers: {
+      Authorization: `Basic ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      countryCode: '+91',
+      phoneNumber: bare,
+      callbackData: 'order_confirmation',
+      type: 'Template',
+      template: {
+        name: 'order_details',
+        languageCode: 'en',
+        bodyValues,
+      },
+    }),
+  });
+}
 
 function getCodCharge(orderTotal: number): number {
   if (orderTotal <= 8000)  return 600;
@@ -49,6 +144,7 @@ export default function CheckoutPage() {
     customer_email: '',
     customer_phone: '',
     shipping_address: '',
+    pincode: '',
     disclaimer_accepted: false,
     age_confirmed: false,
     no_dosing_accepted: false,
@@ -63,7 +159,24 @@ export default function CheckoutPage() {
   const codCharge      = paymentMethod === 'cod' ? getCodCharge(getTotal() + deliveryCharge) : 0;
   const grandTotal     = getTotal() + deliveryCharge + codCharge;
 
-  /* ── Pre-fill from user profile if signed in ── */
+  /* ── Restore saved form from localStorage ── */
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('rl_checkout_form');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setFormData(prev => ({ ...prev, ...parsed }));
+      }
+    } catch (_) {}
+  }, []);
+
+  /* ── Persist form to localStorage on every change (skip checkbox states) ── */
+  useEffect(() => {
+    const { disclaimer_accepted, age_confirmed, no_dosing_accepted, ...rest } = formData;
+    try { localStorage.setItem('rl_checkout_form', JSON.stringify(rest)); } catch (_) {}
+  }, [formData]);
+
+  /* ── Pre-fill from user profile if signed in (overrides saved) ── */
   useEffect(() => {
     if (user) {
       setFormData(prev => ({
@@ -76,10 +189,12 @@ export default function CheckoutPage() {
     }
   }, [user]);
   const [orderReady, setOrderReady] = useState(false);   // step 2: review screen
+  const [submitting, setSubmitting] = useState(false);
+  const [confirming, setConfirming] = useState(false);
   const [whatsappUrl, setWhatsappUrl] = useState('');
   const [orderSent,   setOrderSent]   = useState(false); // step 3: done
   const [savedOrderId, setSavedOrderId] = useState<string | null>(null); // Supabase order ID
-  // const [showQrModal, setShowQrModal] = useState(false); // 💳 UPI QR — commented out
+  const [showQrModal, setShowQrModal] = useState(false);
   const orderSaving = useRef(false); // prevent double-save
 
   // coupon input state
@@ -99,6 +214,11 @@ export default function CheckoutPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (cart.length === 0) return;
+    setSubmitting(true);
+    if (formData.pincode.length !== 6) {
+      alert('Please enter a valid 6-digit PIN code.');
+      return;
+    }
     if (!formData.referral_source) {
       document.getElementById('referral-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
@@ -139,7 +259,7 @@ export default function CheckoutPage() {
       `Name: ${formData.customer_name}\n` +
       `Email: ${formData.customer_email}\n` +
       `Phone: ${formData.customer_phone}${referralLine}\n\n` +
-      `*Shipping Address*\n${formData.shipping_address}\n\n` +
+      `*Shipping Address*\n${formData.shipping_address}${formData.pincode ? `, PIN: ${formData.pincode}` : ''}\n\n` +
       `*Items*\n${lines.join('\n')}` +
       `${discountText}` +
       `${couponText}` +
@@ -150,191 +270,279 @@ export default function CheckoutPage() {
       (paymentMethod === 'cod' ? `\n\n⚠️ COD order — please confirm availability before dispatching.` : `\n\nPayment via UPI preferred (INR).`);
 
     setWhatsappUrl(`https://wa.me/918217824384?text=${encodeURIComponent(message)}`);
-    setOrderReady(true);
+    setTimeout(() => {
+      setOrderReady(true);
+      setSubmitting(false);
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }, 600);
   };
 
-  /** Step 2 → 3: side-effects after the <a> tag natively opens WhatsApp */
-  const handleSendOnWhatsApp = async () => {
-    if (orderSaving.current) return;
+  /** Step 2 → 3: save order + notify customer automatically */
+  const handleConfirmOrder = async () => {
+    if (orderSaving.current || confirming) return;
     orderSaving.current = true;
+    setConfirming(true);
+    try {
 
-    // Snapshot cart before clearing (needed for Supabase insert below)
     const cartSnapshot = cart.map(item => ({ ...item }));
+    const itemsSummary = cartSnapshot
+      .map(i => `${i.product.name} ${i.variant.dosage_mg}mg x${i.quantity} = ₹${(i.variant.price_inr * i.quantity).toLocaleString('en-IN')}`)
+      .join('\n');
 
-    // WhatsApp is opened by the native <a href> — never blocked by popup blockers.
-    clearCart();
-    setOrderSent(true);
-    setTimeout(() => navigate('/'), 6000);
+    const interaktValues = [
+      formData.customer_name,
+      itemsSummary,
+      `₹${grandTotal.toLocaleString('en-IN')}`,
+      `${formData.shipping_address}, PIN: ${formData.pincode}`,
+    ];
 
-    // ── Save to Supabase in background (non-blocking) ───────────────────────
-    if (isSupabaseConfigured()) {
-      try {
-        const { data: order, error: orderErr } = await supabase
-          .from('orders')
-          .insert({
-            customer_name:    formData.customer_name,
-            customer_email:   formData.customer_email,
-            customer_phone:   formData.customer_phone,
-            shipping_address: formData.shipping_address,
-            total_amount:     grandTotal,
-            status:           'pending',
-            order_status:     'pending',
-            payment_status:   'pending',
-          })
-          .select('id')
-          .single();
+    const emailHtml = buildOrderEmailHtml({
+      name: formData.customer_name,
+      phone: formData.customer_phone,
+      address: `${formData.shipping_address}, PIN: ${formData.pincode}`,
+      items: itemsSummary,
+      total: grandTotal,
+      delivery: formData.delivery_option === 'fast' ? 'Express' : 'Standard',
+      payment: paymentMethod === 'cod' ? 'Cash on Delivery' : 'UPI / Online',
+    });
 
-        if (!orderErr && order?.id) {
-          const shortId = (order.id as string).slice(0, 8).toUpperCase();
-          setSavedOrderId(shortId);
-
-          await supabase.from('order_items').insert(
-            cartSnapshot.map(item => ({
-              order_id:   order.id,
-              product_id: item.product.id,
-              variant_id: item.variant.id,
-              quantity:   item.quantity,
-              unit_price: item.variant.price_inr,
-            }))
-          );
-        }
-      } catch (_) {
-        // Supabase save failed — WhatsApp order already sent, no user impact
-      }
+    try {
+      await Promise.all([
+        saveToAirtable({
+          'Name':         formData.customer_name,
+          'Email':        formData.customer_email,
+          'Phone':        formData.customer_phone,
+          'Address':      `${formData.shipping_address}, PIN: ${formData.pincode}`,
+          'Items':        itemsSummary,
+          'Total (₹)':    grandTotal,
+          'Payment':      paymentMethod === 'cod' ? 'COD' : 'UPI/Prepay',
+          'Delivery':     formData.delivery_option === 'fast' ? 'Express' : 'Standard',
+          'Referral':     formData.referral_source,
+          'Status':       'New',
+          'Submitted At': new Date().toISOString(),
+          'Date':         new Date().toISOString().slice(0, 10),
+        }),
+        sendInteraktWhatsApp(formData.customer_phone, interaktValues),
+        sendResendEmail(formData.customer_email, 'Your RetraLabs Order is Confirmed!', emailHtml),
+      ]);
+    } catch (_) {
+      // non-blocking
     }
 
-    orderSaving.current = false;
+      clearCart();
+      localStorage.removeItem('rl_checkout_form');
+      setOrderSent(true);
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    } finally {
+      setConfirming(false);
+      orderSaving.current = false;
+    }
   };
 
-  /* 💳 UPI QR handler — commented out, re-enable when QR payment goes live
-  const handleQrPaymentConfirmed = async () => {
+  const handleQrPaymentConfirmed = async (txnRef: string, screenshot: File | null) => {
     if (orderSaving.current) return;
     orderSaving.current = true;
-    let fullOrderId: string | null = null;
-    let shortId: string | null = null;
-    if (isSupabaseConfigured()) {
-      try {
-        const { data: order, error: orderErr } = await supabase
-          .from('orders')
-          .insert({
-            customer_name:    formData.customer_name,
-            customer_email:   formData.customer_email,
-            customer_phone:   formData.customer_phone,
-            shipping_address: formData.shipping_address,
-            total_amount:     grandTotal,
-            status:           'pending',
-            order_status:     'processing',
-            payment_status:   'completed',
-          })
-          .select('id')
-          .single();
-        if (!orderErr && order?.id) {
-          fullOrderId = order.id as string;
-          shortId = fullOrderId.slice(0, 8).toUpperCase();
-          setSavedOrderId(shortId);
-          await supabase.from('order_items').insert(
-            cart.map(item => ({
-              order_id:   order.id,
-              product_id: item.product.id,
-              variant_id: item.variant.id,
-              quantity:   item.quantity,
-              unit_price: item.variant.price_inr,
-            }))
-          );
-          const rawMsg = decodeURIComponent(whatsappUrl.split('?text=')[1] || '');
-          const merchantMsg = `✅ *PAID VIA UPI QR — Order #${shortId}*\n\n` + rawMsg;
-          const merchantUrl = `https://wa.me/918217824384?text=${encodeURIComponent(merchantMsg)}`;
-          window.open(merchantUrl, '_blank');
-        }
-      } catch (_) {
-        window.open(whatsappUrl, '_blank');
+
+    const cartSnapshot = cart.map(item => ({ ...item }));
+    const itemsSummary = cartSnapshot
+      .map(i => `${i.product.name} ${i.variant.dosage_mg}mg x${i.quantity} = ₹${(i.variant.price_inr * i.quantity).toLocaleString('en-IN')}`)
+      .join('\n');
+
+    const interaktValues = [
+      formData.customer_name,
+      itemsSummary,
+      `₹${grandTotal.toLocaleString('en-IN')}`,
+      `${formData.shipping_address}, PIN: ${formData.pincode}`,
+    ];
+
+    const emailHtml = buildOrderEmailHtml({
+      name: formData.customer_name,
+      phone: formData.customer_phone,
+      address: `${formData.shipping_address}, PIN: ${formData.pincode}`,
+      items: itemsSummary,
+      total: grandTotal,
+      delivery: formData.delivery_option === 'fast' ? 'Express' : 'Standard',
+      payment: 'UPI QR',
+      txnRef,
+    });
+
+    try {
+      const [recordId] = await Promise.all([
+        saveToAirtable({
+          'Name':         formData.customer_name,
+          'Email':        formData.customer_email,
+          'Phone':        formData.customer_phone,
+          'Address':      `${formData.shipping_address}, PIN: ${formData.pincode}`,
+          'Items':        itemsSummary,
+          'Total (₹)':    grandTotal,
+          'Payment':      'UPI QR',
+          'Delivery':     formData.delivery_option === 'fast' ? 'Express' : 'Standard',
+          'Referral':     formData.referral_source,
+          'Transaction':  txnRef,
+          'Status':       'Paid',
+          'Submitted At': new Date().toISOString(),
+          'Date':         new Date().toISOString().slice(0, 10),
+        }),
+        sendInteraktWhatsApp(formData.customer_phone, interaktValues),
+        sendResendEmail(formData.customer_email, 'Your RetraLabs Order is Confirmed!', emailHtml),
+      ]);
+      if (recordId && screenshot) {
+        await uploadScreenshot(recordId, screenshot);
       }
+    } catch (_) {
+      // non-blocking
     }
+
     clearCart();
+    localStorage.removeItem('rl_checkout_form');
+    setShowQrModal(false);
     orderSaving.current = false;
-    if (fullOrderId) {
-      navigate(`/payment-success?orderId=${fullOrderId}`);
-    } else {
-      navigate('/payment-success');
-    }
+    setOrderSent(true);
   };
-  */
 
-  /* ── Step 3: enquiry sent → prompt sign-in if guest ── */
+  /* ── Step 3: order confirmed screen ── */
   if (orderSent) {
+    const isCod = paymentMethod === 'cod';
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-12">
-        <div className="text-center max-w-sm mx-auto">
-          {/* Success tick */}
-          <div className="w-20 h-20 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <Check className="w-10 h-10 text-emerald-600" />
-          </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">Enquiry sent!</h2>
-          <p className="text-slate-500 mb-1 leading-relaxed">
-            Your order details are on WhatsApp. Our team will reply with a UPI payment link within the hour.
-          </p>
+      <div className="min-h-screen bg-slate-50 px-4 py-12">
+        <div className="max-w-lg mx-auto">
 
-          {/* Order ID badge */}
+          <div className="text-center mb-8">
+            <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5">
+              <Check className="w-10 h-10 text-emerald-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-slate-900 mb-1">Order Placed!</h2>
+            <p className="text-slate-500 text-sm">
+              {isCod
+                ? 'Your COD order has been received. We will confirm shortly.'
+                : 'Your order has been received. Payment details sent separately.'}
+            </p>
+          </div>
+
+          <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 mb-5 flex items-start gap-3">
+            <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+              <Check className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-emerald-900 mb-0.5">Confirmation sent</p>
+              <p className="text-xs text-emerald-700 leading-relaxed">
+                A successful order confirmation has been sent to your WhatsApp
+                <span className="font-semibold"> ({formData.customer_phone})</span> and email
+                <span className="font-semibold"> ({formData.customer_email})</span>.
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 mb-5">
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Your Order Details</p>
+
+            <div className="space-y-2 mb-4 pb-4 border-b border-slate-100">
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-500">Name</span>
+                <span className="font-semibold text-slate-900">{formData.customer_name}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-500">Phone</span>
+                <span className="font-semibold text-slate-900">{formData.customer_phone}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-500">Email</span>
+                <span className="font-semibold text-slate-900 text-right max-w-[60%] break-all">{formData.customer_email}</span>
+              </div>
+            </div>
+
+            <div className="mb-4 pb-4 border-b border-slate-100">
+              <p className="text-xs text-slate-500 mb-1">Delivery Address</p>
+              <p className="text-sm font-semibold text-slate-900">{formData.shipping_address}, PIN: {formData.pincode}</p>
+            </div>
+
+            <div className="mb-4 pb-4 border-b border-slate-100 space-y-2">
+              <p className="text-xs text-slate-500 mb-2">Items Ordered</p>
+              {cart.map(item => (
+                <div key={item.variant.id} className="flex justify-between text-sm">
+                  <span className="text-slate-700">{item.product.name} {item.variant.vial_configuration || `${item.variant.dosage_mg}mg`} ×{item.quantity}</span>
+                  <span className="font-semibold text-slate-900">₹{(item.variant.price_inr * item.quantity).toLocaleString('en-IN')}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-500">Delivery</span>
+                <span className="text-slate-900">{formData.delivery_option === 'fast' ? `₹${FAST_DELIVERY_CHARGE.toLocaleString('en-IN')}` : 'Free'}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-500">Payment</span>
+                <span className="text-slate-900">{isCod ? `COD (+₹${codCharge.toLocaleString('en-IN')})` : 'UPI / Online'}</span>
+              </div>
+              <div className="flex justify-between text-base font-bold text-slate-900 pt-2 border-t border-slate-100 mt-2">
+                <span>Total</span>
+                <span>₹{grandTotal.toLocaleString('en-IN')}</span>
+              </div>
+            </div>
+          </div>
+
           {savedOrderId && (
-            <div className="mt-4 mb-2 bg-slate-900 rounded-2xl px-5 py-4 text-center">
-              <p className="text-xs text-slate-400 uppercase tracking-widest mb-1">Your Order ID</p>
+            <div className="bg-slate-900 rounded-2xl px-5 py-4 text-center mb-5">
+              <p className="text-xs text-slate-400 uppercase tracking-widest mb-1">Order ID</p>
               <p className="text-2xl font-black text-white tracking-widest">#{savedOrderId}</p>
               <p className="text-xs text-slate-400 mt-1">Save this to track your order</p>
             </div>
           )}
 
-          {/* Guest: nudge to create account for tracking */}
           {!authLoading && !user && (
-            <div className="mt-8 bg-white rounded-2xl border border-slate-200 p-5 text-left">
+            <div className="bg-white rounded-2xl border border-slate-200 p-5 mb-5">
               <p className="text-sm font-bold text-slate-900 mb-1">Track this order easily</p>
               <p className="text-xs text-slate-500 mb-4 leading-relaxed">
-                Create a free account to view order history and get faster checkout next time — no re-entering details.
+                Create a free account to view order history and faster checkout next time.
               </p>
               <div className="space-y-2">
-                <button
-                  onClick={() => navigate('/register')}
-                  className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-700 text-white font-bold py-3 rounded-xl text-sm transition-colors"
-                >
-                  <UserPlus className="w-4 h-4" />
-                  Create Account
+                <button onClick={() => navigate('/register')} className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-700 text-white font-bold py-3 rounded-xl text-sm transition-colors">
+                  <UserPlus className="w-4 h-4" /> Create Account
                 </button>
-                <button
-                  onClick={() => navigate('/signin')}
-                  className="w-full flex items-center justify-center gap-2 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-700 font-semibold py-3 rounded-xl text-sm transition-all"
-                >
-                  <LogIn className="w-4 h-4" />
-                  Sign In
+                <button onClick={() => navigate('/signin')} className="w-full flex items-center justify-center gap-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold py-3 rounded-xl text-sm transition-all">
+                  <LogIn className="w-4 h-4" /> Sign In
                 </button>
               </div>
             </div>
           )}
 
-          <p className="text-sm text-slate-400 mt-6">
-            {user ? 'Heading back home in a sec\u2026' : "Or we'll take you home in a moment."}
-          </p>
+          {/* WhatsApp support nudge */}
+          <a
+            href={`https://wa.me/${WHATSAPP_SUPPORT_NUMBER}?text=${encodeURIComponent('Hi, I just placed an order and need help with it.')}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full flex items-center justify-center gap-2.5 bg-green-500 hover:bg-green-400 text-white font-bold py-4 rounded-2xl transition-colors mb-3"
+            style={{ textDecoration: 'none' }}
+          >
+            <MessageCircle className="w-5 h-5" />
+            Issue with your order? WhatsApp Support
+          </a>
+          <p className="text-center text-xs text-slate-400 mb-4">We respond within minutes for priority order queries.</p>
+
+          <button onClick={() => navigate('/')} className="w-full text-center text-sm text-slate-400 hover:text-slate-600 transition-colors py-2">
+            ← Back to Home
+          </button>
         </div>
       </div>
     );
   }
 
-  /* ── Step 2: order review + WhatsApp send ── */
+  /* ── Step 2: order review ── */
   if (orderReady) {
+    const isCodReview = paymentMethod === 'cod';
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-12">
+      <div className="min-h-screen bg-slate-50 px-4 py-10">
         <div className="w-full max-w-md mx-auto">
 
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <MessageCircle className="w-8 h-8 text-green-600" />
-            </div>
-            <h2 className="text-2xl font-bold text-slate-900 mb-1">Ready to Send</h2>
-            <p className="text-slate-500 text-sm">Your order is packed. One tap and we're on it.</p>
+          <div className="text-center mb-7">
+            <h2 className="text-2xl font-bold text-slate-900 mb-1">Review Your Order</h2>
+            <p className="text-slate-500 text-sm">Confirm below — we'll send details to your WhatsApp and email instantly.</p>
           </div>
 
-          {/* Order summary card */}
+          {/* Order summary */}
           <div className="bg-white rounded-2xl border border-slate-200 p-5 mb-4">
-            <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">Order Summary</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">Items</p>
             <div className="space-y-2 mb-4">
               {cart.map((item) => (
                 <div key={item.variant.id} className="flex justify-between items-center">
@@ -342,90 +550,57 @@ export default function CheckoutPage() {
                     <p className="text-sm font-semibold text-slate-800">{item.product.name}</p>
                     <p className="text-xs text-slate-400">{item.variant.vial_configuration || `${item.variant.dosage_mg}mg`} · qty {item.quantity}</p>
                   </div>
-                  <p className="text-sm font-bold text-slate-900">
-                    {format(item.variant.price_inr * item.quantity)}
-                  </p>
+                  <p className="text-sm font-bold text-slate-900">{format(item.variant.price_inr * item.quantity)}</p>
                 </div>
               ))}
             </div>
-            {(getDiscount() > 0 || getCouponAmount() > 0 || deliveryCharge > 0) && (
+            {(getDiscount() > 0 || getCouponAmount() > 0 || deliveryCharge > 0 || isCodReview) && (
               <div className="border-t border-slate-100 pt-3 space-y-1.5">
-                {getDiscount() > 0 && (
-                  <div className="flex justify-between text-sm text-emerald-600">
-                    <span>5% Discount 🎉</span>
-                    <span>&minus;{format(getDiscountAmount())}</span>
-                  </div>
-                )}
-                {couponCode && getCouponAmount() > 0 && (
-                  <div className="flex justify-between text-sm text-emerald-600">
-                    <span>Coupon ({couponCode.toUpperCase()})</span>
-                    <span>&minus;{format(getCouponAmount())}</span>
-                  </div>
-                )}
-                {deliveryCharge > 0 && (
-                  <div className="flex justify-between text-sm text-amber-600">
-                    <span className="flex items-center gap-1">
-                      <Zap className="w-3.5 h-3.5" />
-                      Express Delivery (1–2 days)
-                    </span>
-                    <span>+{format(deliveryCharge)}</span>
-                  </div>
-                )}
+                {getDiscount() > 0 && <div className="flex justify-between text-sm text-emerald-600"><span>5% Discount 🎉</span><span>&minus;{format(getDiscountAmount())}</span></div>}
+                {couponCode && getCouponAmount() > 0 && <div className="flex justify-between text-sm text-emerald-600"><span>Coupon ({couponCode.toUpperCase()})</span><span>&minus;{format(getCouponAmount())}</span></div>}
+                {deliveryCharge > 0 && <div className="flex justify-between text-sm text-amber-600"><span className="flex items-center gap-1"><Zap className="w-3.5 h-3.5" />Express Delivery</span><span>+{format(deliveryCharge)}</span></div>}
+                {isCodReview && <div className="flex justify-between text-sm text-orange-600"><span className="flex items-center gap-1"><Banknote className="w-3.5 h-3.5" />COD Fee</span><span>+{format(codCharge)}</span></div>}
               </div>
             )}
-            <div className="border-t border-slate-100 pt-3 flex justify-between items-center">
+            <div className="border-t border-slate-100 pt-3 flex justify-between items-center mt-2">
               <span className="font-semibold text-slate-700">Total</span>
               <span className="text-xl font-black text-slate-900">{format(grandTotal)}</span>
             </div>
           </div>
 
-          {/* Delivery info */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-5 mb-6">
-            <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Shipping To</p>
-            <p className="text-sm font-semibold text-slate-800">{formData.customer_name}</p>
-            <p className="text-sm text-slate-500">{formData.shipping_address}</p>
+          {/* Customer + shipping info */}
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 mb-6 space-y-1.5 text-sm">
+            <div className="flex justify-between"><span className="text-slate-500">Name</span><span className="font-semibold text-slate-900">{formData.customer_name}</span></div>
+            <div className="flex justify-between"><span className="text-slate-500">Phone</span><span className="font-semibold text-slate-900">{formData.customer_phone}</span></div>
+            <div className="flex justify-between"><span className="text-slate-500">Email</span><span className="font-semibold text-slate-900 text-right max-w-[60%] break-all">{formData.customer_email}</span></div>
+            <div className="flex justify-between"><span className="text-slate-500">Address</span><span className="font-semibold text-slate-900 text-right max-w-[60%]">{formData.shipping_address}, PIN: {formData.pincode}</span></div>
+            <div className="flex justify-between"><span className="text-slate-500">Payment</span><span className="font-semibold text-slate-900">{isCodReview ? 'Cash on Delivery' : 'UPI / Online'}</span></div>
           </div>
 
-          {/* How it works steps */}
-          <div className="bg-slate-900 rounded-2xl p-5 mb-5">
-            <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">What happens next</p>
-            <div className="space-y-2.5">
-              {[
-                'Tap the green button below',
-                'WhatsApp opens with your order pre-filled',
-                'Hit SEND — takes 2 seconds',
-                'We confirm + send UPI within 1 hour',
-              ].map((step, i) => (
-                <div key={i} className="flex items-start gap-3">
-                  <span className="w-5 h-5 rounded-full bg-green-500/20 text-green-400 text-[11px] font-black flex items-center justify-center flex-shrink-0 mt-0.5">
-                    {i + 1}
-                  </span>
-                  <p className="text-sm text-slate-300">{step}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* THE button — native <a> avoids popup blockers on all browsers/iOS */}
-          <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={handleSendOnWhatsApp}
-            className="w-full flex items-center justify-center gap-3 bg-green-500 hover:bg-green-400 active:bg-green-600 text-white font-bold text-lg py-4 rounded-2xl transition-all duration-200 shadow-lg shadow-green-500/30 hover:shadow-green-500/50 hover:-translate-y-0.5"
-            style={{ textDecoration: 'none' }}
-          >
-            <MessageCircle className="w-6 h-6" />
-            Send Order on WhatsApp
-          </a>
-
-          {/* 💳 UPI QR button — commented out, re-enable when QR payment goes live
+          {/* Primary CTA */}
           <button
-            onClick={() => setShowQrModal(true)}
-            className="w-full flex items-center justify-center gap-3 bg-[#5f259f] hover:bg-[#4e1d84] active:bg-[#3d1668] text-white font-bold text-lg py-4 rounded-2xl transition-all duration-200 shadow-lg shadow-purple-700/30 hover:shadow-purple-700/50 hover:-translate-y-0.5"
+            onClick={handleConfirmOrder}
+            disabled={confirming}
+            className="w-full flex items-center justify-center gap-3 bg-slate-900 hover:bg-slate-700 disabled:opacity-60 text-white font-bold text-lg py-4 rounded-2xl transition-all duration-200 shadow-lg"
           >
-            Pay via PhonePe QR
+            {confirming ? (
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <><Check className="w-5 h-5" />{isCodReview ? 'Confirm COD Order' : 'Confirm Order'}</>
+            )}
           </button>
+
+          {/* UPI QR option — only for prepay */}
+          {!isCodReview && (
+            <button
+              onClick={() => setShowQrModal(true)}
+              disabled={confirming}
+              className="w-full mt-3 flex items-center justify-center gap-3 bg-white border-2 border-slate-200 hover:border-slate-400 text-slate-700 font-bold text-base py-4 rounded-2xl transition-all duration-200"
+            >
+              Pay via UPI QR instead
+            </button>
+          )}
+
           <UpiQrModal
             isOpen={showQrModal}
             onClose={() => setShowQrModal(false)}
@@ -433,10 +608,9 @@ export default function CheckoutPage() {
             onConfirm={handleQrPaymentConfirmed}
             whatsappUrl={whatsappUrl}
           />
-          */}
 
           <button
-            onClick={() => setOrderReady(false)}
+            onClick={() => { setOrderReady(false); window.scrollTo({ top: 0, behavior: 'instant' }); }}
             className="w-full mt-3 text-sm text-slate-400 hover:text-slate-600 transition-colors py-2"
           >
             ← Go back and edit
@@ -747,6 +921,23 @@ export default function CheckoutPage() {
                   />
                 </div>
 
+                {/* Pincode */}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                    PIN Code <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    required
+                    placeholder="6-digit PIN code"
+                    value={formData.pincode}
+                    onChange={(e) => setFormData({ ...formData, pincode: e.target.value.replace(/\D/g, '').slice(0, 6) })}
+                    className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-800 transition-colors text-base"
+                  />
+                </div>
+
                 {/* ── Delivery Option ── */}
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-2">
@@ -960,11 +1151,17 @@ export default function CheckoutPage() {
 
                 <button
                   type="submit"
-                  disabled={!formData.disclaimer_accepted || !formData.age_confirmed || !formData.no_dosing_accepted}
+                  disabled={!formData.disclaimer_accepted || !formData.age_confirmed || !formData.no_dosing_accepted || submitting}
                   className="w-full flex items-center justify-center gap-2.5 bg-slate-900 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-base py-4 rounded-xl transition-colors"
                 >
-                  <MessageCircle className="w-5 h-5" />
-                  Continue on WhatsApp for Payment
+                  {submitting ? (
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <ArrowRight className="w-5 h-5" />
+                      Review & Place Order
+                    </>
+                  )}
                 </button>
               </form>
             </div>

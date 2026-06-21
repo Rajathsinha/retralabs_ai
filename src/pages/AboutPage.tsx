@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Card,
@@ -71,12 +72,14 @@ const VALUES = [
 const QUALITY_STEPS = [
   { step: '01', title: 'Source Verification', desc: 'Manufacturer credentials, GMP certification, and prior batch records reviewed before any new supplier relationship.' },
   { step: '02', title: 'Batch Testing', desc: 'Each incoming batch is independently HPLC-tested. Batches below 98% threshold are rejected outright — no exceptions.' },
-  { step: '03', title: 'COA Issuance', desc: 'Certificate of Analysis documenting purity, molecular weight, and testing methodology issued with every single order.' },
-  { step: '04', title: 'Sterile Packaging', desc: 'Lyophilised peptides sealed in pharmaceutical-grade sterile vials. Cold-chain packaging for transit integrity.' },
+  { step: '03', title: 'Sterile Packaging', desc: 'Lyophilised peptides sealed in pharmaceutical-grade sterile vials. Cold-chain packaging for transit integrity.' },
 ];
 
 export default function AboutPage() {
   const navigate = useNavigate();
+  const [checks, setChecks] = useState({ research: false, noMedical: false, noDosage: false });
+  const allChecked = checks.research && checks.noMedical && checks.noDosage;
+  const toggle = (key: keyof typeof checks) => setChecks(prev => ({ ...prev, [key]: !prev[key] }));
 
   return (
     <div className="min-h-screen bg-white">
@@ -339,21 +342,6 @@ export default function AboutPage() {
             ))}
           </div>
 
-          <ScrollReveal>
-            <Card
-              shadow="none"
-              className="mt-10 border border-emerald-200 bg-emerald-50 max-w-2xl mx-auto"
-              radius="lg"
-            >
-              <CardBody className="p-7 text-center">
-                <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto mb-3" />
-                <h3 className="font-bold text-emerald-900 mb-2">COA with Every Order</h3>
-                <p className="text-sm text-emerald-700 leading-relaxed">
-                  Every order ships with a full Certificate of Analysis — purity, molecular weight, and HPLC data included. No requests needed.
-                </p>
-              </CardBody>
-            </Card>
-          </ScrollReveal>
         </div>
       </section>
 
@@ -366,11 +354,10 @@ export default function AboutPage() {
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">We're In It for the Long Game.</h2>
             <p className="text-slate-400 leading-relaxed text-lg mb-10 max-w-2xl mx-auto">
-              If a batch doesn't pass purity, it doesn't ship. If your order arrives damaged, we replace it. If you ask us a question before buying and we don't have what you need, we'll tell you that too. Honest business is just better business.
+              If a batch doesn't pass purity below 90%, it doesn't ship. If your order arrives damaged, we replace it. If you ask us a question before buying and we don't have what you need, we'll tell you that too. Honest business is just better business.
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               {[
-                { icon: BadgeCheck, label: 'COA with Every Order' },
                 { icon: Globe, label: 'Verified GMP Source' },
                 { icon: TrendingUp, label: '3,000+ Happy Researchers' },
                 { icon: Clock, label: 'Fast Support Response' },
@@ -394,23 +381,82 @@ export default function AboutPage() {
 
       {/* ─── RESEARCH DISCLAIMER ─── */}
       <section className="py-16 bg-white">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="max-w-xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal>
-            <Card
-              shadow="none"
-              className="border border-amber-200 bg-amber-50"
-              radius="lg"
-            >
-              <CardBody className="p-8">
-                <h3 className="font-bold text-amber-900 mb-3">Research Use Only</h3>
-                <p className="text-amber-800 text-sm leading-relaxed">
-                  All products sold through RetraLabs are strictly for in vitro research and analytical
-                  applications. They are not intended for human consumption, medical use, or application
-                  outside of controlled laboratory environments. Purchasers must be affiliated with
-                  recognized research institutions and comply with all applicable local and national regulations.
-                </p>
-              </CardBody>
-            </Card>
+            <div style={{ border: '1px solid rgba(245,158,11,0.35)', borderRadius: 20, background: '#fffbeb', padding: '2rem' }}>
+              <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+                <span style={{ display: 'inline-block', background: '#f59e0b', color: '#fff', fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', borderRadius: 99, padding: '4px 14px', marginBottom: 12 }}>
+                  Before You Proceed
+                </span>
+                <h3 style={{ fontSize: 20, fontWeight: 800, color: '#78350f', margin: 0 }}>
+                  Please confirm the following
+                </h3>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {([
+                  { key: 'research', label: 'I confirm these products are for research use only — not for personal consumption.' },
+                  { key: 'noMedical', label: 'I understand RetraLabs does not provide medical advice or guidance of any kind.' },
+                  { key: 'noDosage', label: 'I will not request dosage information — no dosage guidance will be provided.' },
+                ] as { key: keyof typeof checks; label: string }[]).map(({ key, label }) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => toggle(key)}
+                    style={{
+                      display: 'flex', alignItems: 'flex-start', gap: 14,
+                      background: checks[key] ? 'rgba(16,185,129,0.08)' : 'rgba(255,255,255,0.7)',
+                      border: `1.5px solid ${checks[key] ? '#10b981' : 'rgba(245,158,11,0.3)'}`,
+                      borderRadius: 12, padding: '14px 16px',
+                      cursor: 'pointer', textAlign: 'left', width: '100%',
+                      transition: 'all 0.18s',
+                    }}
+                  >
+                    <div style={{
+                      width: 22, height: 22, borderRadius: 6, flexShrink: 0, marginTop: 1,
+                      background: checks[key] ? '#10b981' : '#fff',
+                      border: `2px solid ${checks[key] ? '#10b981' : '#d1d5db'}`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      transition: 'all 0.18s',
+                    }}>
+                      {checks[key] && (
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                          <path d="M2 6l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      )}
+                    </div>
+                    <span style={{ fontSize: 14, color: checks[key] ? '#065f46' : '#92400e', fontWeight: 500, lineHeight: 1.5 }}>
+                      {label}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              <div style={{ marginTop: 20 }}>
+                <button
+                  type="button"
+                  onClick={() => allChecked && navigate('/catalogue')}
+                  style={{
+                    width: '100%', padding: '14px', borderRadius: 12,
+                    background: allChecked ? '#10b981' : '#e5e7eb',
+                    color: allChecked ? '#fff' : '#9ca3af',
+                    fontWeight: 800, fontSize: 15, border: 'none',
+                    cursor: allChecked ? 'pointer' : 'not-allowed',
+                    transition: 'all 0.2s',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  }}
+                >
+                  {allChecked ? (
+                    <>
+                      <CheckCircle2 size={18} />
+                      Proceed to Shop
+                    </>
+                  ) : (
+                    'Tick all boxes to continue'
+                  )}
+                </button>
+              </div>
+            </div>
           </ScrollReveal>
         </div>
       </section>
