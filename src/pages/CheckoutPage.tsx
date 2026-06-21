@@ -29,7 +29,7 @@ async function saveToAirtable(payload: Record<string, unknown>): Promise<string 
   const res = await fetch(`https://api.airtable.com/v0/${baseId}/${encodeURIComponent(table)}`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ fields: payload }),
+    body: JSON.stringify({ fields: payload, typecast: true }),
   });
   const json = await res.json();
   return json.id || null;
