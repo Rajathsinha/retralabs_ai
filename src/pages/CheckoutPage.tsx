@@ -622,27 +622,28 @@ export default function CheckoutPage() {
             <div className="flex justify-between"><span className="text-slate-500">Payment</span><span className="font-semibold text-slate-900">{isCodReview ? 'Cash on Delivery' : 'UPI / Online'}</span></div>
           </div>
 
-          {/* Primary CTA */}
-          <button
-            onClick={handleConfirmOrder}
-            disabled={confirming}
-            className="w-full flex items-center justify-center gap-3 bg-slate-900 hover:bg-slate-700 disabled:opacity-60 text-white font-bold text-lg py-4 rounded-2xl transition-all duration-200 shadow-lg"
-          >
-            {confirming ? (
-              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            ) : (
-              <><Check className="w-5 h-5" />{isCodReview ? 'Confirm COD Order' : 'Confirm Order'}</>
-            )}
-          </button>
-
-          {/* UPI QR option — only for prepay */}
-          {!isCodReview && (
+          {/* CTAs — behaviour differs by payment method */}
+          {isCodReview ? (
+            /* COD: single confirm button */
+            <button
+              onClick={handleConfirmOrder}
+              disabled={confirming}
+              className="w-full flex items-center justify-center gap-3 bg-slate-900 hover:bg-slate-700 disabled:opacity-60 text-white font-bold text-lg py-4 rounded-2xl transition-all duration-200 shadow-lg"
+            >
+              {confirming ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <><Check className="w-5 h-5" />Confirm COD Order</>
+              )}
+            </button>
+          ) : (
+            /* Prepay: UPI QR is the primary action */
             <button
               onClick={() => setShowQrModal(true)}
               disabled={confirming}
-              className="w-full mt-3 flex items-center justify-center gap-3 bg-white border-2 border-slate-200 hover:border-slate-400 text-slate-700 font-bold text-base py-4 rounded-2xl transition-all duration-200"
+              className="w-full flex items-center justify-center gap-3 bg-slate-900 hover:bg-slate-700 disabled:opacity-60 text-white font-bold text-lg py-4 rounded-2xl transition-all duration-200 shadow-lg"
             >
-              Pay via UPI QR instead
+              <Check className="w-5 h-5" />Pay via UPI QR
             </button>
           )}
 
