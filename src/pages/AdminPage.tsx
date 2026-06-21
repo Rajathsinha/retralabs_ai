@@ -15,7 +15,7 @@ interface AirtableRecord {
 }
 
 async function fetchOrders(): Promise<AirtableRecord[]> {
-  const url = `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}?sort[0][field]=Submitted At&sort[0][direction]=desc`;
+  const url = `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}?sort[0][field]=Created&sort[0][direction]=desc`;
   const res = await fetch(url, { headers: { Authorization: `Bearer ${TOKEN}` } });
   if (!res.ok) throw new Error('Airtable fetch failed');
   const json = await res.json();
