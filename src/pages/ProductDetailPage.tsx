@@ -267,6 +267,8 @@ export default function ProductDetailPage() {
   const [referralOpen, setReferralOpen] = useState(false);
   const [referralSource, setReferralSource] = useState('');
   const [friendName, setFriendName] = useState('');
+  const [disclaimerTyped, setDisclaimerTyped] = useState('');
+  const DISCLAIMER_PHRASE = 'I will not ask for dosage guidance';
   const [pendingWhatsAppUrl, setPendingWhatsAppUrl] = useState('');
 
   const REFERRAL_OPTIONS = ['Reddit', 'Google', 'Friend', 'Instagram', 'YouTube', 'IndiaMART', 'Other'];
@@ -275,6 +277,7 @@ export default function ProductDetailPage() {
     setPendingWhatsAppUrl(baseUrl);
     setReferralSource('');
     setFriendName('');
+    setDisclaimerTyped('');
     setReferralOpen(true);
   };
 
@@ -1067,9 +1070,40 @@ export default function ProductDetailPage() {
               />
             )}
 
+            {/* Typed disclaimer confirmation */}
+            <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+              <p className="text-xs font-semibold text-amber-800 mb-1">Confirm before continuing:</p>
+              <button
+                type="button"
+                onClick={() => setDisclaimerTyped(DISCLAIMER_PHRASE)}
+                className="w-full text-left text-xs text-amber-700 font-mono bg-amber-100 hover:bg-amber-200 active:bg-emerald-100 rounded px-2 py-1.5 mb-2 transition-colors cursor-pointer"
+                title="Tap to fill"
+              >
+                👆 {DISCLAIMER_PHRASE}
+              </button>
+              <input
+                type="text"
+                list="disclaimer-suggestions"
+                placeholder="Tap above or type here…"
+                value={disclaimerTyped}
+                onChange={e => setDisclaimerTyped(e.target.value)}
+                className={`w-full border-2 rounded-lg px-3 py-2 text-sm focus:outline-none transition-colors ${
+                  disclaimerTyped === DISCLAIMER_PHRASE
+                    ? 'border-emerald-400 bg-emerald-50 text-emerald-800'
+                    : 'border-slate-200 bg-white text-slate-800 focus:border-amber-400'
+                }`}
+              />
+              <datalist id="disclaimer-suggestions">
+                <option value={DISCLAIMER_PHRASE} />
+              </datalist>
+              {disclaimerTyped === DISCLAIMER_PHRASE && (
+                <p className="text-xs text-emerald-600 font-semibold mt-1">✓ Confirmed</p>
+              )}
+            </div>
+
             <button
               onClick={submitReferral}
-              disabled={!referralSource}
+              disabled={!referralSource || disclaimerTyped !== DISCLAIMER_PHRASE}
               className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
             >
               <MessageCircle className="w-4 h-4" />
