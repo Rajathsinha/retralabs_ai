@@ -195,7 +195,15 @@ export default function CheckoutPage() {
   const [orderSent,   setOrderSent]   = useState(false); // step 3: done
   const [savedOrderId, setSavedOrderId] = useState<string | null>(null); // Supabase order ID
   const [showQrModal, setShowQrModal] = useState(false);
-  const [orderSnapshot, setOrderSnapshot] = useState<{ items: string; total: number } | null>(null);
+  const [orderSnapshot, setOrderSnapshot] = useState<{
+    items: string;
+    total: number;
+    cartItems: Array<{ name: string; config: string; qty: number; price: number }>;
+    deliveryOption: string;
+    paymentMethod: 'prepay' | 'cod';
+    deliveryCharge: number;
+    codCharge: number;
+  } | null>(null);
   const orderSaving = useRef(false); // prevent double-save
 
   // coupon input state
@@ -330,7 +338,15 @@ export default function CheckoutPage() {
     }
 
       const snap = cart.map(i => `${i.product.name} ${i.variant.dosage_mg}mg x${i.quantity}`).join(', ');
-      setOrderSnapshot({ items: snap, total: grandTotal });
+      setOrderSnapshot({
+        items: snap,
+        total: grandTotal,
+        cartItems: cart.map(i => ({ name: i.product.name, config: i.variant.vial_configuration || `${i.variant.dosage_mg}mg`, qty: i.quantity, price: i.variant.price_inr })),
+        deliveryOption: formData.delivery_option,
+        paymentMethod,
+        deliveryCharge,
+        codCharge,
+      });
       clearCart();
       localStorage.removeItem('rl_checkout_form');
       setOrderSent(true);
@@ -395,7 +411,15 @@ export default function CheckoutPage() {
     }
 
     const snap = cart.map(i => `${i.product.name} ${i.variant.dosage_mg}mg x${i.quantity}`).join(', ');
-    setOrderSnapshot({ items: snap, total: grandTotal });
+    setOrderSnapshot({
+      items: snap,
+      total: grandTotal,
+      cartItems: cart.map(i => ({ name: i.product.name, config: i.variant.vial_configuration || `${i.variant.dosage_mg}mg`, qty: i.quantity, price: i.variant.price_inr })),
+      deliveryOption: formData.delivery_option,
+      paymentMethod: 'prepay',
+      deliveryCharge,
+      codCharge: 0,
+    });
     clearCart();
     localStorage.removeItem('rl_checkout_form');
     setShowQrModal(false);
@@ -405,7 +429,11 @@ export default function CheckoutPage() {
 
   /* ── Step 3: order confirmed screen ── */
   if (orderSent) {
-    const isCod = paymentMethod === 'cod';
+    const snap = orderSnapshot;
+    const isCod = (snap?.paymentMethod ?? paymentMethod) === 'cod';
+    const snapDeliveryCharge = snap?.deliveryCharge ?? 0;
+    const snapCodCharge = snap?.codCharge ?? 0;
+    const snapTotal = snap?.total ?? 0;
     return (
       <div className="min-h-screen bg-slate-50 px-4 py-12">
         <div className="max-w-lg mx-auto">
@@ -461,10 +489,10 @@ export default function CheckoutPage() {
 
             <div className="mb-4 pb-4 border-b border-slate-100 space-y-2">
               <p className="text-xs text-slate-500 mb-2">Items Ordered</p>
-              {cart.map(item => (
-                <div key={item.variant.id} className="flex justify-between text-sm">
-                  <span className="text-slate-700">{item.product.name} {item.variant.vial_configuration || `${item.variant.dosage_mg}mg`} ×{item.quantity}</span>
-                  <span className="font-semibold text-slate-900">₹{(item.variant.price_inr * item.quantity).toLocaleString('en-IN')}</span>
+              {snap?.cartItems.map((item, idx) => (
+                <div key={idx} className="flex justify-between text-sm">
+                  <span className="text-slate-700">{item.name} {item.config} ×{item.qty}</span>
+                  <span className="font-semibold text-slate-900">₹{(item.price * item.qty).toLocaleString('en-IN')}</span>
                 </div>
               ))}
             </div>
@@ -472,15 +500,15 @@ export default function CheckoutPage() {
             <div className="space-y-1.5">
               <div className="flex justify-between text-sm">
                 <span className="text-slate-500">Delivery</span>
-                <span className="text-slate-900">{formData.delivery_option === 'fast' ? `₹${FAST_DELIVERY_CHARGE.toLocaleString('en-IN')}` : 'Free'}</span>
+                <span className="text-slate-900">{snapDeliveryCharge > 0 ? `₹${snapDeliveryCharge.toLocaleString('en-IN')}` : 'Free'}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-slate-500">Payment</span>
-                <span className="text-slate-900">{isCod ? `COD (+₹${codCharge.toLocaleString('en-IN')})` : 'UPI / Online'}</span>
+                <span className="text-slate-900">{isCod ? `COD (+₹${snapCodCharge.toLocaleString('en-IN')})` : 'UPI / Online'}</span>
               </div>
               <div className="flex justify-between text-base font-bold text-slate-900 pt-2 border-t border-slate-100 mt-2">
                 <span>Total</span>
-                <span>₹{grandTotal.toLocaleString('en-IN')}</span>
+                <span>₹{snapTotal.toLocaleString('en-IN')}</span>
               </div>
             </div>
           </div>

@@ -76,7 +76,7 @@ export default function UpiQrModal({ isOpen, onClose, amount, onConfirm, whatsap
         <div style={{ padding: '16px 20px' }}>
           <div style={{ background: '#fff', borderRadius: 16, padding: 12, textAlign: 'center' }}>
             <img
-              src="/upi-qr.jpg"
+              src="/ypay.jpeg"
               alt="RetraLabs UPI QR"
               style={{ width: '100%', maxWidth: 220, height: 'auto', display: 'block', margin: '0 auto', borderRadius: 8 }}
               onError={(e) => {
