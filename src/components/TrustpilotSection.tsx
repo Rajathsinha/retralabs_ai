@@ -334,7 +334,7 @@ export default function TrustpilotSection() {
           </span>
         </div>
 
-        {/* Stars — 4 filled + 1 dim = 4.3 */}
+        {/* Stars — 4 filled + 1 half = 4.5 */}
         <div className="flex justify-center gap-2 mb-5">
           {[1, 2, 3, 4, 5].map(i => (
             <motion.div
@@ -351,8 +351,15 @@ export default function TrustpilotSection() {
               {i <= 4 ? (
                 <TpStar className="w-9 h-9" />
               ) : (
+                /* half star — left half green, right half dark */
                 <svg viewBox="0 0 105 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-9 h-9" aria-hidden="true">
-                  <path d="M52.5 0L64.6 36.5H103.1L71.8 59.1L83.9 95.5L52.5 72.9L21.1 95.5L33.2 59.1L1.9 36.5H40.4L52.5 0Z" fill="#1e3a2e" />
+                  <defs>
+                    <linearGradient id="half" x1="0" x2="1" y1="0" y2="0">
+                      <stop offset="50%" stopColor="#00b67a" />
+                      <stop offset="50%" stopColor="#1e3a2e" />
+                    </linearGradient>
+                  </defs>
+                  <path d="M52.5 0L64.6 36.5H103.1L71.8 59.1L83.9 95.5L52.5 72.9L21.1 95.5L33.2 59.1L1.9 36.5H40.4L52.5 0Z" fill="url(#half)" />
                 </svg>
               )}
             </motion.div>
@@ -366,7 +373,7 @@ export default function TrustpilotSection() {
 
         {/* Score · count · link */}
         <p className="text-sm text-slate-600">
-          <span className="text-slate-300 font-semibold tabular-nums">4.3</span>
+          <span className="text-slate-300 font-semibold tabular-nums">4.5</span>
           <span className="mx-2 text-slate-800">·</span>
           <a
             href="https://www.trustpilot.com/review/retralabs.in"
@@ -374,7 +381,7 @@ export default function TrustpilotSection() {
             rel="noopener noreferrer"
             className="hover:text-slate-400 transition-colors duration-200"
           >
-            19 verified reviews on Trustpilot ↗
+            30 verified reviews on Trustpilot ↗
           </a>
         </p>
       </motion.div>

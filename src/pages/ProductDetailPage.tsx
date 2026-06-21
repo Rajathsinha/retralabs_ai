@@ -138,7 +138,7 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [quantity, setQuantity] = useState(1);
-  const [bundleAdded, setBundleAdded] = useState(false);
+  const [bundleAdded, setBundleAdded] = useState(true);
   const { addToCart, openCart } = useCart();
   const { format } = useCurrency();
 
@@ -294,7 +294,7 @@ export default function ProductDetailPage() {
       addToCart(product, selectedVariant);
     }
     if (bundleAdded && bacWater) {
-      const bacWaterVariant = bacWater.variants.find((v) => v.dosage_mg === 50);
+      const bacWaterVariant = bacWater.variants.find((v) => v.dosage_mg === 10);
       if (bacWaterVariant) addToCart(bacWater, bacWaterVariant);
     }
     setCartAdded(true);
@@ -308,7 +308,7 @@ export default function ProductDetailPage() {
       addToCart(product, selectedVariant);
     }
     if (bundleAdded && bacWater) {
-      const bacWaterVariant = bacWater.variants.find((v) => v.dosage_mg === 50);
+      const bacWaterVariant = bacWater.variants.find((v) => v.dosage_mg === 10);
       if (bacWaterVariant) addToCart(bacWater, bacWaterVariant);
     }
     openCart();
@@ -380,7 +380,7 @@ export default function ProductDetailPage() {
   const isFlagship = product.name === 'Retatrutide' || product.name === 'Tirzepatide';
   const isBacWater = product.name?.includes('Bacteriostatic');
   const isNonDiscountable = isBacWater || product.name?.includes('GHK');
-  const bacWaterPrice = bacWater?.variants.find((v) => v.dosage_mg === 50)?.price_inr || 800;
+  const bacWaterPrice = bacWater?.variants.find((v) => v.dosage_mg === 10)?.price_inr || 800;
   const purity = PURITY_MAP[product.name] || '99';
   const purityNum = parseFloat(purity);
   const faqs = FAQ_MAP[product.name] || FAQ_MAP['default'];
@@ -766,7 +766,7 @@ export default function ProductDetailPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-slate-900">Bacteriostatic Water</p>
-                      <p className="text-sm text-slate-500">50ML — Pharma Grade · Required for reconstitution</p>
+                      <p className="text-sm text-slate-500">10ML — Pharma Grade · Required for reconstitution</p>
                     </div>
                     <p className="font-bold text-slate-900 flex-shrink-0">{format(bacWaterPrice)}</p>
                   </div>
@@ -804,7 +804,7 @@ export default function ProductDetailPage() {
                     <>
                       <Divider />
                       <div className="flex justify-between text-sm">
-                        <span className="text-slate-600">Bacteriostatic Water (50ML)</span>
+                        <span className="text-slate-600">Bacteriostatic Water (10ML)</span>
                         <span className="font-medium text-slate-900">{format(bacWaterPrice)}</span>
                       </div>
                     </>
@@ -981,7 +981,7 @@ export default function ProductDetailPage() {
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 shadow-[0_-4px_20px_rgba(0,0,0,0.10)] rounded-t-2xl">
         <Card className="rounded-none rounded-t-2xl bg-white shadow-none border-none">
           <CardBody className="px-4 py-3 flex-row items-center gap-4" style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom))' }}>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <p className="text-xs text-slate-500 mb-0.5">Total</p>
               <div className="flex items-baseline gap-2">
                 {discountPercent > 0 && (
@@ -989,7 +989,10 @@ export default function ProductDetailPage() {
                 )}
                 <span className="text-xl font-bold text-slate-900">{format(totalPrice)}</span>
               </div>
-              {discountPercent > 0 && (
+              {bundleAdded && !isBacWater && (
+                <span className="text-[11px] text-emerald-600 font-medium">+ Bac Water 10ML ({format(bacWaterPrice)})</span>
+              )}
+              {discountPercent > 0 && !bundleAdded && (
                 <span className="text-xs text-emerald-600 font-semibold">{discountPercent}% OFF applied</span>
               )}
             </div>

@@ -7,10 +7,10 @@ import {
 } from 'lucide-react';
 
 const BANNERS = [
-  { text: '🚚 Free Shipping Everywhere in India — Always',                    textClass: 'text-cyan-400',    barColor: '#22d3ee' },
-  { text: '🎉 5% Off — Mix 2+ Different Peptides & Spend ₹9,000+',           textClass: 'text-emerald-400', barColor: '#34d399' },
-  { text: '🔬 HPLC-Verified · COA on Every Order · GMP-Certified Source',    textClass: 'text-sky-400',     barColor: '#38bdf8' },
-  { text: '⚡ Usually Ships in 48h · WhatsApp Support · No Middlemen Ever',   textClass: 'text-amber-400',   barColor: '#fbbf24' },
+  { text: '💵 Cash on Delivery (COD) Available Now — Order with Confidence', textClass: 'text-green-400',   barColor: '#4ade80' },
+  { text: '🚚 Free Shipping Everywhere in India — Always',                   textClass: 'text-cyan-400',    barColor: '#22d3ee' },
+  { text: '🎉 5% Off — Mix 2+ Different Peptides & Spend ₹9,000+',          textClass: 'text-emerald-400', barColor: '#34d399' },
+  { text: '⚡ Usually Ships in 48h · WhatsApp Support · No Middlemen Ever',  textClass: 'text-amber-400',   barColor: '#fbbf24' },
 ];
 import { useCart } from '../context/CartContext';
 import { useCurrency, CURRENCIES } from '../context/CurrencyContext';

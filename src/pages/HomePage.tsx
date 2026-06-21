@@ -15,7 +15,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button, Chip } from '@heroui/react';
 import {
   FlaskConical, ShieldCheck, ArrowRight, Star,
-  CheckCircle2, MessageCircle, AlertTriangle,
+  CheckCircle2, MessageCircle, AlertTriangle, Zap, Tag,
 } from 'lucide-react';
 import AnimatedSection from '../components/AnimatedSection';
 import {
@@ -95,17 +95,17 @@ const TESTIMONIALS = [
 
 const FEATURES = [
   {
-    icon: FlaskConical, title: 'HPLC-Verified. Every Batch.',
-    desc: 'Independent third-party purity testing on every single batch. COA included — not on request, just always.',
-    stat: '98%+ Purity', chipColor: 'primary' as const,
+    icon: Zap, title: 'Fastest Delivery in India.',
+    desc: 'Order before 2PM and it ships the same day. Express delivery to Mumbai, Delhi, Bangalore & 500+ cities in 1–2 days.',
+    stat: 'Same-Day Dispatch', chipColor: 'primary' as const,
     bg: 'from-blue-50 to-cyan-50', border: 'border-blue-100',
     iconBg: 'bg-blue-100', iconColor: 'text-blue-700',
     glow: 'rgba(59,130,246,0.1)',
   },
   {
-    icon: ShieldCheck, title: 'Direct from GMP. No Middlemen.',
-    desc: 'Certified GMP manufacturing partners. No markup chains. No mystery suppliers. No "trust me bro" sourcing.',
-    stat: 'GMP Certified Source', chipColor: 'success' as const,
+    icon: Tag, title: 'Lowest Prices in India.',
+    desc: 'No import markup. No middlemen. We source directly so you pay research prices — not the inflated retail rates every other Indian supplier charges.',
+    stat: 'Best Price Guaranteed', chipColor: 'success' as const,
     bg: 'from-emerald-50 to-teal-50', border: 'border-emerald-100',
     iconBg: 'bg-emerald-100', iconColor: 'text-emerald-700',
     glow: 'rgba(16,185,129,0.1)',
@@ -181,9 +181,10 @@ export default function HomePage() {
             transition={{ duration: 0.5, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
           >
             <p className="text-lg md:text-xl text-slate-400 mb-4 leading-relaxed max-w-2xl mx-auto">
-              Fake vials. Useless compounds. Thousands wasted. We couldn't find a single
-              legitimate peptide supplier in India, so we went directly to GMP manufacturers,
-              got HPLC testing done, and made it accessible to everyone.
+              India had no legitimate research peptide source. Everything was grey-market
+              imports with unknown purity and zero accountability. RetraLabs exists to fix
+              that — verified compounds, direct sourcing, shipped to your door faster than
+              anyone else in the country.
             </p>
             <p className="text-slate-500 text-sm italic mb-10">
               That's the whole story. Everything else is just good products at honest prices.
@@ -322,11 +323,11 @@ export default function HomePage() {
               What makes us different
             </p>
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
-              Because the Alternative Is Fake, Unverified Junk.
+              Why Researchers Choose RetraLabs.
             </h2>
             <p className="text-slate-500 mt-3 max-w-xl mx-auto">
-              Every peptide we sell is HPLC-verified, COA-backed, and sourced directly.
-              Radical concept, we know.
+              Fastest delivery. Discreet packaging. Real support.
+              Everything else is just noise.
             </p>
           </AnimatedSection>
 

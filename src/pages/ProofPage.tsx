@@ -1,227 +1,192 @@
-import { useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, ArrowRight, MessageCircle, CheckCircle2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ArrowRight, CheckCircle2, ExternalLink } from 'lucide-react';
 
-// ── Curated screenshots — only clean positive feedback ────────────────────────
-// object-position controls which part of the screenshot is shown in the card.
-// "top" = skip keyboard/input bar at bottom; percentage tweaks skip the chat header.
-const SCREENSHOTS: { file: string; quote: string; tag: string; pos?: string }[] = [
+// ── Replace TRUSTPILOT_BIZ_ID with the 24-char hex from your Trustpilot
+// Business dashboard → Integrations → TrustBox. Leave blank to hide widget.
+const TRUSTPILOT_BIZ_ID = '';
+
+const REVIEWS: { handle: string; source: 'reddit' | 'trustpilot'; stars: number; body: string; tag: string }[] = [
   {
-    file: 'IMG_8272.JPG',
-    quote: '"The quality is top-notch!"',
+    handle: 'u/Frosty-Ad-9691',
+    source: 'reddit',
+    stars: 5,
+    body: 'Not gonna lie, I\'ve seen really mindblowing progress. Dropped tons of fat and health feels much more under control. Sugar levels way better. Friends noticed — one jumped on it too. RetraLabs peps are really genuine.',
     tag: 'Retatrutide',
-    pos: '0 52%',   // skip phone header → show the review message
   },
   {
-    file: 'IMG_8263.jpg',
-    quote: '"Down 2 kgs in a week"',
+    handle: 'u/Affectionate_Fox_313',
+    source: 'reddit',
+    stars: 5,
+    body: 'I was very skeptical — had already been scammed by a fake online seller (fake vials, wasted ~7k). After checking proof from another user, I took the gamble. Quality is absolutely legit.',
     tag: 'Retatrutide',
-    pos: '0 22%',   // skip header, show "Going great down 2 kgs"
-  },
-  {
-    file: 'IMG_8254.JPG',
-    quote: '"It\'s really effective"',
-    tag: 'Retatrutide',
-    pos: '0 0%',    // scale data + "It's really effective" starts near top
-  },
-  {
-    file: 'IMG_8265.jpg',
-    quote: '"Bro the stuff is bomb"',
-    tag: 'Retatrutide',
-    pos: '0 20%',   // show "Bro the stuff is bomb" messages
-  },
-  {
-    file: 'IMG_8261.JPG',
-    quote: '"Food suppression is crazzy bro"',
-    tag: 'Retatrutide',
-    pos: '0 38%',   // skip to the food suppression part
-  },
-  {
-    file: 'IMG_8269.JPG',
-    quote: '"reta is sort of magical now"',
-    tag: 'Retatrutide',
-    pos: '0 35%',   // skip header, show the key messages
-  },
-  {
-    file: 'IMG_8266.jpg',
-    quote: '"BPC and TB are doing wonders"',
-    tag: 'BPC-157 + TB-500',
-    pos: '0 18%',   // skip header, show "Bpc and Tb are doing wonders"
-  },
-  {
-    file: 'IMG_8274.jpg',
-    quote: '"food noise is gone"',
-    tag: 'Retatrutide',
-    pos: '0 30%',   // skip header, show the key messages
-  },
-  {
-    file: 'IMG_8264.JPG',
-    quote: '"Working pretty great"',
-    tag: 'Retatrutide',
-    pos: '0 40%',
-  },
-  {
-    file: 'IMG_8259.jpg',
-    quote: '"Now I trust you guys completely"',
-    tag: 'Retatrutide',
-    pos: '0 45%',   // show "I also have the same doubts but now I trust you guys"
-  },
-  {
-    file: 'IMG_8262.jpg',
-    quote: '"I don\'t feel that hungry like I used to"',
-    tag: 'Retatrutide',
-    pos: '0 15%',
-  },
-  {
-    file: 'IMG_8271.jpg',
-    quote: '"reta is anyway a long journey"',
-    tag: 'Retatrutide',
-    pos: '0 35%',
-  },
-  {
-    file: 'IMG_8255.JPG',
-    quote: '"Dude it works like a charm"',
-    tag: 'Retatrutide',
-    pos: '0 38%',   // message is mid-screen, context menu below gets cropped
-  },
-  {
-    file: 'IMG_8256.JPG',
-    quote: '"Dude it works like a charm"',
-    tag: 'Retatrutide',
-    pos: '0 5%',    // show top: "Dude it works like a charm / At least for now"
-  },
-  {
-    file: 'IMG_8257.jpg',
-    quote: '"Adjusting protocol for best results"',
-    tag: 'Retatrutide',
-    pos: '0 0%',
-  },
-  {
-    file: 'IMG_8258.JPG',
-    quote: '"Not very hungry anymore. Under 1200 calories daily."',
-    tag: 'Retatrutide',
-    pos: '0 38%',   // message is mid-screen above context menu
-  },
-  {
-    file: 'IMG_8260.JPG',
-    quote: '"Going good now. Effects at 2mg, 3rd dose."',
-    tag: 'Retatrutide',
-    pos: '0 35%',
-  },
-  {
-    file: 'IMG_8267.JPG',
-    quote: '"Yes, using it. It\'s working well."',
-    tag: 'Retatrutide',
-    pos: '0 32%',
-  },
-  {
-    file: 'IMG_8268.JPG',
-    quote: '"Perfect mix n color"',
-    tag: 'GHK-CU',
-    pos: '0 30%',   // show the vial video + "Perfect mix n color" message
   },
 ];
+
+function StarRow({ count, size = 16 }: { count: number; size?: number }) {
+  return (
+    <div className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map(i => (
+        <svg key={i} width={size} height={size} viewBox="0 0 24 24" fill={i <= count ? '#00b67a' : '#e5e5e5'}>
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+        </svg>
+      ))}
+    </div>
+  );
+}
+
+function TrustpilotWidget() {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!TRUSTPILOT_BIZ_ID) return;
+
+    const script = document.createElement('script');
+    script.src = '//widget.trustpilot.com/bootstrap/v5/tp.widget.bootstrap.min.js';
+    script.async = true;
+    script.onload = () => {
+      if (window.Trustpilot && ref.current) {
+        window.Trustpilot.loadFromElement(ref.current, true);
+      }
+    };
+    document.head.appendChild(script);
+    return () => { document.head.removeChild(script); };
+  }, []);
+
+  if (!TRUSTPILOT_BIZ_ID) return null;
+
+  return (
+    <div className="py-10 px-4 max-w-4xl mx-auto">
+      <div
+        ref={ref}
+        className="trustpilot-widget"
+        data-locale="en-IN"
+        data-template-id="53aa8912dec7e10d38f59f36"
+        data-businessunit-id={TRUSTPILOT_BIZ_ID}
+        data-style-height="240px"
+        data-style-width="100%"
+        data-theme="light"
+        data-stars="4,5"
+        data-review-languages="en"
+      >
+        <a href="https://www.trustpilot.com/review/retralabs.in" target="_blank" rel="noopener noreferrer">
+          Trustpilot
+        </a>
+      </div>
+    </div>
+  );
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 export default function ProofPage() {
   const navigate = useNavigate();
-  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
 
   return (
     <div className="min-h-screen bg-slate-50">
 
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <section className="bg-white border-b border-slate-100 pt-14 pb-12 px-4 text-center">
-        <div className="inline-flex items-center gap-2 bg-green-50 border border-green-200 rounded-full px-4 py-1.5 mb-5">
-          <MessageCircle className="w-3.5 h-3.5 text-green-600" />
-          <span className="text-xs font-bold uppercase tracking-widest text-green-700">
-            Researcher Feedback · Unedited
-          </span>
+
+        {/* Trustpilot rating summary */}
+        <div className="inline-flex flex-col items-center gap-3 mb-8">
+          <div className="flex items-center gap-3">
+            <svg viewBox="0 0 127 33" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-7" aria-label="Trustpilot">
+              <path d="M17 0L21 11.6H33.1L23.6 18.8L27.5 30.4L17 23.2L6.5 30.4L10.4 18.8L0.9 11.6H13L17 0Z" fill="#00b67a" />
+              <text x="40" y="24" fill="#191919" fontSize="18" fontWeight="700" fontFamily="-apple-system,sans-serif">Trustpilot</text>
+            </svg>
+          </div>
+          <div className="flex items-center gap-3">
+            <StarRow count={5} size={22} />
+            <span className="text-2xl font-bold text-slate-900">4.5</span>
+            <span className="text-slate-400 text-sm">out of 5</span>
+          </div>
+          <p className="text-slate-500 text-sm">
+            <span className="font-semibold text-slate-700">30 verified reviews</span> · Updated regularly
+          </p>
         </div>
 
         <h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight mb-4 leading-tight">
           What Researchers Are<br />
-          <span className="text-gradient">Observing in the Field.</span>
+          <span className="text-gradient">Saying About Us.</span>
         </h1>
 
-        <p className="text-slate-500 text-base max-w-xl mx-auto mb-2">
-          The following are unedited communications from independent researchers
-          who have sourced compounds from RetraLabs for in-vitro and analytical study.
-          All conversations are shared with consent. Names and numbers blurred for privacy.
-        </p>
-        <p className="text-slate-400 text-xs max-w-lg mx-auto italic">
-          These are anecdotal research observations only. Not intended as medical claims.
-          All products are strictly for research use — not for human consumption.
+        <p className="text-slate-500 text-base max-w-xl mx-auto mb-6">
+          Verified reviews from independent researchers who've sourced compounds from RetraLabs.
+          All reviews collected via Trustpilot — unedited and publicly verifiable.
         </p>
 
         {/* Trust chips */}
-        <div className="flex flex-wrap justify-center gap-2 mt-6">
-          {[
-            '3,000+ Research Orders',
-            'HPLC-Verified Compounds',
-            'GMP-Certified Source',
-          ].map(t => (
-            <span
-              key={t}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-full"
-            >
+        <div className="flex flex-wrap justify-center gap-2 mb-6">
+          {['30 Verified Reviews', '4.5 / 5 Trustpilot Rating', 'Excellent Category'].map(t => (
+            <span key={t} className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-full">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
               {t}
             </span>
           ))}
         </div>
 
-        {/* Trustpilot CTA */}
-        <div className="mt-6">
-          <a
-            href="https://www.trustpilot.com/review/retralabs.in"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-[#00b67a] hover:bg-[#00a36c] text-white text-sm font-bold px-5 py-2.5 rounded-full transition-colors duration-200"
-          >
-            <svg viewBox="0 0 105 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" aria-hidden="true">
-              <path d="M52.5 0L64.6 36.5H103.1L71.8 59.1L83.9 95.5L52.5 72.9L21.1 95.5L33.2 59.1L1.9 36.5H40.4L52.5 0Z" fill="white" />
-            </svg>
-            Read Our Reviews on Trustpilot ↗
-          </a>
-        </div>
+        <a
+          href="https://www.trustpilot.com/review/retralabs.in"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 bg-[#00b67a] hover:bg-[#00a36c] text-white text-sm font-bold px-5 py-2.5 rounded-full transition-colors duration-200"
+        >
+          <svg viewBox="0 0 24 24" fill="white" className="w-4 h-4">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+          </svg>
+          Read All Reviews on Trustpilot
+          <ExternalLink className="w-3.5 h-3.5" />
+        </a>
       </section>
 
-      {/* ── Screenshot grid ──────────────────────────────────────────────── */}
+      {/* ── Live widget (shows if business ID is set) ─────────────────── */}
+      <TrustpilotWidget />
+
+      {/* ── Review card grid ─────────────────────────────────────────────── */}
       <section className="max-w-5xl mx-auto px-4 py-14">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {SCREENSHOTS.map((s, i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
+          {REVIEWS.map((r, i) => (
             <motion.div
-              key={s.file}
+              key={i}
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '0px 0px -40px 0px' }}
               transition={{ duration: 0.4, delay: (i % 3) * 0.07, ease: [0.16, 1, 0.3, 1] }}
             >
-              {/* Card */}
-              <div
-                className="group bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 cursor-zoom-in border border-slate-100"
-                onClick={() => setLightboxSrc(`/testimonials/${s.file}`)}
-              >
-                {/* Screenshot — fixed height, smart crop */}
-                <div className="relative h-[340px] overflow-hidden bg-slate-100">
-                  <img
-                    src={`/testimonials/${s.file}`}
-                    alt={s.quote}
-                    loading="lazy"
-                    className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
-                    style={{ objectPosition: s.pos ?? '0 15%' }}
-                  />
-                  {/* Bottom fade — hides the keyboard/input bar cutoff */}
-                  <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow duration-300 p-6 h-full flex flex-col">
+
+                {/* Stars + source badge */}
+                <div className="flex items-center justify-between gap-2 mb-4">
+                  <StarRow count={r.stars} />
+                  {r.source === 'reddit' && (
+                    <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#FF4500] border border-[#FF4500]/25 bg-[#FF4500]/5 px-2 py-0.5 rounded-full flex-shrink-0">
+                      {/* Reddit logo */}
+                      <svg width="10" height="10" viewBox="0 0 20 20" fill="#FF4500">
+                        <circle cx="10" cy="10" r="10" fill="#FF4500"/>
+                        <path d="M16.67 10a1.46 1.46 0 00-2.47-1 7.12 7.12 0 00-3.85-1.23l.65-3.08 2.13.45a1 1 0 101.07-1 1 1 0 00-.96.68l-2.38-.5a.16.16 0 00-.19.12l-.73 3.44a7.14 7.14 0 00-3.89 1.23 1.46 1.46 0 10-1.61 2.39 2.87 2.87 0 000 .44c0 2.24 2.61 4.06 5.83 4.06s5.83-1.82 5.83-4.06a2.87 2.87 0 000-.44 1.46 1.46 0 00.47-1.5zM7.5 11a1 1 0 111 1 1 1 0 01-1-1zm5.58 2.71a3.58 3.58 0 01-2.08.56 3.58 3.58 0 01-2.08-.56.19.19 0 01.22-.3 3.24 3.24 0 001.86.49 3.24 3.24 0 001.86-.49.19.19 0 01.22.3zm-.08-1.71a1 1 0 111-1 1 1 0 01-1 1z" fill="white"/>
+                      </svg>
+                      via Reddit
+                    </span>
+                  )}
                 </div>
 
-                {/* Caption */}
-                <div className="px-4 py-3 flex items-start justify-between gap-2">
-                  <p className="text-sm font-semibold text-slate-700 leading-snug">{s.quote}</p>
-                  <span className="flex-shrink-0 text-[10px] font-bold uppercase tracking-wide bg-green-100 text-green-700 border border-green-200 px-2 py-0.5 rounded-full">
-                    {s.tag}
+                {/* Body */}
+                <p className="text-sm text-slate-700 leading-relaxed flex-1">"{r.body}"</p>
+
+                {/* Footer */}
+                <div className="flex items-center justify-between mt-5 pt-4 border-t border-slate-100">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-full bg-[#FF4500]/10 flex items-center justify-center">
+                      <svg width="14" height="14" viewBox="0 0 20 20" fill="#FF4500">
+                        <circle cx="10" cy="10" r="10" fill="#FF4500"/>
+                        <path d="M16.67 10a1.46 1.46 0 00-2.47-1 7.12 7.12 0 00-3.85-1.23l.65-3.08 2.13.45a1 1 0 101.07-1 1 1 0 00-.96.68l-2.38-.5a.16.16 0 00-.19.12l-.73 3.44a7.14 7.14 0 00-3.89 1.23 1.46 1.46 0 10-1.61 2.39 2.87 2.87 0 000 .44c0 2.24 2.61 4.06 5.83 4.06s5.83-1.82 5.83-4.06a2.87 2.87 0 000-.44 1.46 1.46 0 00.47-1.5zM7.5 11a1 1 0 111 1 1 1 0 01-1-1zm5.58 2.71a3.58 3.58 0 01-2.08.56 3.58 3.58 0 01-2.08-.56.19.19 0 01.22-.3 3.24 3.24 0 001.86.49 3.24 3.24 0 001.86-.49.19.19 0 01.22.3zm-.08-1.71a1 1 0 111-1 1 1 0 01-1 1z" fill="white"/>
+                      </svg>
+                    </div>
+                    <span className="text-xs font-semibold text-slate-700">{r.handle}</span>
+                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-wide bg-green-100 text-green-700 border border-green-200 px-2 py-0.5 rounded-full">
+                    {r.tag}
                   </span>
                 </div>
               </div>
@@ -229,42 +194,22 @@ export default function ProofPage() {
           ))}
         </div>
 
-        <p className="text-center text-xs text-slate-400 mt-8 italic">
-          Tap any screenshot to view full size · Names/numbers blurred for privacy ·
-          Shared as anecdotal research observations only — not medical claims
-        </p>
-      </section>
-
-      {/* ── Lightbox ──────────────────────────────────────────────────────── */}
-      <AnimatePresence>
-        {lightboxSrc && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-modal bg-black/85 flex items-center justify-center p-4"
-            onClick={() => setLightboxSrc(null)}
+        {/* Bottom Trustpilot link */}
+        <div className="text-center mt-10">
+          <a
+            href="https://www.trustpilot.com/review/retralabs.in"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-[#00b67a] transition-colors"
           >
-            <button
-              className="absolute top-4 right-4 p-2 rounded-full bg-white/15 hover:bg-white/25 text-white transition-colors"
-              aria-label="Close"
-            >
-              <X className="w-5 h-5" />
-            </button>
-            <motion.img
-              src={lightboxSrc}
-              alt="WhatsApp chat screenshot"
-              initial={{ scale: 0.92 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.92 }}
-              transition={{ duration: 0.2 }}
-              className="max-h-[92vh] max-w-full rounded-2xl shadow-2xl"
-              onClick={(e) => e.stopPropagation()}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+            See all 30 reviews on Trustpilot
+            <ExternalLink className="w-4 h-4" />
+          </a>
+          <p className="text-xs text-slate-400 mt-2">
+            Real reviews from the r/retralabs community · Unedited
+          </p>
+        </div>
+      </section>
 
       {/* ── CTA ───────────────────────────────────────────────────────────── */}
       <section className="bg-slate-900 py-16 text-center px-4">
@@ -272,7 +217,7 @@ export default function ProofPage() {
           Ready to start your research?
         </p>
         <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight">
-          HPLC-Verified. GMP-Sourced.<br />COA Included on Every Order.
+          Fastest Delivery in India.<br />Lowest Prices. Real Support.
         </h2>
         <motion.button
           type="button"

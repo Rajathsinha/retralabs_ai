@@ -9,7 +9,7 @@ import {
   Divider,
 } from '@heroui/react';
 import { getProductImageUrl, BAC_WATER_IMAGE_URL } from '../utils/imageUrl';
-import { Minus, Plus, Trash2, Check, MessageCircle, Tag, ShoppingBag, ArrowRight, LogIn, UserPlus, X, GraduationCap, Zap, Clock } from 'lucide-react';
+import { Minus, Plus, Trash2, Check, MessageCircle, Tag, ShoppingBag, ArrowRight, LogIn, UserPlus, X, GraduationCap, Zap, Clock, Banknote } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useCurrency } from '../context/CurrencyContext';
@@ -18,6 +18,12 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
 // import UpiQrModal from '../components/UpiQrModal'; // 💳 UPI QR — commented out, re-enable when ready
 
 const FAST_DELIVERY_CHARGE = 800;
+
+function getCodCharge(orderTotal: number): number {
+  if (orderTotal <= 8000)  return 600;
+  if (orderTotal <= 16000) return 1200;
+  return 1500;
+}
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
@@ -51,8 +57,11 @@ export default function CheckoutPage() {
     delivery_option: 'normal',
   });
 
+  const [paymentMethod, setPaymentMethod] = useState<'prepay' | 'cod'>('prepay');
+
   const deliveryCharge = formData.delivery_option === 'fast' ? FAST_DELIVERY_CHARGE : 0;
-  const grandTotal = getTotal() + deliveryCharge;
+  const codCharge      = paymentMethod === 'cod' ? getCodCharge(getTotal() + deliveryCharge) : 0;
+  const grandTotal     = getTotal() + deliveryCharge + codCharge;
 
   /* ── Pre-fill from user profile if signed in ── */
   useEffect(() => {
@@ -120,6 +129,10 @@ export default function CheckoutPage() {
       ? `\n*Delivery: Express (1–2 days, major cities) — +₹${FAST_DELIVERY_CHARGE.toLocaleString('en-IN')}*`
       : `\n*Delivery: Standard (3–4 days Tier 1/2 · 4–6 days remote) — Free*`;
 
+    const paymentLine = paymentMethod === 'cod'
+      ? `\n*Payment: Cash on Delivery — +₹${codCharge.toLocaleString('en-IN')} COD fee*`
+      : `\n*Payment: Online (UPI)*`;
+
     const message =
       `*New Order — RetraLabs.in*\n\n` +
       `*Customer*\n` +
@@ -130,10 +143,11 @@ export default function CheckoutPage() {
       `*Items*\n${lines.join('\n')}` +
       `${discountText}` +
       `${couponText}` +
-      `${deliveryLine}\n\n` +
+      `${deliveryLine}` +
+      `${paymentLine}\n\n` +
       `*Total: ₹${grandTotal.toLocaleString('en-IN')}*` +
       (currency.code !== 'INR' ? ` (~${format(grandTotal)})` : '') +
-      `\n\nPayment via UPI preferred (INR).`;
+      (paymentMethod === 'cod' ? `\n\n⚠️ COD order — please confirm availability before dispatching.` : `\n\nPayment via UPI preferred (INR).`);
 
     setWhatsappUrl(`https://wa.me/918217824384?text=${encodeURIComponent(message)}`);
     setOrderReady(true);
@@ -447,10 +461,9 @@ export default function CheckoutPage() {
               <MessageCircle className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-blue-900 mb-1">One Thing Before We Ship...</h3>
+              <h3 className="text-base font-bold text-blue-900 mb-1">How ordering works</h3>
               <p className="text-sm text-blue-800 leading-relaxed">
-                Online payment through our website is currently unavailable. At the moment, we
-                only accept <strong>UPI payments through WhatsApp</strong>.
+                Fill in your details below, then confirm on WhatsApp. Pay online via <strong>UPI (no extra charge)</strong> or choose <strong>Cash on Delivery</strong> — a small COD fee applies based on order value.
               </p>
             </div>
           </CardBody>
@@ -637,6 +650,18 @@ export default function CheckoutPage() {
                     </span>
                   </div>
 
+                  {/* ── COD charge row ── */}
+                  {paymentMethod === 'cod' && (
+                    <div className="flex justify-between items-center">
+                      <span className="flex items-center gap-1.5 text-sm font-medium text-orange-600">
+                        <Banknote className="w-3.5 h-3.5" />Cash on Delivery fee
+                      </span>
+                      <span className="font-semibold text-sm text-orange-600">
+                        +{format(codCharge)}
+                      </span>
+                    </div>
+                  )}
+
                   <Divider />
 
                   <div className="flex justify-between items-center">
@@ -778,6 +803,68 @@ export default function CheckoutPage() {
                       {formData.delivery_option === 'fast' && (
                         <div className="absolute top-2.5 right-2.5 w-5 h-5 bg-white rounded-full flex items-center justify-center">
                           <Check className="w-3 h-3 text-amber-500" />
+                        </div>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* ── Payment Method ── */}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Payment Method <span className="text-red-500">*</span>
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* Prepay */}
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('prepay')}
+                      className={`relative flex flex-col items-start gap-1.5 p-4 rounded-xl border-2 text-left transition-all ${
+                        paymentMethod === 'prepay'
+                          ? 'border-slate-900 bg-slate-900 text-white shadow-lg'
+                          : 'border-slate-200 bg-white text-slate-700 hover:border-slate-400'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Zap className={`w-4 h-4 ${paymentMethod === 'prepay' ? 'text-emerald-400' : 'text-slate-500'}`} />
+                        <span className="text-sm font-bold">Pay Online</span>
+                      </div>
+                      <p className={`text-xs ${paymentMethod === 'prepay' ? 'text-slate-300' : 'text-slate-500'}`}>
+                        UPI / Bank transfer via WhatsApp
+                      </p>
+                      <span className={`text-base font-black ${paymentMethod === 'prepay' ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                        FREE
+                      </span>
+                      {paymentMethod === 'prepay' && (
+                        <div className="absolute top-2.5 right-2.5 w-5 h-5 bg-white rounded-full flex items-center justify-center">
+                          <Check className="w-3 h-3 text-slate-900" />
+                        </div>
+                      )}
+                    </button>
+
+                    {/* COD */}
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('cod')}
+                      className={`relative flex flex-col items-start gap-1.5 p-4 rounded-xl border-2 text-left transition-all ${
+                        paymentMethod === 'cod'
+                          ? 'border-orange-500 bg-orange-500 text-white shadow-lg shadow-orange-500/30'
+                          : 'border-slate-200 bg-white text-slate-700 hover:border-orange-400'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Banknote className={`w-4 h-4 ${paymentMethod === 'cod' ? 'text-white' : 'text-orange-500'}`} />
+                        <span className="text-sm font-bold">Cash on Delivery</span>
+                      </div>
+                      <p className={`text-xs ${paymentMethod === 'cod' ? 'text-orange-100' : 'text-slate-500'}`}>
+                        Pay in cash when it arrives
+                      </p>
+                      <span className={`text-base font-black ${paymentMethod === 'cod' ? 'text-white' : 'text-orange-600'}`}>
+                        +{format(getCodCharge(getTotal() + deliveryCharge))}
+                      </span>
+                      {paymentMethod === 'cod' && (
+                        <div className="absolute top-2.5 right-2.5 w-5 h-5 bg-white rounded-full flex items-center justify-center">
+                          <Check className="w-3 h-3 text-orange-500" />
                         </div>
                       )}
                     </button>
