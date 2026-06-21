@@ -297,10 +297,13 @@ export default function CheckoutPage() {
     const itemsSummary = cartSnapshot
       .map(i => `${i.product.name} ${i.variant.dosage_mg}mg x${i.quantity} = ₹${(i.variant.price_inr * i.quantity).toLocaleString('en-IN')}`)
       .join('\n');
+    const itemsSummaryFlat = cartSnapshot
+      .map(i => `${i.product.name} ${i.variant.dosage_mg}mg x${i.quantity}`)
+      .join(', ');
 
     const interaktValues = [
       formData.customer_name,
-      itemsSummary,
+      itemsSummaryFlat,
       `₹${grandTotal.toLocaleString('en-IN')}`,
       `${formData.shipping_address}, PIN: ${formData.pincode}`,
     ];
@@ -365,10 +368,13 @@ export default function CheckoutPage() {
     const itemsSummary = cartSnapshot
       .map(i => `${i.product.name} ${i.variant.dosage_mg}mg x${i.quantity} = ₹${(i.variant.price_inr * i.quantity).toLocaleString('en-IN')}`)
       .join('\n');
+    const itemsSummaryFlat = cartSnapshot
+      .map(i => `${i.product.name} ${i.variant.dosage_mg}mg x${i.quantity}`)
+      .join(', ');
 
     const interaktValues = [
       formData.customer_name,
-      itemsSummary,
+      itemsSummaryFlat,
       `₹${grandTotal.toLocaleString('en-IN')}`,
       `${formData.shipping_address}, PIN: ${formData.pincode}`,
     ];
