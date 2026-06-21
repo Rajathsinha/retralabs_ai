@@ -291,9 +291,15 @@ export default function CheckoutPage() {
     if (orderSaving.current || confirming) return;
     orderSaving.current = true;
     setConfirming(true);
-    try {
 
+    // Capture everything before any awaits so values are never stale
     const cartSnapshot = cart.map(item => ({ ...item }));
+    const snapTotal = grandTotal;
+    const snapDeliveryCharge = deliveryCharge;
+    const snapCodCharge = codCharge;
+    const snapPaymentMethod = paymentMethod;
+    const snapFormData = { ...formData };
+
     const itemsSummary = cartSnapshot
       .map(i => `${i.product.name} ${i.variant.dosage_mg}mg x${i.quantity} = ₹${(i.variant.price_inr * i.quantity).toLocaleString('en-IN')}`)
       .join('\n');
@@ -301,54 +307,54 @@ export default function CheckoutPage() {
       .map(i => `${i.product.name} ${i.variant.dosage_mg}mg x${i.quantity}`)
       .join(', ');
 
+    try {
     const interaktValues = [
-      formData.customer_name,
+      snapFormData.customer_name,
       itemsSummaryFlat,
-      `₹${grandTotal.toLocaleString('en-IN')}`,
-      `${formData.shipping_address}, PIN: ${formData.pincode}`,
+      `₹${snapTotal.toLocaleString('en-IN')}`,
+      `${snapFormData.shipping_address}, PIN: ${snapFormData.pincode}`,
     ];
 
     const emailHtml = buildOrderEmailHtml({
-      name: formData.customer_name,
-      phone: formData.customer_phone,
-      address: `${formData.shipping_address}, PIN: ${formData.pincode}`,
+      name: snapFormData.customer_name,
+      phone: snapFormData.customer_phone,
+      address: `${snapFormData.shipping_address}, PIN: ${snapFormData.pincode}`,
       items: itemsSummary,
-      total: grandTotal,
-      delivery: formData.delivery_option === 'fast' ? 'Express' : 'Standard',
-      payment: paymentMethod === 'cod' ? 'Cash on Delivery' : 'UPI / Online',
+      total: snapTotal,
+      delivery: snapFormData.delivery_option === 'fast' ? 'Express' : 'Standard',
+      payment: snapPaymentMethod === 'cod' ? 'Cash on Delivery' : 'UPI / Online',
     });
 
     try {
       await Promise.all([
         saveToAirtable({
-          'Name':         formData.customer_name,
-          'Email':        formData.customer_email,
-          'Phone':        formData.customer_phone,
-          'Address':      `${formData.shipping_address}, PIN: ${formData.pincode}`,
-          'Items':        itemsSummary,
-          'Total':    grandTotal,
-          'Payment':      paymentMethod === 'cod' ? 'COD' : 'UPI/Prepay',
-          'Delivery':     formData.delivery_option === 'fast' ? 'Express' : 'Standard',
-          'Referral':     formData.referral_source,
-          'Status':       'New',
-          'Created': new Date().toISOString().slice(0, 10),
+          'Name':     snapFormData.customer_name,
+          'Email':    snapFormData.customer_email,
+          'Phone':    snapFormData.customer_phone,
+          'Address':  `${snapFormData.shipping_address}, PIN: ${snapFormData.pincode}`,
+          'Items':    itemsSummary,
+          'Total':    snapTotal,
+          'Payment':  snapPaymentMethod === 'cod' ? 'COD' : 'UPI/Prepay',
+          'Delivery': snapFormData.delivery_option === 'fast' ? 'Express' : 'Standard',
+          'Referral': snapFormData.referral_source,
+          'Status':   'New',
+          'Created':  new Date().toISOString().slice(0, 10),
         }),
-        sendInteraktWhatsApp(formData.customer_phone, interaktValues),
-        sendResendEmail(formData.customer_email, 'Your RetraLabs Order is Confirmed!', emailHtml),
+        sendInteraktWhatsApp(snapFormData.customer_phone, interaktValues),
+        sendResendEmail(snapFormData.customer_email, 'Your RetraLabs Order is Confirmed!', emailHtml),
       ]);
     } catch (_) {
       // non-blocking
     }
 
-      const snap = cart.map(i => `${i.product.name} ${i.variant.dosage_mg}mg x${i.quantity}`).join(', ');
       setOrderSnapshot({
-        items: snap,
-        total: grandTotal,
-        cartItems: cart.map(i => ({ name: i.product.name, config: i.variant.vial_configuration || `${i.variant.dosage_mg}mg`, qty: i.quantity, price: i.variant.price_inr })),
-        deliveryOption: formData.delivery_option,
-        paymentMethod,
-        deliveryCharge,
-        codCharge,
+        items: itemsSummaryFlat,
+        total: snapTotal,
+        cartItems: cartSnapshot.map(i => ({ name: i.product.name, config: i.variant.vial_configuration || `${i.variant.dosage_mg}mg`, qty: i.quantity, price: i.variant.price_inr })),
+        deliveryOption: snapFormData.delivery_option,
+        paymentMethod: snapPaymentMethod,
+        deliveryCharge: snapDeliveryCharge,
+        codCharge: snapCodCharge,
       });
       clearCart();
       localStorage.removeItem('rl_checkout_form');
@@ -364,7 +370,12 @@ export default function CheckoutPage() {
     if (orderSaving.current) return;
     orderSaving.current = true;
 
+    // Capture everything before any awaits
     const cartSnapshot = cart.map(item => ({ ...item }));
+    const snapTotal = grandTotal;
+    const snapDeliveryCharge = deliveryCharge;
+    const snapFormData = { ...formData };
+
     const itemsSummary = cartSnapshot
       .map(i => `${i.product.name} ${i.variant.dosage_mg}mg x${i.quantity} = ₹${(i.variant.price_inr * i.quantity).toLocaleString('en-IN')}`)
       .join('\n');
@@ -373,19 +384,19 @@ export default function CheckoutPage() {
       .join(', ');
 
     const interaktValues = [
-      formData.customer_name,
+      snapFormData.customer_name,
       itemsSummaryFlat,
-      `₹${grandTotal.toLocaleString('en-IN')}`,
-      `${formData.shipping_address}, PIN: ${formData.pincode}`,
+      `₹${snapTotal.toLocaleString('en-IN')}`,
+      `${snapFormData.shipping_address}, PIN: ${snapFormData.pincode}`,
     ];
 
     const emailHtml = buildOrderEmailHtml({
-      name: formData.customer_name,
-      phone: formData.customer_phone,
-      address: `${formData.shipping_address}, PIN: ${formData.pincode}`,
+      name: snapFormData.customer_name,
+      phone: snapFormData.customer_phone,
+      address: `${snapFormData.shipping_address}, PIN: ${snapFormData.pincode}`,
       items: itemsSummary,
-      total: grandTotal,
-      delivery: formData.delivery_option === 'fast' ? 'Express' : 'Standard',
+      total: snapTotal,
+      delivery: snapFormData.delivery_option === 'fast' ? 'Express' : 'Standard',
       payment: 'UPI QR',
       txnRef,
     });
@@ -393,21 +404,21 @@ export default function CheckoutPage() {
     try {
       const [recordId] = await Promise.all([
         saveToAirtable({
-          'Name':         formData.customer_name,
-          'Email':        formData.customer_email,
-          'Phone':        formData.customer_phone,
-          'Address':      `${formData.shipping_address}, PIN: ${formData.pincode}`,
-          'Items':        itemsSummary,
-          'Total':    grandTotal,
-          'Payment':      'UPI QR',
-          'Delivery':     formData.delivery_option === 'fast' ? 'Express' : 'Standard',
-          'Referral':     formData.referral_source,
-          'Transaction':  txnRef,
-          'Status':       'Paid',
-          'Created': new Date().toISOString().slice(0, 10),
+          'Name':        snapFormData.customer_name,
+          'Email':       snapFormData.customer_email,
+          'Phone':       snapFormData.customer_phone,
+          'Address':     `${snapFormData.shipping_address}, PIN: ${snapFormData.pincode}`,
+          'Items':       itemsSummary,
+          'Total':       snapTotal,
+          'Payment':     'UPI QR',
+          'Delivery':    snapFormData.delivery_option === 'fast' ? 'Express' : 'Standard',
+          'Referral':    snapFormData.referral_source,
+          'Transaction': txnRef,
+          'Status':      'Paid',
+          'Created':     new Date().toISOString().slice(0, 10),
         }),
-        sendInteraktWhatsApp(formData.customer_phone, interaktValues),
-        sendResendEmail(formData.customer_email, 'Your RetraLabs Order is Confirmed!', emailHtml),
+        sendInteraktWhatsApp(snapFormData.customer_phone, interaktValues),
+        sendResendEmail(snapFormData.customer_email, 'Your RetraLabs Order is Confirmed!', emailHtml),
       ]);
       if (recordId && screenshot) {
         await uploadScreenshot(recordId, screenshot);
@@ -416,14 +427,13 @@ export default function CheckoutPage() {
       // non-blocking
     }
 
-    const snap = cart.map(i => `${i.product.name} ${i.variant.dosage_mg}mg x${i.quantity}`).join(', ');
     setOrderSnapshot({
-      items: snap,
-      total: grandTotal,
-      cartItems: cart.map(i => ({ name: i.product.name, config: i.variant.vial_configuration || `${i.variant.dosage_mg}mg`, qty: i.quantity, price: i.variant.price_inr })),
-      deliveryOption: formData.delivery_option,
+      items: itemsSummaryFlat,
+      total: snapTotal,
+      cartItems: cartSnapshot.map(i => ({ name: i.product.name, config: i.variant.vial_configuration || `${i.variant.dosage_mg}mg`, qty: i.quantity, price: i.variant.price_inr })),
+      deliveryOption: snapFormData.delivery_option,
       paymentMethod: 'prepay',
-      deliveryCharge,
+      deliveryCharge: snapDeliveryCharge,
       codCharge: 0,
     });
     clearCart();
