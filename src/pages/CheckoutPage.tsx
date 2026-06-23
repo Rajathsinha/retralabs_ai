@@ -39,13 +39,22 @@ async function uploadScreenshot(recordId: string, file: File) {
   const token  = import.meta.env.VITE_AIRTABLE_TOKEN;
   const baseId = import.meta.env.VITE_AIRTABLE_BASE_ID;
   if (!token || !baseId) return;
-  const form = new FormData();
-  form.append('file', file, file.name);
-  form.append('filename', file.name);
-  form.append('contentType', file.type);
+  const base64 = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      resolve(result.split(',')[1]); // strip "data:image/...;base64," prefix
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
   await fetch(
     `https://content.airtable.com/v0/${baseId}/${recordId}/Screenshot/uploadAttachment`,
-    { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: form }
+    {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contentType: file.type, filename: file.name, file: base64 }),
+    }
   );
 }
 
