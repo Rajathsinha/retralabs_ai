@@ -106,6 +106,12 @@ export default function HomePage() {
         @keyframes hp-spin  { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
         @keyframes hp-glow  { 0%,100%{opacity:.5} 50%{opacity:1} }
         @keyframes hp-shimmer { 0%{background-position:-400% center} 100%{background-position:400% center} }
+        .hp-hero-grid { display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center; min-height:560px; }
+        .hp-hero-visual { display:flex; }
+        @media (max-width: 768px) {
+          .hp-hero-grid { grid-template-columns:1fr; min-height:auto; gap:0; }
+          .hp-hero-visual { display:none; }
+        }
       `}</style>
 
       {/* ═══════════════════════════ HERO ═══════════════════════════ */}
@@ -127,7 +133,7 @@ export default function HomePage() {
         </div>
 
         <div style={{ maxWidth:1200, margin:'0 auto', padding:'0 24px', position:'relative' }}>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:48, alignItems:'center', minHeight:560 }}>
+          <div className="hp-hero-grid">
 
             {/* ── Left column ── */}
             <div>
@@ -225,7 +231,8 @@ export default function HomePage() {
             {/* ── Right column — visual ── */}
             <motion.div
               initial={{ opacity:0, x:24 }} animate={{ opacity:1, x:0 }} transition={{ duration:.7, delay:.2, ease:[.16,1,.3,1] }}
-              style={{ position:'relative', display:'flex', alignItems:'center', justifyContent:'center', height:520 }}
+              className="hp-hero-visual"
+              style={{ position:'relative', alignItems:'center', justifyContent:'center', height:520 }}
             >
               {/* Outer glow ring */}
               <div style={{
