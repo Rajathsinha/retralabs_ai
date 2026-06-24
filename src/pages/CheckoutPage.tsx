@@ -232,7 +232,6 @@ export default function CheckoutPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (cart.length === 0) return;
-    setSubmitting(true);
     if (formData.pincode.length !== 6) {
       alert('Please enter a valid 6-digit PIN code.');
       return;
@@ -241,6 +240,7 @@ export default function CheckoutPage() {
       document.getElementById('referral-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
+    setSubmitting(true);
 
     const lines = cart.map(
       (item) => {
