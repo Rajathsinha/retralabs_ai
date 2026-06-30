@@ -31,7 +31,7 @@ async function patchStatus(recordId: string, status: string) {
 }
 
 function exportCsv(records: AirtableRecord[]) {
-  const cols = ['Date', 'Name', 'Phone', 'Email', 'Items', 'Total (₹)', 'Payment', 'Transaction', 'Status', 'Address', 'Delivery'];
+  const cols = ['Date', 'Name', 'Phone', 'Email', 'Items', 'Total', 'Payment', 'Transaction', 'Status', 'Address', 'Delivery'];
   const header = cols.join(',');
   const rows = records.map(r =>
     cols.map(c => {
@@ -135,7 +135,7 @@ export default function AdminPage() {
     { key: 'Phone', label: 'Phone', width: 110 },
     { key: 'Email', label: 'Email', width: 180 },
     { key: 'Items', label: 'Items', width: 220 },
-    { key: 'Total (₹)', label: 'Total (₹)', width: 90 },
+    { key: 'Total', label: 'Total (₹)', width: 90 },
     { key: 'Payment', label: 'Payment', width: 100 },
     { key: 'Transaction', label: 'Txn Ref', width: 130 },
     { key: 'Screenshot', label: 'Screenshot', width: 110 },
@@ -249,7 +249,7 @@ export default function AdminPage() {
                       </div>
                     ) : c.key === 'Items' ? (
                       <span style={{ color: '#94a3b8', whiteSpace: 'pre-line' }}>{String(r.fields[c.key] ?? '—')}</span>
-                    ) : c.key === 'Total (₹)' ? (
+                    ) : c.key === 'Total' ? (
                       <span style={{ color: '#00C896', fontWeight: 700 }}>₹{Number(r.fields[c.key] || 0).toLocaleString('en-IN')}</span>
                     ) : (
                       <span style={{ color: '#cbd5e1' }}>{String(r.fields[c.key] ?? '—')}</span>
