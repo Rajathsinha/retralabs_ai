@@ -21,10 +21,10 @@ const FAST_DELIVERY_CHARGE = 800;
 const WHATSAPP_SUPPORT_NUMBER = '918217824384';
 
 // ── Airtable ────────────────────────────────────────────────────────────────
-async function saveToAirtable(payload: Record<string, unknown>): Promise<string | null> {
+async function saveToAirtable(payload: Record<string, unknown>, tableName?: string): Promise<string | null> {
   const token  = import.meta.env.VITE_AIRTABLE_TOKEN;
   const baseId = import.meta.env.VITE_AIRTABLE_BASE_ID;
-  const table  = import.meta.env.VITE_AIRTABLE_TABLE  || 'Orders';
+  const table  = tableName || import.meta.env.VITE_AIRTABLE_TABLE || 'Orders';
   if (!token || !baseId) return null;
   const res = await fetch(`https://api.airtable.com/v0/${baseId}/${encodeURIComponent(table)}`, {
     method: 'POST',
@@ -308,7 +308,7 @@ export default function CheckoutPage() {
     });
 
     try {
-      await Promise.all([
+      const saves: Promise<unknown>[] = [
         saveToAirtable({
           'Name':         formData.customer_name,
           'Email':        formData.customer_email,
@@ -325,7 +325,17 @@ export default function CheckoutPage() {
         }),
         sendInteraktWhatsApp(formData.customer_phone, interaktValues),
         sendResendEmail(formData.customer_email, 'Your RetraLabs Order is Confirmed!', emailHtml),
-      ]);
+      ];
+      if (paymentMethod === 'cod') {
+        saves.push(saveToAirtable({
+          'Name':          formData.customer_name,
+          'Phone No':      formData.customer_phone,
+          'Address':       `${formData.shipping_address}, PIN: ${formData.pincode}`,
+          'Order Details': itemsSummary,
+          'Amount':        grandTotal,
+        }, 'COD Orders'));
+      }
+      await Promise.all(saves);
     } catch (_) {
       // non-blocking
     }
