@@ -29,7 +29,7 @@ async function saveToAirtable(payload: Record<string, unknown>, tableName?: stri
   const res = await fetch(`https://api.airtable.com/v0/${baseId}/${encodeURIComponent(table)}`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ fields: payload }),
+    body: JSON.stringify({ fields: payload, typecast: true }),
   });
   const json = await res.json();
   return json.id || null;
@@ -39,13 +39,22 @@ async function uploadScreenshot(recordId: string, file: File) {
   const token  = import.meta.env.VITE_AIRTABLE_TOKEN;
   const baseId = import.meta.env.VITE_AIRTABLE_BASE_ID;
   if (!token || !baseId) return;
-  const form = new FormData();
-  form.append('file', file, file.name);
-  form.append('filename', file.name);
-  form.append('contentType', file.type);
+  const base64 = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      resolve(result.split(',')[1]); // strip "data:image/...;base64," prefix
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
   await fetch(
     `https://content.airtable.com/v0/${baseId}/${recordId}/Screenshot/uploadAttachment`,
-    { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: form }
+    {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contentType: file.type, filename: file.name, file: base64 }),
+    }
   );
 }
 
@@ -195,7 +204,15 @@ export default function CheckoutPage() {
   const [orderSent,   setOrderSent]   = useState(false); // step 3: done
   const [savedOrderId, setSavedOrderId] = useState<string | null>(null); // Supabase order ID
   const [showQrModal, setShowQrModal] = useState(false);
-  const [orderSnapshot, setOrderSnapshot] = useState<{ items: string; total: number } | null>(null);
+  const [orderSnapshot, setOrderSnapshot] = useState<{
+    items: string;
+    total: number;
+    cartItems: Array<{ name: string; config: string; qty: number; price: number }>;
+    deliveryOption: string;
+    paymentMethod: 'prepay' | 'cod';
+    deliveryCharge: number;
+    codCharge: number;
+  } | null>(null);
   const orderSaving = useRef(false); // prevent double-save
 
   // coupon input state
@@ -215,7 +232,6 @@ export default function CheckoutPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (cart.length === 0) return;
-    setSubmitting(true);
     if (formData.pincode.length !== 6) {
       alert('Please enter a valid 6-digit PIN code.');
       return;
@@ -224,6 +240,7 @@ export default function CheckoutPage() {
       document.getElementById('referral-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
+    setSubmitting(true);
 
     const lines = cart.map(
       (item) => {
@@ -283,65 +300,71 @@ export default function CheckoutPage() {
     if (orderSaving.current || confirming) return;
     orderSaving.current = true;
     setConfirming(true);
-    try {
 
+    // Capture everything before any awaits so values are never stale
     const cartSnapshot = cart.map(item => ({ ...item }));
+    const snapTotal = grandTotal;
+    const snapDeliveryCharge = deliveryCharge;
+    const snapCodCharge = codCharge;
+    const snapPaymentMethod = paymentMethod;
+    const snapFormData = { ...formData };
+
     const itemsSummary = cartSnapshot
       .map(i => `${i.product.name} ${i.variant.dosage_mg}mg x${i.quantity} = ₹${(i.variant.price_inr * i.quantity).toLocaleString('en-IN')}`)
       .join('\n');
+    const itemsSummaryFlat = cartSnapshot
+      .map(i => `${i.product.name} ${i.variant.dosage_mg}mg x${i.quantity}`)
+      .join(', ');
 
+    try {
     const interaktValues = [
-      formData.customer_name,
-      itemsSummary,
-      `₹${grandTotal.toLocaleString('en-IN')}`,
-      `${formData.shipping_address}, PIN: ${formData.pincode}`,
+      snapFormData.customer_name,
+      itemsSummaryFlat,
+      `₹${snapTotal.toLocaleString('en-IN')}`,
+      `${snapFormData.shipping_address}, PIN: ${snapFormData.pincode}`,
     ];
 
     const emailHtml = buildOrderEmailHtml({
-      name: formData.customer_name,
-      phone: formData.customer_phone,
-      address: `${formData.shipping_address}, PIN: ${formData.pincode}`,
+      name: snapFormData.customer_name,
+      phone: snapFormData.customer_phone,
+      address: `${snapFormData.shipping_address}, PIN: ${snapFormData.pincode}`,
       items: itemsSummary,
-      total: grandTotal,
-      delivery: formData.delivery_option === 'fast' ? 'Express' : 'Standard',
-      payment: paymentMethod === 'cod' ? 'Cash on Delivery' : 'UPI / Online',
+      total: snapTotal,
+      delivery: snapFormData.delivery_option === 'fast' ? 'Express' : 'Standard',
+      payment: snapPaymentMethod === 'cod' ? 'Cash on Delivery' : 'UPI / Online',
     });
 
     try {
       const saves: Promise<unknown>[] = [
         saveToAirtable({
-          'Name':     formData.customer_name,
-          'Email':    formData.customer_email,
-          'Phone':    formData.customer_phone,
-          'Address':  `${formData.shipping_address}, PIN: ${formData.pincode}`,
+          'Name':     snapFormData.customer_name,
+          'Email':    snapFormData.customer_email,
+          'Phone':    snapFormData.customer_phone,
+          'Address':  `${snapFormData.shipping_address}, PIN: ${snapFormData.pincode}`,
           'Items':    itemsSummary,
-          'Total (₹)': grandTotal,
-          'Payment':  paymentMethod === 'cod' ? 'COD' : 'UPI/Prepay',
-          'Delivery': formData.delivery_option === 'fast' ? 'Express' : 'Standard',
-          'Referral': formData.referral_source,
+          'Total':    snapTotal,
+          'Payment':  snapPaymentMethod === 'cod' ? 'COD' : 'UPI/Prepay',
+          'Delivery': snapFormData.delivery_option === 'fast' ? 'Express' : 'Standard',
+          'Referral': snapFormData.referral_source,
           'Status':   'New',
-          'Created':  new Date().toISOString(),
+          'Created':  new Date().toISOString().slice(0, 10),
         }),
-        sendInteraktWhatsApp(formData.customer_phone, interaktValues),
-        sendResendEmail(formData.customer_email, 'Your RetraLabs Order is Confirmed!', emailHtml),
-      ];
-      if (paymentMethod === 'cod') {
-        saves.push(saveToAirtable({
-          'Name':          formData.customer_name,
-          'Phone':         formData.customer_phone,
-          'Address':       `${formData.shipping_address}, PIN: ${formData.pincode}`,
-          'Order Details': itemsSummary,
-          'Amount':        grandTotal,
-          'Date':          new Date().toISOString().slice(0, 10),
-        }, 'COD Orders'));
-      }
-      await Promise.all(saves);
+        sendInteraktWhatsApp(snapFormData.customer_phone, interaktValues),
+        sendResendEmail(snapFormData.customer_email, 'Your RetraLabs Order is Confirmed!', emailHtml),
+      ]);
     } catch (_) {
       // non-blocking
     }
 
-      const snap = cart.map(i => `${i.product.name} ${i.variant.dosage_mg}mg x${i.quantity}`).join(', ');
-      setOrderSnapshot({ items: snap, total: grandTotal });
+      setOrderSnapshot({
+        items: itemsSummaryFlat,
+        total: snapTotal,
+        cartItems: cartSnapshot.map(i => ({ name: i.product.name, config: i.variant.vial_configuration || `${i.variant.dosage_mg}mg`, qty: i.quantity, price: i.variant.price_inr })),
+        deliveryOption: snapFormData.delivery_option,
+        paymentMethod: snapPaymentMethod,
+        deliveryCharge: snapDeliveryCharge,
+        codCharge: snapCodCharge,
+      });
       clearCart();
       localStorage.removeItem('rl_checkout_form');
       setOrderSent(true);
@@ -356,25 +379,33 @@ export default function CheckoutPage() {
     if (orderSaving.current) return;
     orderSaving.current = true;
 
+    // Capture everything before any awaits
     const cartSnapshot = cart.map(item => ({ ...item }));
+    const snapTotal = grandTotal;
+    const snapDeliveryCharge = deliveryCharge;
+    const snapFormData = { ...formData };
+
     const itemsSummary = cartSnapshot
       .map(i => `${i.product.name} ${i.variant.dosage_mg}mg x${i.quantity} = ₹${(i.variant.price_inr * i.quantity).toLocaleString('en-IN')}`)
       .join('\n');
+    const itemsSummaryFlat = cartSnapshot
+      .map(i => `${i.product.name} ${i.variant.dosage_mg}mg x${i.quantity}`)
+      .join(', ');
 
     const interaktValues = [
-      formData.customer_name,
-      itemsSummary,
-      `₹${grandTotal.toLocaleString('en-IN')}`,
-      `${formData.shipping_address}, PIN: ${formData.pincode}`,
+      snapFormData.customer_name,
+      itemsSummaryFlat,
+      `₹${snapTotal.toLocaleString('en-IN')}`,
+      `${snapFormData.shipping_address}, PIN: ${snapFormData.pincode}`,
     ];
 
     const emailHtml = buildOrderEmailHtml({
-      name: formData.customer_name,
-      phone: formData.customer_phone,
-      address: `${formData.shipping_address}, PIN: ${formData.pincode}`,
+      name: snapFormData.customer_name,
+      phone: snapFormData.customer_phone,
+      address: `${snapFormData.shipping_address}, PIN: ${snapFormData.pincode}`,
       items: itemsSummary,
-      total: grandTotal,
-      delivery: formData.delivery_option === 'fast' ? 'Express' : 'Standard',
+      total: snapTotal,
+      delivery: snapFormData.delivery_option === 'fast' ? 'Express' : 'Standard',
       payment: 'UPI QR',
       txnRef,
     });
@@ -382,21 +413,21 @@ export default function CheckoutPage() {
     try {
       const [recordId] = await Promise.all([
         saveToAirtable({
-          'Name':      formData.customer_name,
-          'Email':     formData.customer_email,
-          'Phone':     formData.customer_phone,
-          'Address':   `${formData.shipping_address}, PIN: ${formData.pincode}`,
-          'Items':     itemsSummary,
-          'Total (₹)': grandTotal,
-          'Payment':   'UPI QR',
-          'Delivery':  formData.delivery_option === 'fast' ? 'Express' : 'Standard',
-          'Referral':  formData.referral_source,
+          'Name':        snapFormData.customer_name,
+          'Email':       snapFormData.customer_email,
+          'Phone':       snapFormData.customer_phone,
+          'Address':     `${snapFormData.shipping_address}, PIN: ${snapFormData.pincode}`,
+          'Items':       itemsSummary,
+          'Total':       snapTotal,
+          'Payment':     'UPI QR',
+          'Delivery':    snapFormData.delivery_option === 'fast' ? 'Express' : 'Standard',
+          'Referral':    snapFormData.referral_source,
           'Transaction': txnRef,
-          'Status':    'Paid',
-          'Created':   new Date().toISOString(),
+          'Status':      'Paid',
+          'Created':     new Date().toISOString().slice(0, 10),
         }),
-        sendInteraktWhatsApp(formData.customer_phone, interaktValues),
-        sendResendEmail(formData.customer_email, 'Your RetraLabs Order is Confirmed!', emailHtml),
+        sendInteraktWhatsApp(snapFormData.customer_phone, interaktValues),
+        sendResendEmail(snapFormData.customer_email, 'Your RetraLabs Order is Confirmed!', emailHtml),
       ]);
       if (recordId && screenshot) {
         await uploadScreenshot(recordId, screenshot);
@@ -405,8 +436,15 @@ export default function CheckoutPage() {
       // non-blocking
     }
 
-    const snap = cart.map(i => `${i.product.name} ${i.variant.dosage_mg}mg x${i.quantity}`).join(', ');
-    setOrderSnapshot({ items: snap, total: grandTotal });
+    setOrderSnapshot({
+      items: itemsSummaryFlat,
+      total: snapTotal,
+      cartItems: cartSnapshot.map(i => ({ name: i.product.name, config: i.variant.vial_configuration || `${i.variant.dosage_mg}mg`, qty: i.quantity, price: i.variant.price_inr })),
+      deliveryOption: snapFormData.delivery_option,
+      paymentMethod: 'prepay',
+      deliveryCharge: snapDeliveryCharge,
+      codCharge: 0,
+    });
     clearCart();
     localStorage.removeItem('rl_checkout_form');
     setShowQrModal(false);
@@ -416,7 +454,11 @@ export default function CheckoutPage() {
 
   /* ── Step 3: order confirmed screen ── */
   if (orderSent) {
-    const isCod = paymentMethod === 'cod';
+    const snap = orderSnapshot;
+    const isCod = (snap?.paymentMethod ?? paymentMethod) === 'cod';
+    const snapDeliveryCharge = snap?.deliveryCharge ?? 0;
+    const snapCodCharge = snap?.codCharge ?? 0;
+    const snapTotal = snap?.total ?? 0;
     return (
       <div className="min-h-screen bg-slate-50 px-4 py-12">
         <div className="max-w-lg mx-auto">
@@ -472,10 +514,10 @@ export default function CheckoutPage() {
 
             <div className="mb-4 pb-4 border-b border-slate-100 space-y-2">
               <p className="text-xs text-slate-500 mb-2">Items Ordered</p>
-              {cart.map(item => (
-                <div key={item.variant.id} className="flex justify-between text-sm">
-                  <span className="text-slate-700">{item.product.name} {item.variant.vial_configuration || `${item.variant.dosage_mg}mg`} ×{item.quantity}</span>
-                  <span className="font-semibold text-slate-900">₹{(item.variant.price_inr * item.quantity).toLocaleString('en-IN')}</span>
+              {snap?.cartItems.map((item, idx) => (
+                <div key={idx} className="flex justify-between text-sm">
+                  <span className="text-slate-700">{item.name} {item.config} ×{item.qty}</span>
+                  <span className="font-semibold text-slate-900">₹{(item.price * item.qty).toLocaleString('en-IN')}</span>
                 </div>
               ))}
             </div>
@@ -483,15 +525,15 @@ export default function CheckoutPage() {
             <div className="space-y-1.5">
               <div className="flex justify-between text-sm">
                 <span className="text-slate-500">Delivery</span>
-                <span className="text-slate-900">{formData.delivery_option === 'fast' ? `₹${FAST_DELIVERY_CHARGE.toLocaleString('en-IN')}` : 'Free'}</span>
+                <span className="text-slate-900">{snapDeliveryCharge > 0 ? `₹${snapDeliveryCharge.toLocaleString('en-IN')}` : 'Free'}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-slate-500">Payment</span>
-                <span className="text-slate-900">{isCod ? `COD (+₹${codCharge.toLocaleString('en-IN')})` : 'UPI / Online'}</span>
+                <span className="text-slate-900">{isCod ? `COD (+₹${snapCodCharge.toLocaleString('en-IN')})` : 'UPI / Online'}</span>
               </div>
               <div className="flex justify-between text-base font-bold text-slate-900 pt-2 border-t border-slate-100 mt-2">
                 <span>Total</span>
-                <span>₹{grandTotal.toLocaleString('en-IN')}</span>
+                <span>₹{snapTotal.toLocaleString('en-IN')}</span>
               </div>
             </div>
           </div>
@@ -589,27 +631,28 @@ export default function CheckoutPage() {
             <div className="flex justify-between"><span className="text-slate-500">Payment</span><span className="font-semibold text-slate-900">{isCodReview ? 'Cash on Delivery' : 'UPI / Online'}</span></div>
           </div>
 
-          {/* Primary CTA */}
-          <button
-            onClick={handleConfirmOrder}
-            disabled={confirming}
-            className="w-full flex items-center justify-center gap-3 bg-slate-900 hover:bg-slate-700 disabled:opacity-60 text-white font-bold text-lg py-4 rounded-2xl transition-all duration-200 shadow-lg"
-          >
-            {confirming ? (
-              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            ) : (
-              <><Check className="w-5 h-5" />{isCodReview ? 'Confirm COD Order' : 'Confirm Order'}</>
-            )}
-          </button>
-
-          {/* UPI QR option — only for prepay */}
-          {!isCodReview && (
+          {/* CTAs — behaviour differs by payment method */}
+          {isCodReview ? (
+            /* COD: single confirm button */
+            <button
+              onClick={handleConfirmOrder}
+              disabled={confirming}
+              className="w-full flex items-center justify-center gap-3 bg-slate-900 hover:bg-slate-700 disabled:opacity-60 text-white font-bold text-lg py-4 rounded-2xl transition-all duration-200 shadow-lg"
+            >
+              {confirming ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <><Check className="w-5 h-5" />Confirm COD Order</>
+              )}
+            </button>
+          ) : (
+            /* Prepay: UPI QR is the primary action */
             <button
               onClick={() => setShowQrModal(true)}
               disabled={confirming}
-              className="w-full mt-3 flex items-center justify-center gap-3 bg-white border-2 border-slate-200 hover:border-slate-400 text-slate-700 font-bold text-base py-4 rounded-2xl transition-all duration-200"
+              className="w-full flex items-center justify-center gap-3 bg-slate-900 hover:bg-slate-700 disabled:opacity-60 text-white font-bold text-lg py-4 rounded-2xl transition-all duration-200 shadow-lg"
             >
-              Pay via UPI QR instead
+              <Check className="w-5 h-5" />Pay via UPI QR
             </button>
           )}
 

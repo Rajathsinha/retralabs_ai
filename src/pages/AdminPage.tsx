@@ -15,7 +15,7 @@ interface AirtableRecord {
 }
 
 async function fetchOrders(): Promise<AirtableRecord[]> {
-  const url = `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}?sort[0][field]=Submitted At&sort[0][direction]=desc`;
+  const url = `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}?sort[0][field]=Created&sort[0][direction]=desc`;
   const res = await fetch(url, { headers: { Authorization: `Bearer ${TOKEN}` } });
   if (!res.ok) throw new Error('Airtable fetch failed');
   const json = await res.json();
@@ -31,7 +31,7 @@ async function patchStatus(recordId: string, status: string) {
 }
 
 function exportCsv(records: AirtableRecord[]) {
-  const cols = ['Date', 'Name', 'Phone', 'Email', 'Items', 'Total (₹)', 'Payment', 'Transaction', 'Status', 'Address', 'Delivery'];
+  const cols = ['Created', 'Name', 'Phone', 'Email', 'Items', 'Total', 'Payment', 'Transaction', 'Status', 'Address', 'Delivery'];
   const header = cols.join(',');
   const rows = records.map(r =>
     cols.map(c => {
@@ -118,7 +118,7 @@ export default function AdminPage() {
 
   const filtered = records.filter(r => {
     const f = r.fields;
-    if (filterDate && f['Date'] !== filterDate) return false;
+    if (filterDate && f['Created'] !== filterDate) return false;
     if (filterPayment && !String(f['Payment'] ?? '').toLowerCase().includes(filterPayment.toLowerCase())) return false;
     if (filterStatus && f['Status'] !== filterStatus) return false;
     return true;
@@ -130,12 +130,12 @@ export default function AdminPage() {
   };
 
   const cols: { key: string; label: string; width?: number }[] = [
-    { key: 'Date', label: 'Date', width: 100 },
+    { key: 'Created', label: 'Date', width: 100 },
     { key: 'Name', label: 'Name', width: 130 },
     { key: 'Phone', label: 'Phone', width: 110 },
     { key: 'Email', label: 'Email', width: 180 },
     { key: 'Items', label: 'Items', width: 220 },
-    { key: 'Total (₹)', label: 'Total (₹)', width: 90 },
+    { key: 'Total', label: 'Total', width: 90 },
     { key: 'Payment', label: 'Payment', width: 100 },
     { key: 'Transaction', label: 'Txn Ref', width: 130 },
     { key: 'Screenshot', label: 'Screenshot', width: 110 },
@@ -249,7 +249,7 @@ export default function AdminPage() {
                       </div>
                     ) : c.key === 'Items' ? (
                       <span style={{ color: '#94a3b8', whiteSpace: 'pre-line' }}>{String(r.fields[c.key] ?? '—')}</span>
-                    ) : c.key === 'Total (₹)' ? (
+                    ) : c.key === 'Total' ? (
                       <span style={{ color: '#00C896', fontWeight: 700 }}>₹{Number(r.fields[c.key] || 0).toLocaleString('en-IN')}</span>
                     ) : (
                       <span style={{ color: '#cbd5e1' }}>{String(r.fields[c.key] ?? '—')}</span>
