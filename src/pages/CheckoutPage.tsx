@@ -334,24 +334,35 @@ export default function CheckoutPage() {
       payment: snapPaymentMethod === 'cod' ? 'Cash on Delivery' : 'UPI / Online',
     });
 
+    const saves: Promise<unknown>[] = [
+      saveToAirtable({
+        'Name':      snapFormData.customer_name,
+        'Email':     snapFormData.customer_email,
+        'Phone':     snapFormData.customer_phone,
+        'Address':   `${snapFormData.shipping_address}, PIN: ${snapFormData.pincode}`,
+        'Items':     itemsSummary,
+        'Total (₹)': snapTotal,
+        'Payment':   snapPaymentMethod === 'cod' ? 'COD' : 'UPI/Prepay',
+        'Delivery':  snapFormData.delivery_option === 'fast' ? 'Express' : 'Standard',
+        'Referral':  snapFormData.referral_source,
+        'Status':    'New',
+        'Created':   new Date().toISOString(),
+      }),
+      sendInteraktWhatsApp(snapFormData.customer_phone, interaktValues),
+      sendResendEmail(snapFormData.customer_email, 'Your RetraLabs Order is Confirmed!', emailHtml),
+    ];
+    if (snapPaymentMethod === 'cod') {
+      saves.push(saveToAirtable({
+        'Name':          snapFormData.customer_name,
+        'Phone':         snapFormData.customer_phone,
+        'Address':       `${snapFormData.shipping_address}, PIN: ${snapFormData.pincode}`,
+        'Order Details': itemsSummary,
+        'Amount':        snapTotal,
+        'Date':          new Date().toISOString().slice(0, 10),
+      }, 'COD Orders'));
+    }
     try {
-      const saves: Promise<unknown>[] = [
-        saveToAirtable({
-          'Name':     snapFormData.customer_name,
-          'Email':    snapFormData.customer_email,
-          'Phone':    snapFormData.customer_phone,
-          'Address':  `${snapFormData.shipping_address}, PIN: ${snapFormData.pincode}`,
-          'Items':    itemsSummary,
-          'Total':    snapTotal,
-          'Payment':  snapPaymentMethod === 'cod' ? 'COD' : 'UPI/Prepay',
-          'Delivery': snapFormData.delivery_option === 'fast' ? 'Express' : 'Standard',
-          'Referral': snapFormData.referral_source,
-          'Status':   'New',
-          'Created':  new Date().toISOString().slice(0, 10),
-        }),
-        sendInteraktWhatsApp(snapFormData.customer_phone, interaktValues),
-        sendResendEmail(snapFormData.customer_email, 'Your RetraLabs Order is Confirmed!', emailHtml),
-      ]);
+      await Promise.all(saves);
     } catch (_) {
       // non-blocking
     }
