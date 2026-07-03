@@ -310,10 +310,10 @@ export default function CheckoutPage() {
     const snapFormData = { ...formData };
 
     const itemsSummary = cartSnapshot
-      .map(i => `${i.product.name} ${i.variant.dosage_mg}mg x${i.quantity} = ₹${(i.variant.price_inr * i.quantity).toLocaleString('en-IN')}`)
+      .map(i => `${i.product.name} ${i.variant.vial_configuration || `${i.variant.dosage_mg}mg`} x${i.quantity} = ₹${(i.variant.price_inr * i.quantity).toLocaleString('en-IN')}`)
       .join('\n');
     const itemsSummaryFlat = cartSnapshot
-      .map(i => `${i.product.name} ${i.variant.dosage_mg}mg x${i.quantity}`)
+      .map(i => `${i.product.name} ${i.variant.vial_configuration || `${i.variant.dosage_mg}mg`} x${i.quantity}`)
       .join(', ');
 
     try {
@@ -397,10 +397,10 @@ export default function CheckoutPage() {
     const snapFormData = { ...formData };
 
     const itemsSummary = cartSnapshot
-      .map(i => `${i.product.name} ${i.variant.dosage_mg}mg x${i.quantity} = ₹${(i.variant.price_inr * i.quantity).toLocaleString('en-IN')}`)
+      .map(i => `${i.product.name} ${i.variant.vial_configuration || `${i.variant.dosage_mg}mg`} x${i.quantity} = ₹${(i.variant.price_inr * i.quantity).toLocaleString('en-IN')}`)
       .join('\n');
     const itemsSummaryFlat = cartSnapshot
-      .map(i => `${i.product.name} ${i.variant.dosage_mg}mg x${i.quantity}`)
+      .map(i => `${i.product.name} ${i.variant.vial_configuration || `${i.variant.dosage_mg}mg`} x${i.quantity}`)
       .join(', ');
 
     const interaktValues = [

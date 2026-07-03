@@ -390,9 +390,7 @@ export default function ProductDetailPage() {
 
   const basePrice = selectedVariant ? selectedVariant.price_inr * quantity : 0;
   const subtotal = bundleAdded ? basePrice + bacWaterPrice : basePrice;
-  const discountPercent = isNonDiscountable ? 0 : quantity >= 3 ? 20 : quantity === 2 ? 10 : 0;
-  const discountAmount = Math.round((basePrice * discountPercent) / 100);
-  const totalPrice = subtotal - discountAmount;
+  const totalPrice = subtotal;
 
   const whatsappMsg = encodeURIComponent(
     `Hi! I'd like to order ${product.name}${selectedVariant ? ` — ${selectedVariant.dosage_mg}${isBacWater ? 'ML' : 'mg'} (${format(selectedVariant.price_inr)})` : ''}. Can you help me complete my order?`
@@ -736,22 +734,6 @@ export default function ProductDetailPage() {
                   </ButtonGroup>
                 </div>
 
-                {quantity > 1 && !isBacWater && (
-                  <div className="mt-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2.5">
-                    <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                    <span className="text-sm font-medium text-emerald-800">
-                      {discountPercent}% volume discount applied — saving {format(discountAmount)}
-                    </span>
-                  </div>
-                )}
-                {quantity === 1 && !isNonDiscountable && (
-                  <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2.5">
-                    <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
-                    <span className="text-sm text-amber-800">
-                      Add 1 more to get <strong>10% OFF</strong> · Add 2 more for <strong>20% OFF</strong>
-                    </span>
-                  </div>
-                )}
               </CardBody>
             </Card>
 
@@ -799,7 +781,7 @@ export default function ProductDetailPage() {
                 <div className="space-y-3 mb-4">
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-600">
-                      {product.name} ({selectedVariant?.dosage_mg}{isBacWater ? 'ML' : 'mg'}) × {quantity}
+                      {product.name} ({selectedVariant?.vial_configuration || `${selectedVariant?.dosage_mg}${isBacWater ? 'ML' : 'mg'}`}) × {quantity}
                     </span>
                     <span className="font-medium text-slate-900">{format(basePrice)}</span>
                   </div>
@@ -812,37 +794,14 @@ export default function ProductDetailPage() {
                       </div>
                     </>
                   )}
-                  {discountPercent > 0 && (
-                    <>
-                      <Divider />
-                      <div className="flex justify-between text-sm text-emerald-600">
-                        <span className="font-medium">Volume Discount ({discountPercent}%)</span>
-                        <span className="font-semibold">−{format(discountAmount)}</span>
-                      </div>
-                    </>
-                  )}
                 </div>
 
                 <Divider className="my-4" />
 
                 <div className="flex items-baseline justify-between mb-5">
                   <span className="text-slate-700 font-medium">Total</span>
-                  <div className="text-right">
-                    {discountPercent > 0 && (
-                      <span className="text-sm text-slate-400 line-through mr-2">{format(subtotal)}</span>
-                    )}
-                    <span className="text-3xl font-bold text-slate-900">{format(totalPrice)}</span>
-                  </div>
+                  <span className="text-3xl font-bold text-slate-900">{format(totalPrice)}</span>
                 </div>
-
-                {discountPercent > 0 && (
-                  <div className="mb-5 p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2">
-                    <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                    <span className="text-sm font-medium text-emerald-800">
-                      You save {format(discountAmount)} with {discountPercent}% volume discount
-                    </span>
-                  </div>
-                )}
 
                 {/* Shipping cards */}
                 <div className="space-y-3 mb-6">
@@ -987,16 +946,10 @@ export default function ProductDetailPage() {
             <div className="flex-1 min-w-0">
               <p className="text-xs text-slate-500 mb-0.5">Total</p>
               <div className="flex items-baseline gap-2">
-                {discountPercent > 0 && (
-                  <span className="text-xs text-slate-400 line-through">{format(subtotal)}</span>
-                )}
                 <span className="text-xl font-bold text-slate-900">{format(totalPrice)}</span>
               </div>
               {bundleAdded && !isBacWater && (
                 <span className="text-[11px] text-emerald-600 font-medium">+ Bac Water 10ML ({format(bacWaterPrice)})</span>
-              )}
-              {discountPercent > 0 && !bundleAdded && (
-                <span className="text-xs text-emerald-600 font-semibold">{discountPercent}% OFF applied</span>
               )}
             </div>
             {/* Add to Cart — icon only */}
