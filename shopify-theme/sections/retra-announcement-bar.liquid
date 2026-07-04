@@ -1,0 +1,46 @@
+{{ 'retra-theme.css' | asset_url | stylesheet_tag }}
+
+<div class="retra-section retra-announce" role="region" aria-label="Announcement">
+  <div class="retra-announce__track">
+    {%- comment -%} Two identical groups make the marquee loop seamless. {%- endcomment -%}
+    {%- for i in (1..2) -%}
+      <div class="retra-announce__group" {% if i == 2 %}aria-hidden="true"{% endif %}>
+        {%- for block in section.blocks -%}
+          <span class="retra-announce__item" {{ block.shopify_attributes }}>{{ block.settings.text }}</span>
+        {%- endfor -%}
+      </div>
+    {%- endfor -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Announcement bar",
+  "class": "retra-announcement-section",
+  "max_blocks": 6,
+  "blocks": [
+    {
+      "type": "message",
+      "name": "Message",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "🚚 FREE SHIPPING ACROSS INDIA"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Announcement bar",
+      "blocks": [
+        { "type": "message", "settings": { "text": "🚚 FREE SHIPPING ACROSS INDIA" } },
+        { "type": "message", "settings": { "text": "⚡ FASTEST DELIVERY IN INDIA" } },
+        { "type": "message", "settings": { "text": "✅ CASH ON DELIVERY AVAILABLE" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,16 @@
+{
+  "type": "footer",
+  "name": "Footer group",
+  "sections": {
+    "footer": {
+      "type": "retra-footer",
+      "blocks": {
+        "menu-1": { "type": "menu", "settings": { "heading": "Shop", "menu": "footer" } },
+        "menu-2": { "type": "menu", "settings": { "heading": "Support", "menu": "footer" } },
+        "menu-3": { "type": "menu", "settings": { "heading": "Company", "menu": "footer" } }
+      },
+      "block_order": ["menu-1", "menu-2", "menu-3"]
+    }
+  },
+  "order": ["footer"]
+}

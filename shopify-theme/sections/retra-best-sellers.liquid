@@ -1,0 +1,73 @@
+{{ 'retra-theme.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'retra-theme.js' | asset_url }}" defer></script>
+
+<section class="retra-section retra-wrap retra-bestsellers" id="best-sellers">
+  <div class="retra-section-head">
+    <h2>{{ section.settings.title }}</h2>
+    {%- if section.settings.collection != blank -%}
+      <a href="{{ section.settings.collection.url }}" class="retra-view-all">
+        {{ section.settings.view_all_label }}
+        {% render 'retra-icon', icon: 'arrow' %}
+      </a>
+    {%- endif -%}
+  </div>
+
+  <div class="retra-carousel">
+    <div class="retra-products">
+      {%- if section.settings.collection != blank -%}
+        {%- for product in section.settings.collection.products limit: section.settings.products_to_show -%}
+          {% render 'retra-product-card', card_product: product %}
+        {%- endfor -%}
+      {%- else -%}
+        {%- comment -%} Theme editor placeholder state. {%- endcomment -%}
+        {%- for i in (1..4) -%}
+          <article class="retra-card">
+            <span class="retra-card__media">{{ 'product-1' | placeholder_svg_tag }}</span>
+            <h3 class="retra-card__title">Example product</h3>
+            <div class="retra-card__price">₹0.00</div>
+            <button class="retra-card__add" disabled>Add to Cart</button>
+          </article>
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+    <button class="retra-carousel__arrow" aria-label="{{ 'general.slider.next_slide' | t | default: 'Next products' }}">
+      <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 3 7 6-7 6"/></svg>
+    </button>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Best sellers",
+  "class": "retra-bestsellers-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Best Sellers"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "label": "Products to show",
+      "min": 4,
+      "max": 12,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "text",
+      "id": "view_all_label",
+      "label": "View all label",
+      "default": "View all"
+    }
+  ],
+  "presets": [{ "name": "Best sellers" }]
+}
+{% endschema %}

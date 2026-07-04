@@ -1,0 +1,129 @@
+{{ 'retra-theme.css' | asset_url | stylesheet_tag }}
+
+<section class="retra-section retra-hero">
+  <div class="retra-hero__copy">
+    {%- if section.settings.badge != blank -%}
+      <span class="retra-hero__badge">{{ section.settings.badge }}</span>
+    {%- endif -%}
+
+    <h1 class="retra-hero__title">
+      {{ section.settings.heading }}
+      {%- if section.settings.heading_accent != blank -%}
+        <em>{{ section.settings.heading_accent }}</em>
+      {%- endif -%}
+    </h1>
+
+    {%- if section.settings.text != blank -%}
+      <div class="retra-hero__text">{{ section.settings.text }}</div>
+    {%- endif -%}
+
+    {%- if section.settings.note != blank -%}
+      <p class="retra-hero__note">{{ section.settings.note }}</p>
+    {%- endif -%}
+
+    <div class="retra-hero__ctas">
+      {%- if section.settings.primary_label != blank -%}
+        <a href="{{ section.settings.primary_link }}" class="retra-btn retra-btn--primary">
+          {{ section.settings.primary_label }}
+          {% render 'retra-icon', icon: 'arrow' %}
+        </a>
+      {%- endif -%}
+      {%- if section.settings.secondary_label != blank -%}
+        <a href="{{ section.settings.secondary_link }}" class="retra-btn retra-btn--secondary">
+          {{ section.settings.secondary_label }}
+          {% render 'retra-icon', icon: 'arrow' %}
+        </a>
+      {%- endif -%}
+    </div>
+  </div>
+
+  <div class="retra-hero__media">
+    {%- if section.settings.image -%}
+      {%- comment -%} Hero image is the LCP element: eager load + fetchpriority. {%- endcomment -%}
+      <img
+        src="{{ section.settings.image | image_url: width: 1100 }}"
+        srcset="
+          {{ section.settings.image | image_url: width: 750 }} 750w,
+          {{ section.settings.image | image_url: width: 1100 }} 1100w,
+          {{ section.settings.image | image_url: width: 1500 }} 1500w
+        "
+        sizes="(min-width: 1025px) 50vw, 100vw"
+        width="{{ section.settings.image.width }}"
+        height="{{ section.settings.image.height }}"
+        alt="{{ section.settings.image.alt | escape }}"
+        loading="eager"
+        fetchpriority="high"
+      >
+    {%- else -%}
+      {{ 'lifestyle-1' | placeholder_svg_tag: 'retra-hero__placeholder' }}
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Hero — split",
+  "class": "retra-hero-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "badge",
+      "label": "Badge text",
+      "default": "India's Most Trusted Peptide Source"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "We Built RetraLabs"
+    },
+    {
+      "type": "text",
+      "id": "heading_accent",
+      "label": "Heading (accent color)",
+      "default": "Because We Got Scammed."
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>No grey market. No compromises. Verified compounds, direct sourcing, and fastest delivery in India — straight to your door.</p>"
+    },
+    {
+      "type": "text",
+      "id": "note",
+      "label": "Italic note",
+      "default": "That's the whole story. Everything else is just good products at honest prices."
+    },
+    {
+      "type": "text",
+      "id": "primary_label",
+      "label": "Primary button label",
+      "default": "Shop the Real Stuff"
+    },
+    {
+      "type": "url",
+      "id": "primary_link",
+      "label": "Primary button link"
+    },
+    {
+      "type": "text",
+      "id": "secondary_label",
+      "label": "Secondary button label",
+      "default": "Read Our Reviews"
+    },
+    {
+      "type": "url",
+      "id": "secondary_link",
+      "label": "Secondary button link"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image",
+      "info": "Studio product photography, 1100×1200px or larger recommended."
+    }
+  ],
+  "presets": [{ "name": "Hero — split" }]
+}
+{% endschema %}

@@ -1,0 +1,23 @@
+{
+  "type": "header",
+  "name": "Header group",
+  "sections": {
+    "announcement": {
+      "type": "retra-announcement-bar",
+      "blocks": {
+        "msg-1": { "type": "message", "settings": { "text": "🚚 FREE SHIPPING ACROSS INDIA" } },
+        "msg-2": { "type": "message", "settings": { "text": "⚡ FASTEST DELIVERY IN INDIA" } },
+        "msg-3": { "type": "message", "settings": { "text": "✅ CASH ON DELIVERY AVAILABLE" } }
+      },
+      "block_order": ["msg-1", "msg-2", "msg-3"]
+    },
+    "header": {
+      "type": "retra-header",
+      "settings": {
+        "menu": "main-menu",
+        "transparent_at_top": true
+      }
+    }
+  },
+  "order": ["announcement", "header"]
+}

@@ -1,0 +1,64 @@
+{{ 'retra-theme.css' | asset_url | stylesheet_tag }}
+
+<section class="retra-section retra-trust">
+  <div class="retra-wrap retra-trust__grid">
+    {%- for block in section.blocks -%}
+      <div class="retra-trust__item retra-reveal" {{ block.shopify_attributes }}>
+        <span class="retra-trust__icon">{% render 'retra-icon', icon: block.settings.icon %}</span>
+        <span class="retra-trust__value">{{ block.settings.value }}</span>
+        <span class="retra-trust__label">{{ block.settings.label }}</span>
+      </div>
+    {%- endfor -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Trust strip",
+  "class": "retra-trust-section",
+  "max_blocks": 4,
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Item",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "star", "label": "Star" },
+            { "value": "bolt", "label": "Lightning" },
+            { "value": "truck", "label": "Truck" },
+            { "value": "shield", "label": "Shield" }
+          ],
+          "default": "star"
+        },
+        {
+          "type": "text",
+          "id": "value",
+          "label": "Value",
+          "default": "4.5 ★"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Trustpilot Rating"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Trust strip",
+      "blocks": [
+        { "type": "item", "settings": { "icon": "star", "value": "4.5 ★", "label": "Trustpilot Rating" } },
+        { "type": "item", "settings": { "icon": "bolt", "value": "Order by 2PM", "label": "Same-Day Dispatch" } },
+        { "type": "item", "settings": { "icon": "truck", "value": "Fastest Delivery", "label": "In India" } },
+        { "type": "item", "settings": { "icon": "shield", "value": "Discreet", "label": "Packaging" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

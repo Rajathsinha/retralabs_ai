@@ -1,0 +1,45 @@
+{% comment %}
+  Renders an inline SVG icon.
+  Usage: {% render 'retra-icon', icon: 'truck' %}
+  Icons: logo, search, account, cart, menu, chevron, arrow,
+         star, bolt, truck, shield, cube, flask, microscope, globe, box
+{% endcomment %}
+{%- case icon -%}
+{%- when 'logo' -%}
+<svg viewBox="0 0 40 40" fill="none" aria-hidden="true">
+  <path d="M20 3 35 11.5v17L20 37 5 28.5v-17L20 3Z" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/>
+  <path d="M20 3v14M5 11.5 20 17l15-5.5M20 37V17" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/>
+</svg>
+{%- when 'search' -%}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.8-3.8"/></svg>
+{%- when 'account' -%}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4.5 20c1.4-3.3 4.2-5 7.5-5s6.1 1.7 7.5 5"/></svg>
+{%- when 'cart' -%}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 11a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8L5 8Z"/><path d="M8.5 8V6.5a3.5 3.5 0 0 1 7 0V8"/></svg>
+{%- when 'menu' -%}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+{%- when 'chevron' -%}
+<svg class="retra-chev" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="m2 4 4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+{%- when 'arrow' -%}
+<svg class="retra-arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8h11M9 3.5 13.5 8 9 12.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+{%- when 'star' -%}
+<svg viewBox="0 0 44 44" fill="currentColor" aria-hidden="true"><path d="M22 5.5 27 15.8l11.4 1.7-8.2 8 1.9 11.3L22 31.5l-10.1 5.3 1.9-11.3-8.2-8L17 15.8 22 5.5Z"/></svg>
+{%- when 'bolt' -%}
+<svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" aria-hidden="true"><path d="M24.5 4 10 25h9.5L19 40l15-21h-9.5L24.5 4Z"/></svg>
+{%- when 'truck' -%}
+<svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h22v18H4zM26 18h8l6 6v6h-14"/><circle cx="12" cy="34" r="3.6"/><circle cx="32" cy="34" r="3.6"/></svg>
+{%- when 'shield' -%}
+<svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 5c5 3 10 4.4 14 4.7V22c0 8.6-5.7 14.5-14 17.5C13.7 36.5 8 30.6 8 22V9.7C12 9.4 17 8 22 5Z"/><circle cx="22" cy="20" r="3"/><path d="M22 23v6"/></svg>
+{%- when 'cube' -%}
+<svg viewBox="0 0 52 52" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><path d="M26 5 44 14.5v19L26 43 8 33.5v-19L26 5Z"/><path d="M26 5v19M8 14.5 26 24l18-9.5M26 43V24"/></svg>
+{%- when 'flask' -%}
+<svg viewBox="0 0 38 38" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4h8M17 4v10l-7.5 13a4 4 0 0 0 3.4 6h12.2a4 4 0 0 0 3.4-6L21 14V4"/><path d="M13 26h12"/></svg>
+{%- when 'microscope' -%}
+<svg viewBox="0 0 38 38" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 4v8l-3 3a7 7 0 1 0 10 0l-3-3V4M13 4h12M8 34h22"/><circle cx="19" cy="24" r="2"/></svg>
+{%- when 'globe' -%}
+<svg viewBox="0 0 38 38" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="19" cy="19" r="14"/><path d="M5 19h28M19 5c-4.5 4-6.5 8.8-6.5 14S14.5 29 19 33c4.5-4 6.5-8.8 6.5-14S23.5 9 19 5Z"/></svg>
+{%- when 'box' -%}
+<svg viewBox="0 0 38 38" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M19 4 33 11v16L19 34 5 27V11L19 4Z"/><path d="M19 4v15M5 11l14 8 14-8"/></svg>
+{%- when 'star-small' -%}
+<svg viewBox="0 0 14 14" aria-hidden="true"><path d="M7 0l2.16 4.38 4.84.7-3.5 3.41.83 4.81L7 11.03 2.67 13.3l.83-4.81L0 5.08l4.84-.7L7 0Z"/></svg>
+{%- endcase -%}

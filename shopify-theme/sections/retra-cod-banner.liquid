@@ -1,0 +1,49 @@
+{{ 'retra-theme.css' | asset_url | stylesheet_tag }}
+
+<div class="retra-section retra-wrap retra-cod-outer">
+  <div class="retra-cod retra-reveal">
+    <span class="retra-cod__icon">{% render 'retra-icon', icon: 'cube' %}</span>
+    <div>
+      <div class="retra-cod__title">{{ section.settings.title }}</div>
+      <div class="retra-cod__sub">{{ section.settings.subtitle }}</div>
+    </div>
+    {%- if section.settings.pill_link != blank -%}
+      <a href="{{ section.settings.pill_link }}" class="retra-cod__pill">{{ section.settings.pill_text }}</a>
+    {%- else -%}
+      <span class="retra-cod__pill">{{ section.settings.pill_text }}</span>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "COD banner",
+  "class": "retra-cod-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Cash on Delivery (COD) Available"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Pay when your order arrives at your doorstep."
+    },
+    {
+      "type": "text",
+      "id": "pill_text",
+      "label": "Pill text",
+      "default": "COD"
+    },
+    {
+      "type": "url",
+      "id": "pill_link",
+      "label": "Pill link (optional)"
+    }
+  ],
+  "presets": [{ "name": "COD banner" }]
+}
+{% endschema %}

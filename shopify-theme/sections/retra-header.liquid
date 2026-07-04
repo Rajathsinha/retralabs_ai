@@ -1,0 +1,109 @@
+{{ 'retra-theme.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'retra-theme.js' | asset_url }}" defer></script>
+
+<header class="retra-section retra-header{% if section.settings.transparent_at_top %} retra-header--transparent{% endif %}">
+  <div class="retra-wrap retra-header__inner">
+    <button class="retra-header__toggle" aria-expanded="false" aria-label="{{ 'general.header.menu' | t | default: 'Menu' }}">
+      {% render 'retra-icon', icon: 'menu' %}
+    </button>
+
+    <a href="{{ routes.root_url }}" class="retra-header__brand">
+      {%- if section.settings.logo -%}
+        <img
+          src="{{ section.settings.logo | image_url: width: 300 }}"
+          width="{{ section.settings.logo.width }}"
+          height="{{ section.settings.logo.height }}"
+          alt="{{ shop.name | escape }}"
+          loading="eager"
+        >
+      {%- else -%}
+        <span style="color: var(--retra-accent); display: inline-flex;">{% render 'retra-icon', icon: 'logo' %}</span>
+        {{ shop.name }}
+      {%- endif -%}
+    </a>
+
+    <nav class="retra-nav" aria-label="{{ 'general.header.main_menu' | t | default: 'Main menu' }}">
+      {%- for link in section.settings.menu.links -%}
+        <div class="retra-nav__item">
+          <a href="{{ link.url }}" class="retra-nav__link" {% if link.links != blank %}aria-haspopup="true"{% endif %}>
+            {{ link.title }}
+            {%- if link.links != blank -%}{% render 'retra-icon', icon: 'chevron' %}{%- endif -%}
+          </a>
+
+          {%- if link.links != blank -%}
+            {%- assign has_grandchildren = false -%}
+            {%- for child in link.links -%}
+              {%- if child.links != blank -%}{%- assign has_grandchildren = true -%}{%- endif -%}
+            {%- endfor -%}
+
+            {%- if has_grandchildren -%}
+              {%- comment -%} Mega menu: children become columns. {%- endcomment -%}
+              <div class="retra-nav__panel retra-nav__mega">
+                {%- for child in link.links -%}
+                  <div class="retra-nav__mega-col">
+                    <h5>{{ child.title }}</h5>
+                    {%- for grandchild in child.links -%}
+                      <a href="{{ grandchild.url }}">{{ grandchild.title }}</a>
+                    {%- endfor -%}
+                  </div>
+                {%- endfor -%}
+              </div>
+            {%- else -%}
+              <div class="retra-nav__panel">
+                {%- for child in link.links -%}
+                  <a href="{{ child.url }}">{{ child.title }}</a>
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
+          {%- endif -%}
+        </div>
+      {%- endfor -%}
+    </nav>
+
+    <div class="retra-header__icons">
+      <a href="{{ routes.search_url }}" class="retra-header__icon-btn" aria-label="{{ 'general.search.search' | t | default: 'Search' }}">
+        {% render 'retra-icon', icon: 'search' %}
+      </a>
+      <a href="{{ routes.account_url }}" class="retra-header__icon-btn" aria-label="{{ 'customer.account.title' | t | default: 'Account' }}">
+        {% render 'retra-icon', icon: 'account' %}
+      </a>
+      <a href="{{ routes.cart_url }}" class="retra-header__icon-btn" aria-label="{{ 'general.cart.title' | t | default: 'Cart' }}">
+        {% render 'retra-icon', icon: 'cart' %}
+        <span class="retra-cart-badge" data-retra-cart-count>{{ cart.item_count }}</span>
+      </a>
+    </div>
+  </div>
+
+  <nav class="retra-drawer" aria-label="{{ 'general.header.main_menu' | t | default: 'Main menu' }}">
+    {%- for link in section.settings.menu.links -%}
+      <a href="{{ link.url }}">{{ link.title }}</a>
+    {%- endfor -%}
+  </nav>
+</header>
+
+{% schema %}
+{
+  "name": "Header",
+  "class": "retra-header-section",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo image"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Menu",
+      "default": "main-menu"
+    },
+    {
+      "type": "checkbox",
+      "id": "transparent_at_top",
+      "label": "Transparent at top of page",
+      "info": "Header becomes solid white after scrolling.",
+      "default": true
+    }
+  ]
+}
+{% endschema %}

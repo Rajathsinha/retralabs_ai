@@ -1,0 +1,84 @@
+{% comment %}
+  Renders one product card.
+  Usage: {% render 'retra-product-card', card_product: product %}
+  Review data comes from the standard Shopify product-review metafields:
+    product.metafields.reviews.rating        (rating value)
+    product.metafields.reviews.rating_count  (number of reviews)
+{% endcomment %}
+
+{%- liquid
+  assign rating = 0
+  assign rating_count = 0
+  if card_product.metafields.reviews.rating.value != blank
+    assign rating = card_product.metafields.reviews.rating.value.rating | times: 1.0
+  endif
+  if card_product.metafields.reviews.rating_count.value != blank
+    assign rating_count = card_product.metafields.reviews.rating_count.value
+  endif
+  assign rating_rounded = rating | round
+-%}
+
+<article class="retra-card retra-reveal">
+  <a href="{{ card_product.url }}" class="retra-card__media" aria-label="{{ card_product.title | escape }}">
+    {%- if card_product.featured_image -%}
+      <img
+        src="{{ card_product.featured_image | image_url: width: 460 }}"
+        srcset="
+          {{ card_product.featured_image | image_url: width: 300 }} 300w,
+          {{ card_product.featured_image | image_url: width: 460 }} 460w,
+          {{ card_product.featured_image | image_url: width: 620 }} 620w
+        "
+        sizes="(min-width: 1024px) 270px, (min-width: 750px) 45vw, 80vw"
+        width="{{ card_product.featured_image.width }}"
+        height="{{ card_product.featured_image.height }}"
+        alt="{{ card_product.featured_image.alt | default: card_product.title | escape }}"
+        loading="lazy"
+      >
+    {%- else -%}
+      {{ 'product-1' | placeholder_svg_tag }}
+    {%- endif -%}
+  </a>
+
+  <h3 class="retra-card__title">
+    <a href="{{ card_product.url }}">{{ card_product.title }}</a>
+  </h3>
+
+  {%- if rating_count > 0 -%}
+    <div class="retra-stars" aria-label="{{ 'accessibility.star_reviews_info' | t: rating_value: rating, rating_max: 5 | default: rating }}">
+      <span class="retra-stars__row" aria-hidden="true">
+        {%- for i in (1..5) -%}
+          {%- if i <= rating_rounded -%}
+            {% render 'retra-icon', icon: 'star-small' %}
+          {%- else -%}
+            <svg class="is-empty" viewBox="0 0 14 14"><path d="M7 0l2.16 4.38 4.84.7-3.5 3.41.83 4.81L7 11.03 2.67 13.3l.83-4.81L0 5.08l4.84-.7L7 0Z"/></svg>
+          {%- endif -%}
+        {%- endfor -%}
+      </span>
+      <span class="retra-stars__count">{{ rating_count }} reviews</span>
+    </div>
+  {%- endif -%}
+
+  <div class="retra-card__price">
+    {{ card_product.price | money }}
+    {%- if card_product.compare_at_price > card_product.price -%}
+      <s>{{ card_product.compare_at_price | money }}</s>
+    {%- endif -%}
+  </div>
+
+  {%- form 'product', card_product, data-retra-atc: '' -%}
+    <input type="hidden" name="id" value="{{ card_product.selected_or_first_available_variant.id }}">
+    <button
+      type="submit"
+      class="retra-card__add"
+      data-adding-text="{{ 'products.product.adding' | t | default: 'Adding…' }}"
+      data-added-text="{{ 'products.product.added' | t | default: 'Added ✓' }}"
+      {% unless card_product.available %}disabled{% endunless %}
+    >
+      {%- if card_product.available -%}
+        {{ 'products.product.add_to_cart' | t | default: 'Add to Cart' }}
+      {%- else -%}
+        {{ 'products.product.sold_out' | t | default: 'Sold Out' }}
+      {%- endif -%}
+    </button>
+  {%- endform -%}
+</article>
